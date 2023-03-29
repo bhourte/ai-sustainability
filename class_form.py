@@ -240,7 +240,6 @@ class Form:
 
         for list_answer in answers:
             for dict_answer in list_answer:
-                print(a)
                 actual_node = self.run_gremlin_query("g.E('"+str(dict_answer['id'])+"').outV()")[0]
                 print('Question:', actual_node['properties']['text'][0]['value'])
                 print('Actual node id: ', actual_node['id'])
