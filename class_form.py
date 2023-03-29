@@ -100,16 +100,17 @@ class Form:
         for option in propositions:
             options.append(option)
         answers = st.multiselect(label=question, options=options, default=None)
+        answers_returned = []
         if answers == []:
             answers = None
             next_node_id = None
+            
         else:
-            answers_returned = []
             next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
             for answer in answers:
                 index = propositions.index(answer)
                 text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
-                answers_returned.append({'id': index, 'text': text['value']})
+                answers_returned.append({'id': props_ids[index], 'text': text['value']})
         return next_node_id, answers_returned, modif_crypted
     
     def add_qcm_bool_question(self, node_id, modif_crypted):
@@ -167,29 +168,30 @@ class Form:
     def save_answers(self, answers, username):
         """
         Save answers in db
+        Answers = list of list of dict {id: , text:}
         """
-        self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
-        previous_node_id = username
-        for answer in answers:
-            if type(answer) == dict:
-                vertex = self.run_gremlin_query("g.E('"+answer['id']+"').outV()")[0]
-                next_node_id = 'answer'+vertex['id']
-                self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('answer', '"+answer['text']+"').property('proposition_id', '"+answer['id']+"')")
-            elif type(answer) == list:
-                i = 0
-                for ans in answer:
-                    vertex = self.run_gremlin_query("g.E('"+ans+"').outV()")[0]
-                    next_node_id = 'answer'+vertex['id']
-                    if i == 0:
-                        self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                    self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('proposition_id', '"+ans+"').property('answer', '"+self.run_gremlin_query("g.E('"+ans+"').properties('text').value()")[0]+"')")
-                    i += 1
-                    
-            else:
-                vertex = self.run_gremlin_query("g.E('"+answer+"').outV()")[0]
-                next_node_id = 'answer'+vertex['id']
-                self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('proposition_id', '"+answer+"').property('answer', '"+self.run_gremlin_query("g.E('"+answer+"').properties('text').value()")[0]+"')")
+        print('DEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG')
 
-            previous_node_id = next_node_id
+        # self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
+        for list_answer in answers:
+            for dict_answer in list_answer:   
+                actual_node = self.run_gremlin_query("g.E('"+str(dict_answer['id'])+"').outV()")[0]
+                print('Question:', actual_node['properties']['text'][0]['value'])
+                print('Actual node id: ', actual_node['id'])
+                next_question_node = self.run_gremlin_query("g.E('"+dict_answer['id']+"').inV()")[0]
+                print('Next node id: ', next_question_node['id'])
+                new_node_id = 'answer'+actual_node['id']
+                next_new_node_id = 'answer'+next_question_node['id']
+                new_node_id_exist = self.run_gremlin_query("g.V('"+new_node_id+"').id()")
+                next_new_node_id_exist = self.run_gremlin_query("g.V('"+next_new_node_id+"').id()")
+                print('new_node_id_exist: ', new_node_id_exist)
+                print('next_new_node_id_exist: ', next_new_node_id_exist)
+                if not new_node_id_exist:
+                    self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+new_node_id+"').property('question', '"+actual_node['properties']['text'][0]['value']+"').property('question_id', '"+actual_node['id']+"')")
+                    print('If new_node_id created so id: ', self.run_gremlin_query("g.V('"+new_node_id+"').id()"))
+                if not next_new_node_id_exist :
+                    self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_new_node_id+"').property('question', '"+actual_node['properties']['text'][0]['value']+"').property('question_id', '"+actual_node['id']+"')")
+                    print('If next_new_node_id created so id', self.run_gremlin_query("g.V('"+next_new_node_id+"').id()"))
+                self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
+                print('answer added :', dict_answer['text'])
+                print('-------------------------------------------------------------------------------------------------------------------------------')
