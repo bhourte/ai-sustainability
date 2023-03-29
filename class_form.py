@@ -153,6 +153,13 @@ class Form:
         
         return propositions, props_ids
     
+    def get_weight(self, edge_id):
+        list_weight = self.run_gremlin_query("g.E('"+edge_id+"').properties('list_coef').value()")[0].split(', ')
+        return list_weight
+    
+    def calcul_weight(self, list_edges):
+        return None
+
     def save_answers(self, answers, username):
         """
         Save answers in db

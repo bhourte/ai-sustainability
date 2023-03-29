@@ -24,6 +24,10 @@ def main():
             answers.append(answer)
 
     if next_node_id == 'end':
+
+        liste_edges = None
+        form.calcul_weight(liste_edges)
+
         st.write(answers)
         if st.button('Submit', on_click=form.save_answers, args=(answers,'Arnauld')):
             st.write('Answers saved')
