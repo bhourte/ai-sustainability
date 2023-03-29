@@ -9,10 +9,11 @@ BASE_MODIF_CRYPTED = False
 
 def main():
 
+    print("###########################################")
     form = Form(
                 endpoint = "questions-db.gremlin.cosmos.azure.com",
                 database_name = "graphdb",
-                container_name = "Persons",
+                container_name = "Form",
                 primary_key= PRIMARYKEY,
            )
     
@@ -25,8 +26,8 @@ def main():
 
     if next_node_id == 'end':
 
-        liste_edges = None
-        form.calcul_weight(liste_edges)
+        print(answers)
+        form.calcul_weight(answers)
 
         st.write(answers)
         if st.button('Submit', on_click=form.save_answers, args=(answers,'Arnauld')):
