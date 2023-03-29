@@ -26,7 +26,7 @@ def main():
 
     if next_node_id == 'end':
 
-        print(form.calcul_best_AIs(5, answers))
+        # print(form.calcul_best_AIs(5, answers))
 
         st.write(answers)
         if st.button('Submit', on_click=form.save_answers, args=(answers,'Arnauld')):
