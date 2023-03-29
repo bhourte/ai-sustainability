@@ -13,7 +13,7 @@ def main():
                 endpoint = "questions-db.gremlin.cosmos.azure.com",
                 database_name = "graphdb",
                 container_name = "Persons",
-                primary_key=PRIMARYKEY,
+                primary_key= PRIMARYKEY,
            )
     
     next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED)
