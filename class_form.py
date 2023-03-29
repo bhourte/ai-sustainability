@@ -167,8 +167,10 @@ class Form:
             Get the list_coef from the edge with edge_id id
         """
         list_weight = self.run_gremlin_query("g.E('"+edge_id+"').properties('list_coef').value()")[0].split(", ")
-        for i in range(len(list_weight)):
+        i = 0
+        while i < len(list_weight):
             list_weight[i] = float(list_weight[i])
+            i += 1
         return list_weight
     
     def calcul_best_AIs(self, nbAI, answers):
@@ -177,22 +179,29 @@ class Form:
         """
         list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(",")
         coef_AI = [1] * len(list_AI)
-        print(range(len(answers)))
-        for i in range(len(answers)):
-            for j in range(len(answers[i])):
+        i = 0
+        while i < len(answers):
+            j = 0
+            while j <len(answers[i]):
                 list_coef = self.get_weight(answers[i][j]["id"])
                 coef_AI = np.multiply(coef_AI, list_coef)
+                j += 1
+            i += 1
         # We put all NaN value to -1
-        for i in range(len(coef_AI)):
+        i = 0
+        while i < len(coef_AI):
             if coef_AI[i] != coef_AI[i]:  # if a NaN value is encounter, we put it to -1
                 coef_AI[i] = -1
+            i += 1
         best = list(heapq.nlargest(nbAI, np.array(coef_AI)))
         # We put the nbAI best AI in list_bests_AIs
         list_bests_AIs = []
-        for i in range(nbAI):
+        i = 0
+        while i < nbAI:
             if best[i] > 0:
                 index = list(coef_AI).index(best[i])
                 list_bests_AIs.append(list_AI[index])
+            i += 1
         self.show_best_AI(list_bests_AIs)
         return list_bests_AIs
     
@@ -204,8 +213,10 @@ class Form:
         """
         if len(list_bests_AIs) > 0:
             st.subheader("There is "+str(len(list_bests_AIs))+" IA corresponding to your specifications, here they are in order of the most efficient to the least:", anchor=None)
-            for i in range(len(list_bests_AIs)):
+            i = 0
+            while i < len(list_bests_AIs):
                 st.caption(str(i+1)+") "+list_bests_AIs[i])
+                i += 1
         else:
             st.subheader("There is no AI corresponding to your request, please make other choices in the form", anchor=None)
         return None
@@ -228,7 +239,8 @@ class Form:
         nb_form = "-form"+str(nb_form)
 
         for list_answer in answers:
-            for dict_answer in list_answer:   
+            for dict_answer in list_answer:
+                print(a)
                 actual_node = self.run_gremlin_query("g.E('"+str(dict_answer['id'])+"').outV()")[0]
                 print('Question:', actual_node['properties']['text'][0]['value'])
                 print('Actual node id: ', actual_node['id'])
