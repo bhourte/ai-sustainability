@@ -64,10 +64,10 @@ class Form:
         if not answer:
             answer = None
             next_node_id = None
-        answer = {
+        answer = [{
             "text": answer,
             "id": self.run_gremlin_query("g.V('"+node_id+"').outE().id()")[0],
-        }
+        }]
         return next_node_id, answer, modif_crypted
     
     def add_qcm_question(self, node_id, modif_crypted):
@@ -86,7 +86,8 @@ class Form:
         else:
             index = propositions.index(answer)
             next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
-            answer = props_ids[index]
+            text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
+            answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
 
     def add_qrm_question(self, node_id, modif_crypted):
@@ -103,11 +104,13 @@ class Form:
             answers = None
             next_node_id = None
         else:
+            answers_returned = []
             next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
             for answer in answers:
                 index = propositions.index(answer)
-                answers[answers.index(answer)] = props_ids[index]
-        return next_node_id, answers, modif_crypted
+                text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
+                answers_returned.append({'id': index, 'text': text['value']})
+        return next_node_id, answers_returned, modif_crypted
     
     def add_qcm_bool_question(self, node_id, modif_crypted):
         """
@@ -125,8 +128,9 @@ class Form:
         else:
             index = propositions.index(answer)
             next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
+            text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
             modif_crypted = answer == 'Yes'
-            answer = props_ids[index]
+            answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
     
     def get_text_question(self, node_id):
@@ -158,7 +162,7 @@ class Form:
         return list_weight
     
     def calcul_weight(self, list_edges):
-        return None
+        return list_edges
 
     def save_answers(self, answers, username):
         """
@@ -189,4 +193,3 @@ class Form:
                 self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('proposition_id', '"+answer+"').property('answer', '"+self.run_gremlin_query("g.E('"+answer+"').properties('text').value()")[0]+"')")
 
             previous_node_id = next_node_id
-                
