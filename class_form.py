@@ -3,15 +3,19 @@ from gremlin_python.driver import client, serializer
 import streamlit as st
 statics.load_statics(globals())
 
-class Form:
-    
-    def __init__(self, endpoint, database_name, container_name, primary_key):
-        self.gremlin_client = client.Client(
+@st.cache_resource
+def connect(endpoint, database_name, container_name, primary_key):
+        return client.Client(
             'wss://' + endpoint + ':443/', 'g',
             username="/dbs/" + database_name + "/colls/" + container_name,
             password=primary_key,
             message_serializer=serializer.GraphSONSerializersV2d0()
         )
+
+class Form:
+    
+    def __init__(self, endpoint, database_name, container_name, primary_key):
+        self.gremlin_client = connect(endpoint, database_name, container_name, primary_key)
     
     def run_gremlin_query(self, query):
         """

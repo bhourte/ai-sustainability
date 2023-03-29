@@ -102,6 +102,61 @@ class DbGestion:
             file.close()
         print(f"Script {script_path} created")
 
+    def create_script_with_weight(self, data_path, script_path, matrix_path):
+        """
+        Create a script to create the graph from a json file and update all weight from a local weight_matrix excel file
+        and put the list of all AI's name in the node with id=1
+
+        Parameters :
+            - data_path : the path of the json file (string) (Exemple : "data/graph.json")
+            - script_path : the path of the script file (string) (Exemple : "data/script.json")
+            - matrix_path : the path of the excel file where the weight matrix is stored
+        """
+        with open(data_path, 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
+            file.close()
+        print(f"File {data_path} loaded")
+
+        df = pd.read_excel(matrix_path)
+        ids = list(df["id_edges"])
+        list_AI = list(df.drop(['id_edges', 'text'], axis=1).keys())
+        AIs = str(list_AI[1])
+        i = 0
+        while i < len(list_AI):
+            AIs += "," + str(list_AI[i])
+            i += 1
+        df = df.drop(["id_edges", "text"], axis=1)
+        matrix = df.to_numpy()
+        dico_matrix = {}
+
+        i = 0
+        while i < 40:
+            dico_matrix[ids[i]] = list(matrix[i])
+            i += 1
+
+        querys = []
+        for vertex in json_data[0]:
+            query = "g.addV('"+vertex['label']+"').property('id', '"+vertex['id']+"')"
+            if 'properties' in vertex:
+                for prop in vertex['properties']:
+                    if prop != "list_AI":
+                        query += ".property('"+prop+"', '"+vertex['properties'][prop][0]["value"]+"')"
+            if vertex['id'] == '1':
+                query += ".property( 'list_AI', '"+AIs+"')"
+            querys.append(query)
+        for edge in json_data[1]:
+            query = "g.V('"+edge['outV']+"').addE('"+edge['label']+"').to(g.V('"+edge['inV']+"')).property('id', '"+edge['id']+"')"
+            if 'properties' in edge:
+                for prop in edge['properties']:
+                    if prop != "list_coef":
+                        query += ".property('"+prop+"', '"+edge['properties'][prop]+"')"
+                    query += ".property('list_coef', '"+str(dico_matrix[edge['id']])[1:-1]+"')"
+            querys.append(query)
+        with open(script_path, 'w', encoding='utf-8') as file:
+            json.dump(querys, file, ensure_ascii=False, indent=4)
+            file.close()
+        print(f"Script {script_path} created")
+
     def import_graph(self, script_path):
         """
         Import a graph from a script
@@ -127,11 +182,12 @@ def main():
     ENDPOINT = "questions-db.gremlin.cosmos.azure.com"
     DATABASE = "graphdb"
     COLLECTION = "Persons"
-    PRIMARYKEY = config('PRIMARYKEY') # Replace this value with the primary key of the database in environment variable
+    PRIMARYKEY = config('PRIMARYKEY')
 
     db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
     # db_gestion.save_graph("data.json")
     db_gestion.create_script("data.json", "script.json")
+    # db_gestion.create_script_with_weight("data_weght.json","script_weight.json", "Weight_matrix.xlsx")
     db_gestion.import_graph("script.json")
     db_gestion.close()
 
