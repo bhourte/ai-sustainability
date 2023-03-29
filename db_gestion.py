@@ -121,8 +121,8 @@ class DbGestion:
         df = pd.read_excel(matrix_path)
         ids = list(df["id_edges"])
         list_AI = list(df.drop(['id_edges', 'text'], axis=1).keys())
-        AIs = str(list_AI[1])
-        i = 0
+        AIs = str(list_AI[0])
+        i = 1
         while i < len(list_AI):
             AIs += "," + str(list_AI[i])
             i += 1
@@ -151,7 +151,7 @@ class DbGestion:
                 for prop in edge['properties']:
                     if prop != "list_coef":
                         query += ".property('"+prop+"', '"+edge['properties'][prop]+"')"
-                    query += ".property('list_coef', '"+str(dico_matrix[edge['id']])[1:-1]+"')"
+            query += ".property('list_coef', '"+str(dico_matrix[edge['id']])[1:-1]+"')"
             querys.append(query)
         with open(script_path, 'w', encoding='utf-8') as file:
             json.dump(querys, file, ensure_ascii=False, indent=4)
@@ -182,14 +182,16 @@ def main():
 #   - You will have a new node saved in the database and in the script (test_node)
     ENDPOINT = "questions-db.gremlin.cosmos.azure.com"
     DATABASE = "graphdb"
-    COLLECTION = "Persons"
+    COLLECTION = "Form"
     PRIMARYKEY = config('PRIMARYKEY')
 
     db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
-    # db_gestion.save_graph("data.json")
-    db_gestion.create_script("data.json", "script.json")
-    # db_gestion.create_script_with_weight("data_weght.json","script_weight.json", "Weight_matrix.xlsx")
-    db_gestion.import_graph("script.json")
+    db_gestion.save_graph("data_weight.json")
+    db_gestion.run_gremlin_query("g.E().drop()")
+    db_gestion.run_gremlin_query("g.V().drop()")
+    # db_gestion.create_script("data.json", "script.json")
+    db_gestion.create_script_with_weight("data_weight.json","script_weight.json", "Weight_matrix.xlsx")
+    db_gestion.import_graph("script_weight.json")
     db_gestion.close()
 
 if __name__ == "__main__":
