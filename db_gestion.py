@@ -4,6 +4,7 @@ import gremlin_python
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 from decouple import config
+import pandas as pd
 statics.load_statics(globals())
 
 class DbGestion:

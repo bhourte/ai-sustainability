@@ -164,21 +164,22 @@ class Form:
                 vertex = self.run_gremlin_query("g.E('"+answer['id']+"').outV()")[0]
                 next_node_id = 'answer'+vertex['id']
                 self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('answer', '"+answer['text']+"')")
+                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('answer', '"+answer['text']+"').property('proposition_id', '"+answer['id']+"')")
             elif type(answer) == list:
                 i = 0
                 for ans in answer:
                     vertex = self.run_gremlin_query("g.E('"+ans+"').outV()")[0]
-                    next_node_id = 'answer'+vertex['id']+"-"+str(i)   
-                    self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                    self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('answer', '"+ans+"')")
+                    next_node_id = 'answer'+vertex['id']
+                    if i == 0:
+                        self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
+                    self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('proposition_id', '"+ans+"').property('answer', '"+self.run_gremlin_query("g.E('"+ans+"').properties('text').value()")[0]+"')")
                     i += 1
                     
             else:
                 vertex = self.run_gremlin_query("g.E('"+answer+"').outV()")[0]
                 next_node_id = 'answer'+vertex['id']
                 self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_node_id+"').property('question', '"+vertex['properties']['text'][0]['value']+"').property('question_id', '"+vertex['id']+"')")
-                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('answer_id', '"+answer+"').property('text', '"+self.run_gremlin_query("g.E('"+answer+"').properties('text')")+"')")
+                self.run_gremlin_query("g.V('"+previous_node_id+"').addE('answer').to(g.V('"+next_node_id+"')).property('proposition_id', '"+answer+"').property('answer', '"+self.run_gremlin_query("g.E('"+answer+"').properties('text').value()")[0]+"')")
 
             previous_node_id = next_node_id
                 
