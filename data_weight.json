@@ -7,13 +7,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "9be470ad-974d-43be-adfb-c37c8f2fbb71",
+                        "id": "13875f32-9126-4c82-a823-8acb565bf281",
                         "value": "Explain in a few words the problem to be solved by the AI you want."
                     }
                 ],
                 "help text": [
                     {
-                        "id": "896ca482-afa6-4ded-8cef-fcfdb5035ee7",
+                        "id": "89b10b4b-c9ff-4d2c-89fc-c97b0da85072",
                         "value": "Having a clear idea of what the AI should do is the first step before you start making technical choices."
                     }
                 ],
@@ -25,7 +25,7 @@
                 ],
                 "list_AI": [
                     {
-                        "id": "11fab618-acb6-4004-9527-ed3d29f3cc06",
+                        "id": "2b9334fe-cd48-4a8e-9613-32b515fd7e43",
                         "value": "LinearRegression,Lars,Lasso,Ridge,ElasticNet,Support Vector Machine (SVR) with linear kernel (for regression),Support Vector Machine (SVR) with rbf kernel (for regression),Multilayer perceptron (MLP) regressor,K-Nearest Neighbors regressor,Gradient Boosting Machine (LightGBM) with absolute error loss for regression,Gradient Boosting Machine (LightGBM) with poisson loss for regression,AdaBoost regressor,Random Forest regressor,LinearSVC,Support Vector Machine (SVC) with rbf kernel,Decision Tree,K-Nearest Neighbors classifier,Multilayer perceptron (MLP) classifier,Gradient Boosting Machine (LightGBM) with absolute error loss for classification,Gradient Boosting Machine (LightGBM) with poisson loss for classification,AdaBoost classifier,Random Forest classifier"
                     }
                 ]
@@ -38,13 +38,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "3dfc259b-c481-4638-abc5-30b73d9cf4b2",
+                        "id": "2c588794-a19a-4ece-a1f3-fe351b89d76a",
                         "value": "What is the format of the data you are going to give to your AI?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "c3e34779-5d5f-45ea-a552-6164e2ea359a",
+                        "id": "fe16e563-3e1b-4663-b2d9-3322a82dccef",
                         "value": "The choice of an AI is made above all according to the type of data that will be provided to it. Each model has its specificity, image or text analysis is done in a very different way."
                     }
                 ],
@@ -63,13 +63,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "078f06df-6944-484c-b602-245976f8ca48",
+                        "id": "815cd128-a8d0-43dc-8d78-5534f58276c6",
                         "value": "What do you want to get from this data?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "c3a2e116-c4cb-4df6-a931-4f566751f6fb",
+                        "id": "6fb022cc-6ccb-4149-8327-fe953ed93d1a",
                         "value": "From raw data we can retrieve a lot of information and make all kinds of predictions. One can try to predict a value or even classify data into some category."
                     }
                 ],
@@ -88,13 +88,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "852b1b29-01d8-4b61-aeb2-4ac0e2538b3a",
+                        "id": "880294e1-776d-4601-843c-bb5dd2ee51ae",
                         "value": "What do you want to get from text?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "edba81c6-3a38-4d2d-b732-17fb3013e3f1",
+                        "id": "4c90ac28-c191-41dc-8770-b0de1b0f05c7",
                         "value": "There are many ways to analyze text, each providing different information. You can detect important elements, seek to analyze the feeling that emerges from a text, translate the text into another language and many other things."
                     }
                 ],
@@ -113,13 +113,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "18ea9fde-34db-434d-aa54-6d59896ead60",
+                        "id": "8bf56893-918b-4e43-9b92-77dc6a946e72",
                         "value": "What do you want to get from these image?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "675ac503-17cc-4c50-8d10-152615a7be35",
+                        "id": "70a6d078-480f-48bf-9d8b-415d453d95f7",
                         "value": "When working with images, you have many possibilities. This ranges from object detection to image recognition and passing through the analysis of facial expressions."
                     }
                 ],
@@ -138,13 +138,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "5b5da842-f47e-4911-a0af-ac081f77159e",
+                        "id": "0cf3c7a7-1bcc-4e91-9252-d229b1870928",
                         "value": "Choose between speed of execution and accuracy ."
                     }
                 ],
                 "help text": [
                     {
-                        "id": "a9cc0a02-2ad1-43e8-bdbe-73b1c674d326",
+                        "id": "b8316097-369a-4e48-b229-bbefca56d0aa",
                         "value": "The more accurate an AI is, the longer it will need to get its answer. \"The longer the AI thinks, the better its response will be.\" Depending on the case, it is sometimes better to obtain a result quickly (if for example one seeks to obtain many predictions in a short time), even to the detriment of the precision of the solution, whereas in others it is preferable to have the most precise answer possible even if it must take time to calculate."
                     }
                 ],
@@ -163,13 +163,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "cc7a1d0e-b0c1-4d61-b627-9b05b6141f22",
+                        "id": "1b057801-cb8e-4ebe-8c56-64ba05b49720",
                         "value": "Do you want the data on which the AI is based to be able to be updated after the deployment of the model?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "536a9574-ca6f-48e1-873a-93a53e2f530e",
+                        "id": "f315d19d-9f38-42c1-a660-e137e919ce7a",
                         "value": "Being able to update an AI after it goes live can be a good idea to improve its performance, but it will require maintenance and finding new training data."
                     }
                 ],
@@ -188,13 +188,13 @@
             "properties": {
                 "help text": [
                     {
-                        "id": "481e31a3-7b4d-4461-9cb4-79b0ae500785",
+                        "id": "6b9f381e-028f-4ddd-9f5d-02c29b64e2a4",
                         "value": "There are 2 main methods to update an AI model. The first consists in providing it with new data in the form of a dataset provided by data analysts. And the second is to allow AI to use data provided by users to update itself. Each method has its advantages and disadvantages, the first allows to be sure that the data provided to the model is correct, but it requires more work, while the second allows to automate all that, but the AI risks to be biased by users (if many users say the same thing, the AI will consider it to be true, even if it is factually false)."
                     }
                 ],
                 "text": [
                     {
-                        "id": "f8d0395a-0eec-454f-86fa-0b87c0bd32f9",
+                        "id": "cc4ca57a-bd96-4642-ab7b-15d4af32c91c",
                         "value": "What data do you want to update your AI with?"
                     }
                 ],
@@ -213,13 +213,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "8f6e8364-2b29-41d1-a035-3e55938287e0",
+                        "id": "1151625c-e8ca-4035-890d-9db664411301",
                         "value": "How often do you want to update your AI?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "12290a3e-6abf-4193-bbf1-0fc09f3b31a0",
+                        "id": "d1319c21-a4eb-4a5c-886f-77e971780efc",
                         "value": "When an AI is updated, it must be in maintenance mode, the time to make the changes. Thus, the more frequent the updates, the more often the AI will be inaccessible, but the more efficient it will be because it is up to date with new data that improves its performance."
                     }
                 ],
@@ -238,13 +238,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "79a52c8f-194b-4830-91b7-a19eb6f4e706",
+                        "id": "c8a4f1b2-ae21-4093-84db-5ce8a1a7ea90",
                         "value": "Who will be the user using your AI? (You can select more than one option)"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "7418be32-e5f4-4be1-8937-a260ea1789c1",
+                        "id": "c2e92691-9155-4bfa-b6c5-665560328e44",
                         "value": "The use of AI can be personalized according to its user, the interface will not be the same if a child or a specialist must use it. For the child, for example, the interface will be much simpler and contain only a few buttons, while a specialist might need all the options we can provide."
                     }
                 ],
@@ -263,13 +263,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "be79b100-d459-450b-a544-bb40ecc4e529",
+                        "id": "c90bbbad-421e-45bb-81ba-352a4d98567e",
                         "value": "How do you want to see the results provided by the AI?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "28f5e803-e3e9-4738-8c1d-1d2110c3a2e7",
+                        "id": "8c41cc3f-2f07-426c-83e8-ac76bb82cbce",
                         "value": "Visual representation of the results of an AI is a very important choice, an effective data representation will allow you to see at a glance the patterns that stand out where a simple string of numbers is not likely to tell you much."
                     }
                 ],
@@ -301,13 +301,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "3b3dd66a-9f64-45b6-ae79-3e21e03d8788",
+                        "id": "ed985cdf-5861-44c0-92eb-6229ece43f4c",
                         "value": "What is your desired goal regarding your AI errors?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "81d6bf4b-0227-4f4f-be6d-68f9819d49c8",
+                        "id": "c9713aa5-5466-4d5a-9519-4158f6465504",
                         "value": "Depending on the context of your project, you may want to reduce some of the errors that the AI may make."
                     }
                 ],
@@ -326,13 +326,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "dff2f2fc-a55a-47ed-a35d-c83161585dad",
+                        "id": "1ec753b7-0738-4861-9d3f-0aad0b596e70",
                         "value": "Are there any classification categories in which you want your AI to be more accurate? "
                     }
                 ],
                 "help text": [
                     {
-                        "id": "b3bc173c-c857-41cf-8e92-d485c2c75dba",
+                        "id": "6e62816e-95fc-48f3-9445-691ef65ac15e",
                         "value": "Depending on the context of the project, it is sometimes preferable that the AI does not make mistakes, especially in one or more specific categories. Example: In the categorization of emails, it is better that the AI makes a mistake and categorizes \"non-fraudulent\" emails as \"fraudulent\" than the opposite."
                     }
                 ],
@@ -351,13 +351,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "0d55ebe0-d1a8-4738-965e-92585de3ccbc",
+                        "id": "1d7e8294-95fc-406c-a9c3-1e521f279d69",
                         "value": "Name the more sensitive categories."
                     }
                 ],
                 "help text": [
                     {
-                        "id": "c01caa47-b28b-44e6-9e79-d84e59f99d0d",
+                        "id": "2ecc8e52-ec69-450a-a843-bd4c73d4cd5d",
                         "value": "Prefer to put a small number of sensitive categories to optimize your AI on them."
                     }
                 ],
@@ -376,13 +376,13 @@
             "properties": {
                 "text": [
                     {
-                        "id": "5c23f4cd-453e-41d4-9209-d5ea594d85e2",
+                        "id": "41f82916-da11-49cf-8f1a-226a9c04c42a",
                         "value": "What is your desired goal regarding your AI errors?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "a7a2a3eb-8208-470b-ba8a-ee1fe5f3b435",
+                        "id": "640bbb25-80bb-47f9-8e86-f9b4a7b571c4",
                         "value": "Depending on the context of your project, you may want to reduce some of the errors that the AI may make."
                     }
                 ],
@@ -407,13 +407,13 @@
                 ],
                 "text": [
                     {
-                        "id": "bc26d56d-be5f-4978-8d33-0c7c5b32b925",
+                        "id": "8335b045-c52d-4552-91f2-94bd8ce00624",
                         "value": "Your AI must be able to work on encrypted data?"
                     }
                 ],
                 "help text": [
                     {
-                        "id": "ac71a2cd-b6c6-4a2a-9eca-baa9fa4ac38e",
+                        "id": "c6e6a711-c52a-4cbb-942a-2430937b7450",
                         "value": "Some AIs can operate on encrypted data. But this strongly limits the possible choice of model and considerably increases the calculation time, so only check this option if you are working with sensitive data."
                     }
                 ]
@@ -491,7 +491,7 @@
                 "modif_crypted": "false",
                 "help text": "Text classification allows many things such as: categorizing articles, sentiment analysis, spam detection and much more.",
                 "text": "Classify texts",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -506,7 +506,7 @@
                 "modif_crypted": "true",
                 "help text": "Within the extraction of elements in a text, we can cite the recognition of entities, the extraction of key points of a text to make summaries, and many others.",
                 "text": "Extraction of elements",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -521,7 +521,7 @@
                 "modif_crypted": "true",
                 "help text": "Translate texts automatically from one language to another.",
                 "text": "Translation",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -536,7 +536,7 @@
                 "modif_crypted": "true",
                 "help text": "This includes everything related to object detection in an image (such as the detection of all faces in a photo, car, text character, etc.)",
                 "text": "Object detection",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -551,7 +551,7 @@
                 "modif_crypted": "true",
                 "text": "Classify between two choices",
                 "help text": "Allows to classify images between 2 distinct choices. Example: Classify diseased or non-diseased plants according to their images.",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -566,7 +566,7 @@
                 "modif_crypted": "true",
                 "text": "Classify between more than two choices",
                 "help text": "All classification methods that include the ability to classify images into multiple categories (such as classifying birds by species)",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -817,7 +817,7 @@
                 "text": "Minimize the average error. ",
                 "help text": "Errors are generally smaller, but when they do occur they are very far from the expected answer.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -832,7 +832,7 @@
                 "text": "Minimize the maximum error that can be made.",
                 "help text": "Errors are more frequent but rarely far from the expected answer.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -847,7 +847,7 @@
                 "text": "Balanced",
                 "help text": "Balanced according to the maximum error and according to the average error.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -861,7 +861,7 @@
             "properties": {
                 "text": "Yes",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -875,7 +875,7 @@
             "properties": {
                 "text": "No",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -902,7 +902,7 @@
                 "text": "That a true thing is considered false.",
                 "help text": "Example: That in a cancer detection, one detects a person having cancer when he has it.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -917,7 +917,7 @@
                 "text": "That a false thing is considered true.",
                 "help text": "Example: That in a detection of cancer, we detect that a person has cancer when it does not have it.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -932,7 +932,7 @@
                 "text": "Balanced.",
                 "help text": "A balance between the two other propositions.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -987,7 +987,7 @@
                 "text": "Higher speed",
                 "help text": "Higher speed usually means lower accuracy.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -1002,7 +1002,7 @@
                 "text": "Balance between speed and precision",
                 "help text": "A balance between speed and accuracy.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         },
         {
@@ -1017,7 +1017,7 @@
                 "text": "Higher accuracy",
                 "help text": "Higher accuracy usually means lower speed.",
                 "modif_crypted": "false",
-                "list_coef": "nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
+                "list_coef": "1.0, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan"
             }
         }
     ]

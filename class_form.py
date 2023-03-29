@@ -1,3 +1,5 @@
+import math
+import heapq
 import numpy as np
 import streamlit as st
 from gremlin_python import statics
@@ -160,26 +162,35 @@ class Form:
         return propositions, props_ids
     
     def get_weight(self, edge_id):
-        print(edge_id)
+        """
+            Get the list_coef from the edge with edge_id id
+        """
         list_weight = self.run_gremlin_query("g.E('"+edge_id+"').properties('list_coef').value()")[0].split(", ")
         for i in range(len(list_weight)):
             list_weight[i] = float(list_weight[i])
         return list_weight
     
-    def calcul_weight(self, answers):
-        print(answers)
+    def calcul_best_AIs(self, nbAI, answers):
+        """
+            Return the nbAI best AIs from a list of answers
+        """
         list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(",")
-        print(list_AI)
         coef_AI = [1] * len(list_AI)
-        print(coef_AI)
         for i in range(len(answers)):
             for j in range(len(answers[i])):
-                print(answers[i][j]['text'])
                 list_coef = self.get_weight(answers[i][j]["id"])
                 coef_AI = np.multiply(coef_AI, list_coef)
-        print("@@@@@@@@@@@@@@@@@@@@@@@@é")
-        print(coef_AI)
-        return None
+        # We put all NaN value to -1
+        for i in range(len(coef_AI)):
+            if coef_AI[i] != coef_AI[i]:  # if a NaN value is encounter, we put it to -1
+                coef_AI[i] = -1
+        best = list(heapq.nlargest(nbAI, np.array(coef_AI)))
+        # We put the nbAI best AI in list_bests_AIs
+        list_bests_AIs = []
+        for i in range(nbAI):
+            index = list(coef_AI).index(best[i])
+            list_bests_AIs.append(list_AI[index])
+        return list_bests_AIs
 
     def save_answers(self, answers, username):
         """
