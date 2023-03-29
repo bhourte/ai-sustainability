@@ -3,7 +3,7 @@ import os
 import gremlin_python
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
-
+from decouple import config
 statics.load_statics(globals())
 
 class DbGestion:
@@ -127,7 +127,7 @@ def main():
     ENDPOINT = "questions-db.gremlin.cosmos.azure.com"
     DATABASE = "graphdb"
     COLLECTION = "Persons"
-    PRIMARYKEY = PRIMARYKEY # Replace this value with the primary key of the database in environment variable
+    PRIMARYKEY = config('PRIMARYKEY') # Replace this value with the primary key of the database in environment variable
 
     db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
     # db_gestion.save_graph("data.json")

@@ -1,6 +1,8 @@
 from class_form import Form
 import streamlit as st
+from decouple import config
 
+PRIMARYKEY = config('PRIMARYKEY')
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
 
