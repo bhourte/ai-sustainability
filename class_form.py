@@ -188,9 +188,25 @@ class Form:
         # We put the nbAI best AI in list_bests_AIs
         list_bests_AIs = []
         for i in range(nbAI):
-            index = list(coef_AI).index(best[i])
-            list_bests_AIs.append(list_AI[index])
+            if best[i] > 0:
+                index = list(coef_AI).index(best[i])
+                list_bests_AIs.append(list_AI[index])
+        self.show_best_AI(list_bests_AIs)
         return list_bests_AIs
+    
+    def show_best_AI(self, list_bests_AIs):
+        """
+            Method used to show the n best AI obtained after the user has completed the Form
+            The number of AI choosen is based on the nbAI wanted by the user and the maximum of available AI for the use of the user
+            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
+        """
+        if len(list_bests_AIs) > 0:
+            st.subheader("There is "+str(len(list_bests_AIs))+" IA corresponding to your specifications, here they are in order of the most efficient to the least:", anchor=None)
+            for i in range(len(list_bests_AIs)):
+                st.caption(str(i+1)+") "+list_bests_AIs[i])
+        else:
+            st.subheader("There is no AI corresponding to your request, please make other choices in the form", anchor=None)
+        return None
 
     def save_answers(self, answers, username):
         """
