@@ -14,7 +14,7 @@ def main():
     form = Form(
             endpoint = "questions-db.gremlin.cosmos.azure.com",
             database_name = "graphdb",
-            container_name = 'Form',
+            container_name = 'Persons',
             primary_key= config('PRIMARYKEY'),
         )
 
