@@ -259,8 +259,8 @@ class Form:
 
 
                 self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
-
-        self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('answer1"+nb_form+"')).property('partitionKey', 'Answer')")
+        first_node_id = username+'-'+'answer1'+nb_form
+        self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
             
     def save_feedback(self, text_feedback, username):
         """
@@ -272,3 +272,15 @@ class Form:
             self.run_gremlin_query("g.addV('Feedback').property('partitionKey', 'Feedback').property('id', '"+node_feedback_id+"')")
         edge_feedback_id = 'feedback'+username+str(nb_feedback_by_user+1)
         self.run_gremlin_query("g.V('"+username+"').addE('Feedback').to(g.V('"+node_feedback_id+"')).property('id', '"+edge_feedback_id+"').property('text', '"+text_feedback+"')")
+    
+    def get_all_feedback(self):
+        """
+        Get all feedback in db
+        """
+        all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
+        for user_id in all_users_id:
+            all_feedback = self.run_gremlin_query("g.V('"+user_id+"').outE().hasLabel('Feedback').id()")
+            with st.expander('Feedbacks from '+ user_id):
+                for feedback_id in all_feedback:
+                    feedback = self.run_gremlin_query("g.E('"+feedback_id+"').properties('text').value()")
+                    st.write(feedback_id + ': '+ feedback[0])
