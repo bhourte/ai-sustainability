@@ -3,9 +3,11 @@ from class_form import Form
 from decouple import config
 def main():
     st.title("Feedback")
-    if 'username' not in st.session_state or st.session_state.username == "":
+    if 'username' not in st.session_state or st.session_state.username == "":  # Not connected
         st.caption("You are not connected, please connect with your username in the Connection page.")
-    elif st.session_state.username != 'Admin':
+        return None
+    username = st.session_state.username
+    if username != 'Admin':  # Connected as an User
         st.caption("Connected as " + str(st.session_state.username))
         username = st.session_state.username
         form = Form(
@@ -27,12 +29,9 @@ def main():
             st.write("You have to fill the form first")
             st.write("Please fill the form first and come back to give us your feedback")
             st.write("Thank you")
-    elif st.session_state.username == 'Admin':
+    else:  # Connected as an Admin
+        st.caption("Connected as an Admin")
         # Code pour l'admin ici
-        pass
-    else:
-        # Error, not supposed to go here
-        pass
 
 if __name__ == "__main__":
       main()
