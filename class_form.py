@@ -2,8 +2,10 @@ import math
 import heapq
 import numpy as np
 import streamlit as st
+import matplotlib.pyplot as plt
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
+
 
 statics.load_statics(globals())
 
@@ -327,7 +329,7 @@ class Form:
         edge_feedback_id = 'feedback'+username+str(nb_feedback_by_user+1)
         self.run_gremlin_query("g.V('"+username+"').addE('Feedback').to(g.V('"+node_feedback_id+"')).property('id', '"+edge_feedback_id+"').property('text', '"+text_feedback+"')")
     
-    def get_all_feedback(self):
+    def get_all_feedbacks(self):
         """
         Get all feedback in db
         """
@@ -338,3 +340,34 @@ class Form:
                 for feedback_id in all_feedback:
                     feedback = self.run_gremlin_query("g.E('"+feedback_id+"').properties('text').value()")
                     st.write(feedback_id + ': '+ feedback[0])
+
+    def get_nb_selected_edges(self):
+        """
+        Get all answers in db
+
+        return list of dictionnary {proposition_id: nb_selected}
+        """
+        edges_selected = {}
+        all_selected_edges = self.run_gremlin_query("g.E().hasLabel('Answer').valueMap('proposition_id')")
+        for edge in all_selected_edges:
+            if 'proposition_id' in edge.keys():
+                if edge['proposition_id'] not in edges_selected.keys():
+                    edges_selected[edge['proposition_id']] = 0
+                edges_selected[edge['proposition_id']] += 1
+        st.subheader("Number of times each edge was selected")
+        return edges_selected
+
+    def display_bar_graph(self, edges_selected):
+        """
+        Display bar graph of edges selected
+        """
+        fig = plt.figure( figsize=(20, 10))
+        ax = fig.add_axes([0,0,1,1])
+        proposition_ids = []
+        nb_selected = []
+        for key, value in edges_selected.items():
+            proposition_ids.append(key)
+            nb_selected.append(value)
+        ax.bar(proposition_ids,nb_selected)
+        st.pyplot(fig)
+

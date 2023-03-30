@@ -12,7 +12,7 @@ def main():
     form = Form(
             endpoint = "questions-db.gremlin.cosmos.azure.com",
             database_name = "graphdb",
-            container_name = 'Form',
+            container_name = 'Persons',
             primary_key= config('PRIMARYKEY'),
         )
     if username != 'Admin':  # Connected as an User
@@ -35,7 +35,7 @@ def main():
     else:  # Connected as an Admin
         st.caption("Connected as an Admin")
         # Code pour l'admin ici
-        form.get_all_feedback()
+        form.get_all_feedbacks()
 
 if __name__ == "__main__":
       main()
