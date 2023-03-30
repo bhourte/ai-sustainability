@@ -8,7 +8,7 @@ FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
 
 def main():
-
+    st.title("Form")
     form = Form(
                 endpoint = "questions-db.gremlin.cosmos.azure.com",
                 database_name = "graphdb",
