@@ -2,9 +2,6 @@ import math
 import heapq
 import numpy as np
 import streamlit as st
-# import matplotlib.pyplot as plt
-# from matplotlib.ticker import MaxNLocator
-import plotly.express as px
 import plotly.graph_objects as go
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -396,10 +393,4 @@ class Form:
                 )
             # Rotate x-axis labels, and set y-axis tick interval to 1 and 
             st.plotly_chart(fig)
-
-
-
-
-
-
-
+            
