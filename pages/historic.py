@@ -1,4 +1,7 @@
 import streamlit as st
+from class_form import Form
+from decouple import config
+
 
 def main():
     st.title("Historic")
@@ -7,6 +10,13 @@ def main():
         return None
     username = st.session_state.username
     st.caption("Connected as " + str(username))
+
+    form = Form(
+            endpoint = "questions-db.gremlin.cosmos.azure.com",
+            database_name = "graphdb",
+            container_name = 'Form',
+            primary_key= config('PRIMARYKEY'),
+        )
 
 if __name__ == "__main__":
       main()
