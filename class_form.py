@@ -40,19 +40,19 @@ class Form:
         """
         self.gremlin_client.close()
     
-    def add_question(self, node_id, modif_crypted):
+    def add_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add question from db to form
         """
         q_type = self.run_gremlin_query("g.V('"+node_id+"').label()")
         if q_type[0] == "Q_Open":
-            next_node_id, answer, modif_crypted = self.add_open_question(node_id, modif_crypted)
+            next_node_id, answer, modif_crypted = self.add_open_question(node_id, modif_crypted, previous_answer)
         elif q_type[0] == "Q_QCM":
-            next_node_id, answer, modif_crypted = self.add_qcm_question(node_id, modif_crypted)
+            next_node_id, answer, modif_crypted = self.add_qcm_question(node_id, modif_crypted, previous_answer)
         elif q_type[0] == "Q_QRM":
-            next_node_id, answer, modif_crypted = self.add_qrm_question(node_id, modif_crypted)
+            next_node_id, answer, modif_crypted = self.add_qrm_question(node_id, modif_crypted, previous_answer)
         elif q_type[0] == "Q_QCM_Bool":
-            next_node_id, answer, modif_crypted = self.add_qcm_bool_question(node_id, modif_crypted)
+            next_node_id, answer, modif_crypted = self.add_qcm_bool_question(node_id, modif_crypted, previous_answer)
         elif q_type[0] == "end":
             next_node_id = "end"
             answer = None
@@ -60,13 +60,16 @@ class Form:
             print("Error: unknown question type")
         return next_node_id, answer, modif_crypted
     
-    def add_open_question(self, node_id, modif_crypted):
+    def add_open_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add open question from db to form
         """
         question = self.get_text_question(node_id)
         next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
-        answer = st.text_area(label=question, height=100,label_visibility="visible")
+        if previous_answer is not None:
+            answer = st.text_area(label=question, height=100,label_visibility="visible", value=previous_answer[0])
+        else:
+            answer = st.text_area(label=question, height=100,label_visibility="visible")
         if not answer:
             answer = None
             next_node_id = None
@@ -76,7 +79,7 @@ class Form:
         }]
         return next_node_id, answer, modif_crypted
     
-    def add_qcm_question(self, node_id, modif_crypted):
+    def add_qcm_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add qcm question from db to form
         """
@@ -85,7 +88,11 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        answer = st.selectbox(label=question, options=options, index=0)
+        if previous_answer is not None:
+            previous_index = options.index(previous_answer[0])
+            answer = st.selectbox(label=question, options=options, index=previous_index)
+        else:
+            answer = st.selectbox(label=question, options=options, index=0)
         if answer == '<Select an option>':
             answer = None
             next_node_id = None
@@ -96,7 +103,7 @@ class Form:
             answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
 
-    def add_qrm_question(self, node_id, modif_crypted):
+    def add_qrm_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add qrm question from db to form
         """
@@ -105,7 +112,10 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        answers = st.multiselect(label=question, options=options, default=None)
+        if previous_answer is not None:
+            answers = st.multiselect(label=question, options=options, default=previous_answer)
+        else:
+            answers = st.multiselect(label=question, options=options, default=None)
         answers_returned = []
         if answers == []:
             answers = None
@@ -119,7 +129,7 @@ class Form:
                 answers_returned.append({'id': props_ids[index], 'text': text['value']})
         return next_node_id, answers_returned, modif_crypted
     
-    def add_qcm_bool_question(self, node_id, modif_crypted):
+    def add_qcm_bool_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add qcm bool question from db to form
         """
@@ -128,7 +138,11 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        answer = st.selectbox(label=question, options=options, index=0)
+        if previous_answer is not None:
+            previous_index = options.index(previous_answer[0])
+            answer = st.selectbox(label=question, options=options, index=previous_index)
+        else:
+            answer = st.selectbox(label=question, options=options, index=0)
         if answer == '<Select an option>':
             answer = None
             next_node_id = None
@@ -222,6 +236,25 @@ class Form:
         else:
             st.subheader("There is no AI corresponding to your request, please make other choices in the form", anchor=None)
         return None
+
+    def add_qcm_select_form(self, username):
+        """
+            Display a qcm question with all the previous answered form
+        """
+        question = "Select the previous form you want to see again or edit"
+        options = ['<Select a form>']
+        edges_answers = self.run_gremlin_query("g.V('"+str(username)+"').outE('Answer')")
+        props_ids = []
+        for edge in edges_answers:
+            options.append(edge['inV'])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
+            props_ids.append(edge['inV'])
+        answer = st.selectbox(label=question, options=options, index=0)
+        if answer == '<Select a form>':
+            next_node_id = None
+        else:
+            index = options.index(answer)-1
+            next_node_id = props_ids[index]
+        return next_node_id
 
     def save_answers(self, answers, username):
         """
