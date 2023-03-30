@@ -30,7 +30,5 @@ def main():
             st.write('Answers saved')
             st.write(answers)
 
-
-
 if __name__ == "__main__":
     main()  
