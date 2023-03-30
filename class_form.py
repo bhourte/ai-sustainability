@@ -233,7 +233,7 @@ class Form:
 
         else : 
             # count number of edges from user
-            nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().id()"))
+            nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Answer').id()"))
             nb_form = nb_edges+1
         nb_form = "-form"+str(nb_form)
 
@@ -262,3 +262,13 @@ class Form:
 
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('answer1"+nb_form+"')).property('partitionKey', 'Answer')")
             
+    def save_feedback(self, text_feedback, username):
+        """
+        Save feedback in db
+        """
+        nb_feedback_by_user = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Feedback')"))
+        node_feedback_id = 'feedback'+username
+        if nb_feedback_by_user == 0:
+            self.run_gremlin_query("g.addV('Feedback').property('partitionKey', 'Feedback').property('id', '"+node_feedback_id+"')")
+        edge_feedback_id = 'feedback'+username+str(nb_feedback_by_user+1)
+        self.run_gremlin_query("g.V('"+username+"').addE('Feedback').to(g.V('"+node_feedback_id+"')).property('id', '"+edge_feedback_id+"').property('text', '"+text_feedback+"')")

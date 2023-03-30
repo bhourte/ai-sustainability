@@ -3,7 +3,6 @@ import streamlit as st
 
 from decouple import config
 
-PRIMARYKEY = config('PRIMARYKEY')
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
 
@@ -13,7 +12,7 @@ def main():
                 endpoint = "questions-db.gremlin.cosmos.azure.com",
                 database_name = "graphdb",
                 container_name = "Form",
-                primary_key= PRIMARYKEY,
+                primary_key= config('PRIMARYKEY'),
            )
     
     next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED)
