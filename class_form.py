@@ -226,7 +226,6 @@ class Form:
         Save answers in db
         Answers = list of list of dict {id: , text:}
         """
-        print('DEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG')
         username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
         if not username_exist:
             self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
@@ -241,34 +240,25 @@ class Form:
         for list_answer in answers:
             for dict_answer in list_answer:
                 actual_node = self.run_gremlin_query("g.E('"+str(dict_answer['id'])+"').outV()")[0]
-                print('Question:', actual_node['properties']['text'][0]['value'])
-                print('Actual node id: ', actual_node['id'])
                 next_question_node = self.run_gremlin_query("g.E('"+dict_answer['id']+"').inV()")[0]
-                print('Next node id: ', next_question_node['id'])
 
                 new_node_id = 'answer'+actual_node['id']+nb_form
                 next_new_node_id = 'answer'+next_question_node['id']+nb_form
 
                 new_node_id_exist = self.run_gremlin_query("g.V('"+new_node_id+"').id()")
                 next_new_node_id_exist = self.run_gremlin_query("g.V('"+next_new_node_id+"').id()")
-                print('new_node_id_exist: ', new_node_id_exist)
-                print('next_new_node_id_exist: ', next_new_node_id_exist)
 
                 if not new_node_id_exist:
                     self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+new_node_id+"').property('question', '"+actual_node['properties']['text'][0]['value']+"').property('question_id', '"+actual_node['id']+"')")
-                    print('If new_node_id created so id: ', self.run_gremlin_query("g.V('"+new_node_id+"').id()"))
 
                 if not next_new_node_id_exist :
                     if next_question_node['label'] == 'end':
                         self.run_gremlin_query('g.addV("end").property("partitionKey", "Answer").property("id", "'+next_new_node_id+'")')
                     else:
                         self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_new_node_id+"').property('question', '"+next_question_node['properties']['text'][0]['value']+"').property('question_id', '"+next_question_node['id']+"')")
-                    print('If next_new_node_id created so id', self.run_gremlin_query("g.V('"+next_new_node_id+"').id()"))
 
 
                 self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
-                print('answer added :', dict_answer['text'])
-                print('-------------------------------------------------------------------------------------------------------------------------------')
 
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('answer1"+nb_form+"')).property('partitionKey', 'Answer')")
             
