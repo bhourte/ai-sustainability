@@ -32,6 +32,7 @@ def main():
     else:  # Connected as an Admin
         st.caption("Connected as an Admin")
         # Code pour l'admin ici
+        
 
 if __name__ == "__main__":
       main()
