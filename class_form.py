@@ -2,7 +2,10 @@ import math
 import heapq
 import numpy as np
 import streamlit as st
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+# from matplotlib.ticker import MaxNLocator
+import plotly.express as px
+import plotly.graph_objects as go
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
@@ -333,20 +336,49 @@ class Form:
                 if edge['proposition_id'] not in edges_selected.keys():
                     edges_selected[edge['proposition_id']] = 0
                 edges_selected[edge['proposition_id']] += 1
-        st.subheader("Number of times each edge was selected")
         return edges_selected
 
     def display_bar_graph(self, edges_selected):
         """
         Display bar graph of edges selected
         """
-        fig = plt.figure( figsize=(20, 10))
-        ax = fig.add_axes([0,0,1,1])
-        proposition_ids = []
-        nb_selected = []
+        # change the dictionnary in dict {proposition_id: {text: text, nb_selected: nb_selected}}
+        edges_selected_with_text = {}
         for key, value in edges_selected.items():
-            proposition_ids.append(key)
-            nb_selected.append(value)
-        ax.bar(proposition_ids,nb_selected)
-        st.pyplot(fig)
+            text = self.run_gremlin_query("g.E('"+key+"').properties('text').value()")
+            if text:
+                edges_selected_with_text[key] = {'text': text[0], 'nb_selected': value}
+            else:
+                edges_selected_with_text[key] = {'text': self.run_gremlin_query("g.E('"+key+"').label()")[0], 'nb_selected': value}
+        
+        # sort the dict on x_axis (keys), display on x_label only the id of the proposition, and on the hover text the label and the text of the proposition
+        # add in hover text the id of the proposition
+        with st.spinner('Loading...'):
+            sorted_edges_selected_with_text = {k: edges_selected_with_text[k] for k in sorted(edges_selected_with_text)}
+            x_axis = []
+            x_label = []
+            hover_text = []
+            y_axis = []
+            for key, value in sorted_edges_selected_with_text.items():
+                x_axis.append(key)
+                x_label.append(key.split('-')[0])
+                hover_text.append(value['text'] +'<br> proposition_id: ' +key)
+                y_axis.append(value['nb_selected'])
+            fig = go.Figure(data=[go.Bar(x=x_axis, y=y_axis, text=hover_text, hovertext=hover_text, hoverinfo='text')])
+            # hover text angle to -90
+            fig.update_layout(
+                title='Number of times each edge was selected', 
+                xaxis_title='Question', 
+                yaxis_title='Number of times selected', 
+                xaxis = dict(tickangle = -45, ticktext=x_label, tickvals=x_axis), 
+                yaxis = dict(dtick = 1),
+                )
+            # Rotate x-axis labels, and set y-axis tick interval to 1 and 
+            st.plotly_chart(fig)
+
+
+
+
+
+
 
