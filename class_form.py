@@ -242,8 +242,8 @@ class Form:
                 actual_node = self.run_gremlin_query("g.E('"+str(dict_answer['id'])+"').outV()")[0]
                 next_question_node = self.run_gremlin_query("g.E('"+dict_answer['id']+"').inV()")[0]
 
-                new_node_id = 'answer'+actual_node['id']+nb_form
-                next_new_node_id = 'answer'+next_question_node['id']+nb_form
+                new_node_id = username+'-'+'answer'+actual_node['id']+nb_form
+                next_new_node_id = username+'-'+'answer'+next_question_node['id']+nb_form
 
                 new_node_id_exist = self.run_gremlin_query("g.V('"+new_node_id+"').id()")
                 next_new_node_id_exist = self.run_gremlin_query("g.V('"+next_new_node_id+"').id()")
