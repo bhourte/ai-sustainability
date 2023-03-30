@@ -244,7 +244,8 @@ class Form:
         edges_answers = self.run_gremlin_query("g.V('"+str(username)+"').outE('Answer')")
         props_ids = []
         for edge in edges_answers:
-            options.append(edge['inV'])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
+            text = edge['inV'].split("-")
+            options.append(text[-1])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
             props_ids.append(edge['inV'])
         answer = st.selectbox(label=question, options=options, index=0)
         if answer == '<Select a form>':
@@ -254,21 +255,24 @@ class Form:
             next_node_id = props_ids[index]
         return next_node_id
 
-    def save_answers(self, answers, username):
+    def save_answers(self, answers, username, form_name=None):
         """
         Save answers in db
         Answers = list of list of dict {id: , text:}
         """
-        username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
-        if not username_exist:
-            self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
-            nb_form = 1
-
-        else : 
-            # count number of edges from user
-            nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Answer').id()"))
-            nb_form = nb_edges+1
-        nb_form = "-form"+str(nb_form)
+        if form_name is None:
+            username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
+            if not username_exist:
+                self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
+                nb_form = 1
+    
+            else : 
+                # count number of edges from user
+                nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Answer').id()"))
+                nb_form = nb_edges+1
+            nb_form = "-form"+str(nb_form)
+        else:
+            nb_form = "-"+str(form_name)
 
         for list_answer in answers:
             for dict_answer in list_answer:
@@ -294,7 +298,24 @@ class Form:
                 self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
         first_node_id = username+'-'+'answer1'+nb_form
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
-            
+
+    def change_answers(self, answers, username, form_name):
+        """
+            Change the answer in db
+        """
+        # We first delete the existing graph
+        node_id = username+'-answer1-'+str(form_name)
+        end = True
+        while end:
+            next_node_id = self.run_gremlin_query("g.V('"+node_id+"').out().properties('id')")
+            # we delete the node
+            self.run_gremlin_query("g.V('"+node_id+"').drop()")
+            if not next_node_id:
+                end = False
+            else:
+                node_id = next_node_id[0]['value']
+        self.save_answers(answers, username, form_name)
+
     def save_feedback(self, text_feedback, username):
         """
         Save feedback in db

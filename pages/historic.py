@@ -6,7 +6,6 @@ from decouple import config
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
 
-@st.cache_resource
 def get_list_result(_form, node_answer, next_node_id):
 
     # We create a list with all previous answers
@@ -21,7 +20,7 @@ def get_list_result(_form, node_answer, next_node_id):
         for i in panswer:
             previous_answer.append(i['value'])
         previous_answers.append(previous_answer)
-
+        
         node_answer = _form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value']  # We go to the next vertice
     return previous_answers
 
@@ -41,29 +40,34 @@ def main():
         )
 
     node_answer = form.add_qcm_select_form(username)
-    if node_answer == None:  # if non form selected, don't show the rest
+    if node_answer == None:  # if none form selected, don't show the rest
         return None
+    form_name = node_answer.split("-")[-1]
     next_node_id = node_answer
 
     previous_answers = get_list_result(form, node_answer, next_node_id)
 
     next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED, previous_answers[0])
+    label_next_node = form.run_gremlin_query("g.V('"+str(next_node_id)+"').properties('label')")[0]['value']
     answers = [answer]
     i = 1
-    while next_node_id != '9' and next_node_id is not None:
+    while label_next_node != 'end' and next_node_id is not None:
         next_node_id, answer, modif_crypted = form.add_question(next_node_id, modif_crypted, previous_answers[i])
-        if answer is not None:
+        if answer is not None and len(answer) != 0:
+            label_next_node = form.run_gremlin_query("g.V('"+str(next_node_id)+"').properties('label')")[0]['value']
             answers.append(answer)
             if previous_answers[i] != None and answer[0]['text'] != previous_answers[i][0]:
                 previous_answers = [None] * len(previous_answers)
         i += 1
+        if i == len(previous_answers):
+            previous_answers.append(None)
 
-    if next_node_id == '9':
+    if label_next_node == 'end':
 
-        print(form.calcul_best_AIs(5, answers))
+        print("best AIs : " + str(form.calcul_best_AIs(5, answers)))
 
-        if st.button('Submit', on_click=form.save_answers, args=(answers,username)):
-            st.write('Answers saved')
+        if st.button('Save Change', on_click=form.change_answers, args=(answers,username, form_name)):
+            st.write('Change saved')
             st.write(answers)
 
 
