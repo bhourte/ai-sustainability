@@ -7,15 +7,16 @@ def main():
         st.caption("You are not connected, please connect with your username in the Connection page.")
         return None
     username = st.session_state.username
-    if username != 'Admin':  # Connected as an User
-        st.caption("Connected as " + str(st.session_state.username))
-        username = st.session_state.username
-        form = Form(
+    form = Form(
             endpoint = "questions-db.gremlin.cosmos.azure.com",
             database_name = "graphdb",
             container_name = 'Form',
             primary_key= config('PRIMARYKEY'),
         )
+    if username != 'Admin':  # Connected as an User
+        st.caption("Connected as " + str(st.session_state.username))
+        username = st.session_state.username
+        
         username_exists = form.run_gremlin_query("g.V('"+username+"')")
         if username_exists:
             st.write("Welcome back "+username)
@@ -32,7 +33,7 @@ def main():
     else:  # Connected as an Admin
         st.caption("Connected as an Admin")
         # Code pour l'admin ici
-        
+        form.get_all_feedback()
 
 if __name__ == "__main__":
       main()

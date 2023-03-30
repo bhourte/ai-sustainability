@@ -278,3 +278,9 @@ class Form:
         Get all feedback in db
         """
         all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
+        for user_id in all_users_id:
+            all_feedback = self.run_gremlin_query("g.V('"+user_id+"').outE().hasLabel('Feedback').id()")
+            with st.expander('Feedbacks from '+ user_id):
+                for feedback_id in all_feedback:
+                    feedback = self.run_gremlin_query("g.E('"+feedback_id+"').properties('text').value()")
+                    st.write(feedback_id + ': '+ feedback[0])
