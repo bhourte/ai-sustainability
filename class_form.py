@@ -323,6 +323,8 @@ class Form:
                     self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
         first_node_id = username+'-'+'answer1'+nb_form
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
+        list_bests_AIs = str(list_bests_AIs)[1:-1]
+        self.run_gremlin_query("g.V('"+first_node_id+"').property('list_bests_AIs', '"+list_bests_AIs+"')")
 
     def change_answers(self, answers, username, list_bests_AIs, form_name, new_form_name):
         """

@@ -25,6 +25,7 @@ def get_list_result(form, node_answer, next_node_id):
 
 def show_form(form, node_answer):
     next_node_id = None
+    list_bests_AIs = form.run_gremlin_query("g.V('"+str(node_answer)+"').properties('list_bests_AIs')")[0]['value']
     while next_node_id != 'end':
         node_answer_label = form.run_gremlin_query("g.V('"+str(node_answer)+"').properties('label')")[0]['value']
         if node_answer_label == 'end':
@@ -37,6 +38,7 @@ def show_form(form, node_answer):
         st.subheader(question + " :")
         st.caption(answers, unsafe_allow_html=True)
         node_answer = form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value']  # We go to the next vertice
+    form.show_best_AI(list_bests_AIs)
     return None
 
 def main():
@@ -80,12 +82,12 @@ def main():
         if label_next_node == 'end':
 
             new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
-            if new_form_name != "" and new_form_name != form_name:
+            if new_form_name != "":
                 list_bests_AIs = form.calcul_best_AIs(5, answers)
+                form.show_best_AI(list_bests_AIs)
                 if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
                     print("best AIs : " + str(list_bests_AIs))
                     st.write('Change saved')
-                    form.show_best_AI(list_bests_AIs)
                     st.write(answers)
 
 
