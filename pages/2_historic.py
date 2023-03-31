@@ -108,10 +108,8 @@ def main():
             form_name = st.selectbox(label="Select a Form", options=all_form)
             if form_name != "<Select a Form>":
                 first_node = str(user) + "-answer1-" + str(form_name)
-                print(first_node)
                 show_form(form, first_node)
 
 
 if __name__ == "__main__":
-    print("\n\n\n START \n\n\n")
     main()
