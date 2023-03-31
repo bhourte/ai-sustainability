@@ -33,7 +33,6 @@ def main():
         form_name = st.text_input("Give a name to your form here")
         if form_name != "":
             if st.button('Submit', on_click=form.save_answers, args=(answers,username,form_name)):
-                print(form.calcul_best_AIs(5, answers))
                 st.write('Answers saved')
                 st.write(answers)
 

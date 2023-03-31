@@ -21,8 +21,6 @@ def get_list_result(_form, node_answer, next_node_id):
             previous_answer.append(i['value'])
         previous_answers.append(previous_answer)
         
-        print(node_answer)
-        print("debug : " + _form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value'])
         node_answer = _form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value']  # We go to the next vertice
     return previous_answers
 
@@ -66,12 +64,11 @@ def main():
 
     if label_next_node == 'end':
 
-        new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
-        if new_form_name != "" and new_form_name != form_name:
-            if st.button('Save Change', on_click=form.change_answers, args=(answers,username,form_name,new_form_name)):
-                print("best AIs : " + str(form.calcul_best_AIs(5, answers)))
-                st.write('Change saved')
-                st.write(answers)
+        print("best AIs : " + str(form.calcul_best_AIs(5, answers)))
+
+        if st.button('Save Change', on_click=form.change_answers, args=(answers,username, form_name)):
+            st.write('Change saved')
+            st.write(answers)
 
 
 if __name__ == "__main__":
