@@ -81,10 +81,11 @@ def main():
 
             new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
             if new_form_name != "" and new_form_name != form_name:
+                list_bests_AIs = form.calcul_best_AIs(5, answers)
                 if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
-                    list_bests_AIs = form.calcul_best_AIs(5, answers)
                     print("best AIs : " + str(list_bests_AIs))
                     st.write('Change saved')
+                    form.show_best_AI(list_bests_AIs)
                     st.write(answers)
 
 
