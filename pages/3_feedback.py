@@ -25,7 +25,7 @@ def main():
         st.caption("Connected as " + str(st.session_state.username))
         username = st.session_state.username
         
-        username_exists = form.run_gremlin_query("g.V('"+username+"')")
+        username_exists = form.run_gremlin_query("g.V('"+username+"')")  # check if the user already exist in the database
         if username_exists:
             st.write("Welcome back "+username)
             st.write("You can now give us your feedback")

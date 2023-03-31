@@ -7,12 +7,15 @@ from decouple import config
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
 
-def get_list_result(form, node_answer):
+def get_list_result(form:object, node_answer:str)->list:
     """
         Specific function used by the "Historic" page to get the list with all the previous answer for a previous form
         Parameters :
-            - form : the form create from class_form.py (used to made de link with the gremlin database)
-            - node_answer : the 'id' of the node of the first answer
+            - form (object) : the form create from class_form.py (used to made de link with the gremlin database)
+            - node_answer (str) : the 'id' of the node of the first answer
+
+        Return :
+            - previous_answers (list) : list of all previous answer contained in the form
     """
 
     # We create a list with all previous answers
@@ -33,11 +36,15 @@ def get_list_result(form, node_answer):
         node_answer = form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value']  # We go to the next vertice
     return previous_answers
 
-def show_form(form, node_answer):
+def show_form(form:object, node_answer:str):
     """
         Specific function used by the "Historic" page to show the form in the Admin section of the Historic page
         Parameters :
-            - node_answer : the 'id' of the node of the first answer
+            - form (object) : the form create from class_form.py (used to made de link with the gremlin database)
+            - node_answer (str) : the 'id' of the node of the first answer
+
+        Return :
+            - None
     """
 
     next_node_id = None
@@ -86,7 +93,7 @@ def main():
         form_name = node_answer.split("-")[-1]
         next_node_id = node_answer
 
-        previous_answers = get_list_result(form, node_answer)
+        previous_answers = get_list_result(form, node_answer)  # get the list with all previous answers contained in the form
 
         next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED, previous_answers[0])
         label_next_node = form.run_gremlin_query("g.V('"+str(next_node_id)+"').properties('label')")[0]['value']
