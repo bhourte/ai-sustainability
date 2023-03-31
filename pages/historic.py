@@ -21,6 +21,7 @@ def get_list_result(_form, node_answer, next_node_id):
             previous_answer.append(i['value'])
         previous_answers.append(previous_answer)
         
+        print(node_answer)
         node_answer = _form.run_gremlin_query("g.V('"+str(node_answer)+"').out().properties('id')")[0]['value']  # We go to the next vertice
     return previous_answers
 
