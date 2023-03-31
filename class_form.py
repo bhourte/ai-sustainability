@@ -70,6 +70,17 @@ class Form:
             print("Error: unknown question type")
         return next_node_id, answer, modif_crypted
     
+    def build_question_help_text(self, node_id, props_ids = None):
+        """
+        Build the help text of a question
+        """
+        help_text = self.run_gremlin_query("g.V('"+node_id+"').properties('help text').value()")[0] + "\n"
+        if props_ids is not None:
+            for prop_id in props_ids:
+                if self.run_gremlin_query("g.E('"+prop_id+"').properties('help text')"):
+                    help_text += self.run_gremlin_query("g.E('"+prop_id+"').properties('text').value()")[0] + ": "+self.run_gremlin_query("g.E('"+prop_id+"').properties('help text').value()")[0] + "\n"
+        return help_text
+
     def add_open_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add open question from db to form
@@ -77,9 +88,9 @@ class Form:
         question = self.get_text_question(node_id)
         next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
         if previous_answer is not None:
-            answer = st.text_area(label=question, height=100,label_visibility="visible", value=previous_answer[0])
+            answer = st.text_area(label=question, height=100,label_visibility="visible", value=previous_answer[0], help=self.build_question_help_text(node_id))
         else:
-            answer = st.text_area(label=question, height=100,label_visibility="visible")
+            answer = st.text_area(label=question, height=100,label_visibility="visible", help=self.build_question_help_text(node_id))
         if not answer:
             answer = None
             next_node_id = None
@@ -102,9 +113,9 @@ class Form:
             options.append(option)
         if previous_answer is not None:
             previous_index = options.index(previous_answer[0])
-            answer = st.selectbox(label=question, options=options, index=previous_index)
+            answer = st.selectbox(label=question, options=options, index=previous_index, help=self.build_question_help_text(node_id, props_ids))
         else:
-            answer = st.selectbox(label=question, options=options, index=0)
+            answer = st.selectbox(label=question, options=options, index=0, help=self.build_question_help_text(node_id, props_ids))
         if answer == '<Select an option>':
             answer = None
             next_node_id = None
@@ -118,6 +129,9 @@ class Form:
     def add_qrm_question(self, node_id, modif_crypted, previous_answer=None):
         """
         Add qrm question from db to form
+
+        Parameters:
+            node_id (str): id of the node in the db
         """
         question = self.get_text_question(node_id)
         options = []
@@ -125,9 +139,9 @@ class Form:
         for option in propositions:
             options.append(option)
         if previous_answer is not None:
-            answers = st.multiselect(label=question, options=options, default=previous_answer)
+            answers = st.multiselect(label=question, options=options, default=previous_answer, help=self.build_question_help_text(node_id, props_ids))
         else:
-            answers = st.multiselect(label=question, options=options, default=None)
+            answers = st.multiselect(label=question, options=options, default=None, help=self.build_question_help_text(node_id, props_ids))
         answers_returned = []
         if answers == []:
             answers = None
@@ -152,9 +166,9 @@ class Form:
             options.append(option)
         if previous_answer is not None:
             previous_index = options.index(previous_answer[0])
-            answer = st.selectbox(label=question, options=options, index=previous_index)
+            answer = st.selectbox(label=question, options=options, index=previous_index, help=self.build_question_help_text(node_id, props_ids))
         else:
-            answer = st.selectbox(label=question, options=options, index=0)
+            answer = st.selectbox(label=question, options=options, index=0, help=self.build_question_help_text(node_id, props_ids))
         if answer == '<Select an option>':
             answer = None
             next_node_id = None
