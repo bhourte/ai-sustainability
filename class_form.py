@@ -107,7 +107,7 @@ class Form:
         """
         self.gremlin_client.close()
     
-    def add_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
+    def add_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
         Add question from db to form
 
@@ -138,7 +138,7 @@ class Form:
             print("Error: unknown question type")
         return next_node_id, answer, modif_crypted
     
-    def build_question_help_text(self, node_id:str, props_ids:list(str) = None)->str:
+    def build_question_help_text(self, node_id:str, props_ids:list = None)->str:
         """
         Build the help text of a question
 
@@ -156,7 +156,7 @@ class Form:
                     help_text += self.run_gremlin_query("g.E('"+prop_id+"').properties('text').value()")[0] + ": "+self.run_gremlin_query("g.E('"+prop_id+"').properties('help text').value()")[0] + "\n"
         return help_text
 
-    def add_open_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
+    def add_open_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
         Add open question from db to form
 
@@ -187,7 +187,7 @@ class Form:
         }]
         return next_node_id, answer, modif_crypted
     
-    def add_qcm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
+    def add_qcm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
         Add qcm question from db to form
 
@@ -221,7 +221,7 @@ class Form:
             answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
 
-    def add_qrm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
+    def add_qrm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
         Add qrm question from db to form
 
@@ -257,7 +257,7 @@ class Form:
                 answers_returned.append({'id': props_ids[index], 'text': text['value']})
         return next_node_id, answers_returned, modif_crypted
     
-    def add_qcm_bool_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
+    def add_qcm_bool_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
         Add qcm bool question from db to form
 
@@ -305,7 +305,7 @@ class Form:
         question = self.run_gremlin_query("g.V('"+node_id+"').properties('text').value()")[0]
         return question
 
-    def get_propositions_of_question(self, node_id:str, modif_crypted:str)->tuple(list(str), list(str)):
+    def get_propositions_of_question(self, node_id:str, modif_crypted:str)->tuple:
         """
         Get propositions of a question
 
@@ -330,7 +330,7 @@ class Form:
         
         return propositions, props_ids
     
-    def get_weight(self, edge_id:str)->list(float):
+    def get_weight(self, edge_id:str)->list:
         """
             Get the list_coef from the edge with edge_id id
         
@@ -433,7 +433,7 @@ class Form:
             next_node_id = props_ids[index]
         return next_node_id
 
-    def save_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str=None):
+    def save_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str=None)->None:
         """
         Save answers in db
         
@@ -485,7 +485,7 @@ class Form:
         list_bests_AIs = str(list_bests_AIs)[1:-1]
         self.run_gremlin_query("g.V('"+first_node_id+"').property('list_bests_AIs', '"+list_bests_AIs+"')")
 
-    def change_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str, new_form_name:str):
+    def change_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str, new_form_name:str)->None:
         """
             Change the answer in db
 
@@ -512,7 +512,7 @@ class Form:
                 node_id = next_node_id[0]['value']
         self.save_answers(answers, username, list_bests_AIs, new_form_name)
 
-    def save_feedback(self, text_feedback:str, username:str):
+    def save_feedback(self, text_feedback:str, username:str)->None:
         """
         Save feedback in db
 
@@ -628,7 +628,15 @@ class Form:
                 )
             st.plotly_chart(fig)
 
-    def no_dash_in_my_text(self, text):
+    def no_dash_in_my_text(self, text:str)->bool:
+        """
+        Check if there is a dash in the text
+        
+        Parameters:
+            - text (str): text to check
+        
+        Return:
+            - bool: True if there is no dash, False otherwise"""
         if '-' in text:
             return False
         else:
