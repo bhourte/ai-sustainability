@@ -382,6 +382,7 @@ class Form:
         
         # sort the dict on x_axis (keys), display on x_label only the id of the proposition, and on the hover text the label and the text of the proposition
         # add in hover text the id of the proposition
+                
         with st.spinner('Loading...'):
             sorted_edges_selected_with_text = {k: edges_selected_with_text[k] for k in sorted(edges_selected_with_text)}
             x_axis = []
@@ -403,5 +404,21 @@ class Form:
                 yaxis = dict(dtick = 1),
                 )
             # Rotate x-axis labels, and set y-axis tick interval to 1 and 
+            st.plotly_chart(fig)
+
+    def display_bar_graph_v2(self, edge_selected):
+        """
+        Display bar graph of edges selected
+        """
+        with st.spinner("Loading..."):
+            # sort the dict on keys
+            edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
+            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()))])
+            fig.update_layout(
+                title='Number of times each edge was selected',
+                xaxis_title='Question',
+                yaxis_title='Number of times selected',
+                yaxis = dict(dtick = 1),
+                )
             st.plotly_chart(fig)
             

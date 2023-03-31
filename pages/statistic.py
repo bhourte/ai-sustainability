@@ -18,6 +18,7 @@ def main():
         st.write("You can now see the statistic of the form")
         selected_edges = form.get_nb_selected_edges()
         form.display_bar_graph(selected_edges)
+        form.display_bar_graph_v2(selected_edges)
 
 if __name__ == "__main__":
     main()
