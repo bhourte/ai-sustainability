@@ -66,11 +66,12 @@ def main():
 
     if label_next_node == 'end':
 
-        print("best AIs : " + str(form.calcul_best_AIs(5, answers)))
-
-        if st.button('Save Change', on_click=form.change_answers, args=(answers,username, form_name)):
-            st.write('Change saved')
-            st.write(answers)
+        new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
+        if new_form_name != "" and new_form_name != form_name:
+            if st.button('Save Change', on_click=form.change_answers, args=(answers,username,form_name,new_form_name)):
+                print("best AIs : " + str(form.calcul_best_AIs(5, answers)))
+                st.write('Change saved')
+                st.write(answers)
 
 
 if __name__ == "__main__":

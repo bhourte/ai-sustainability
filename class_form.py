@@ -18,6 +18,16 @@ def connect(endpoint, database_name, container_name, primary_key):
             message_serializer=serializer.GraphSONSerializersV2d0()
         )
 
+def validate_answer(text):
+    text = list(text)
+    i = 0
+    while i < len(text):
+        if text[i] == "'":
+            text.insert(i, "\\")
+            i += 1
+        i += 1
+    return "".join(text)
+
 class Form:
     
     def __init__(self, endpoint, database_name, container_name, primary_key):
@@ -73,6 +83,8 @@ class Form:
         if not answer:
             answer = None
             next_node_id = None
+        else:
+            answer = validate_answer(answer)
         answer = [{
             "text": answer,
             "id": self.run_gremlin_query("g.V('"+node_id+"').outE().id()")[0],
@@ -245,7 +257,6 @@ class Form:
         options = ['<Select a form>']
         edges_answers = self.run_gremlin_query("g.V('"+str(username)+"').outE('Answer')")
         props_ids = []
-        print(edges_answers)
         for edge in edges_answers:
             text = edge['inV'].split("-")
             options.append(text[-1])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
@@ -300,7 +311,7 @@ class Form:
         first_node_id = username+'-'+'answer1'+nb_form
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
 
-    def change_answers(self, answers, username, form_name):
+    def change_answers(self, answers, username, form_name, new_form_name):
         """
             Change the answer in db
         """
@@ -315,7 +326,7 @@ class Form:
                 end = False
             else:
                 node_id = next_node_id[0]['value']
-        self.save_answers(answers, username, form_name)
+        self.save_answers(answers, username, new_form_name)
 
     def save_feedback(self, text_feedback, username):
         """

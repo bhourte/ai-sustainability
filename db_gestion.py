@@ -182,7 +182,7 @@ def main():
 #   - You will have a new node saved in the database and in the script (test_node)
     ENDPOINT = "questions-db.gremlin.cosmos.azure.com"
     DATABASE = "graphdb"
-    COLLECTION = "Persons"
+    COLLECTION = "Form"
     PRIMARYKEY = config('PRIMARYKEY')
 
     db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
