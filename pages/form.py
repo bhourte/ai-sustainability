@@ -17,7 +17,7 @@ def main():
     form = Form(
                 endpoint = "questions-db.gremlin.cosmos.azure.com",
                 database_name = "graphdb",
-                container_name = "Persons",
+                container_name = config('DATABASENAME'),
                 primary_key= config('PRIMARYKEY'),
            )
     
@@ -30,11 +30,13 @@ def main():
 
     if next_node_id == 'end':
 
-        print(form.calcul_best_AIs(5, answers))
-
-        if st.button('Submit', on_click=form.save_answers, args=(answers,username)):
-            st.write('Answers saved')
-            st.write(answers)
+        form_name = st.text_input("Give a name to your form here")
+        print('form_name = ' + str(form_name))
+        if form_name != "":
+            if st.button('Submit', on_click=form.save_answers, args=(answers,username,form_name)) and form_name != "":
+                print(form.calcul_best_AIs(5, answers))
+                st.write('Answers saved')
+                st.write(answers)
 
 if __name__ == "__main__":
     main()  

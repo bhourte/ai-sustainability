@@ -245,6 +245,7 @@ class Form:
         options = ['<Select a form>']
         edges_answers = self.run_gremlin_query("g.V('"+str(username)+"').outE('Answer')")
         props_ids = []
+        print(edges_answers)
         for edge in edges_answers:
             text = edge['inV'].split("-")
             options.append(text[-1])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
@@ -262,18 +263,17 @@ class Form:
         Save answers in db
         Answers = list of list of dict {id: , text:}
         """
-        if form_name is None:
-            username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
-            if not username_exist:
-                self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
-                nb_form = 1
-    
-            else : 
-                # count number of edges from user
-                nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Answer').id()"))
-                nb_form = nb_edges+1
-            nb_form = "-form"+str(nb_form)
-        else:
+        username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
+        if not username_exist:
+            self.run_gremlin_query("g.addV('user').property('partitionKey', 'Answer').property('id', '"+username+"')")
+            nb_form = 1
+
+        else : 
+            # count number of edges from user
+            nb_edges = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Answer').id()"))
+            nb_form = nb_edges+1
+        nb_form = "-form"+str(nb_form)
+        if form_name is not None:
             nb_form = "-"+str(form_name)
 
         for list_answer in answers:

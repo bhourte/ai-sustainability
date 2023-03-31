@@ -9,7 +9,7 @@ def main():
         return None
     username = st.session_state.username
     st.caption("Connected as " + str(username))
-    form = Form(endpoint="questions-db.gremlin.cosmos.azure.com", database_name="graphdb", container_name='Persons', primary_key= config('PRIMARYKEY'),)
+    form = Form(endpoint="questions-db.gremlin.cosmos.azure.com", database_name="graphdb", container_name=config('DATABASENAME'), primary_key= config('PRIMARYKEY'),)
     if username != 'Admin':
         st.write("You are not an Admin")
         st.write("You can't access to this page")
