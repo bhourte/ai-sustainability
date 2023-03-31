@@ -31,9 +31,8 @@ def main():
     if next_node_id == 'end':
 
         form_name = st.text_input("Give a name to your form here")
-        print('form_name = ' + str(form_name))
         if form_name != "":
-            if st.button('Submit', on_click=form.save_answers, args=(answers,username,form_name)) and form_name != "":
+            if st.button('Submit', on_click=form.save_answers, args=(answers,username,form_name)):
                 print(form.calcul_best_AIs(5, answers))
                 st.write('Answers saved')
                 st.write(answers)
