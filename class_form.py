@@ -306,8 +306,8 @@ class Form:
                         self.run_gremlin_query('g.addV("end").property("partitionKey", "Answer").property("id", "'+next_new_node_id+'")')
                     else:
                         self.run_gremlin_query("g.addV('Answer').property('partitionKey', 'Answer').property('id', '"+next_new_node_id+"').property('question', '"+next_question_node['properties']['text'][0]['value']+"').property('question_id', '"+next_question_node['id']+"')")
-                while len(self.run_gremlin_query("g.V('"+new_node_id+"').outE().has('answer', '"+dict_answer['text']+"')")) == 0:
-                    b = self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
+                while (self.run_gremlin_query("g.V('"+new_node_id+"').outE().has('answer', '"+dict_answer['text']+"').id()") == []): 
+                    self.run_gremlin_query("g.V('"+new_node_id+"').addE('Answer').to(g.V('"+next_new_node_id+"')).property('answer', '"+dict_answer['text']+"').property('proposition_id', '"+dict_answer['id']+"')")
         first_node_id = username+'-'+'answer1'+nb_form
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
 
@@ -420,4 +420,3 @@ class Form:
                 yaxis = dict(dtick = 1),
                 )
             st.plotly_chart(fig)
-            
