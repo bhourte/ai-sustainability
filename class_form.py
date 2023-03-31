@@ -1,4 +1,3 @@
-import math
 import heapq
 import numpy as np
 import streamlit as st
@@ -6,19 +5,39 @@ import plotly.graph_objects as go
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
-
 statics.load_statics(globals())
 
 @st.cache_resource
-def connect(endpoint, database_name, container_name, primary_key):
+def connect(endpoint:str, database_name:str, container_name:str, primary_key:str) -> client.Client:
+        """
+        Connect to the database and return the client (made only once thanks to the cache)
+
+        Parameters :
+            - endpoint : the endpoint of the database (string)
+            - database_name : the name of the database (string)
+            - container_name : the name of the container (string)
+            - primary_key : the primary key of the database (string)
+        
+        Return :
+            - client : the client to connect to the database
+        """
         return client.Client(
             'wss://' + endpoint + ':443/', 'g',
             username="/dbs/" + database_name + "/colls/" + container_name,
             password=primary_key,
             message_serializer=serializer.GraphSONSerializersV2d0()
         )
+# only string on 
+def validate_answer(text:str)->str:
+    """
+    Validate the answer to avoid errors in the gremlin query
 
-def validate_answer(text):
+    Parameters :
+        - text : the answer to validate (string)
+    
+    Return :
+        - text : the validated answer (string)
+    """
     text = list(text)
     i = 0
     while i < len(text):
@@ -29,16 +48,54 @@ def validate_answer(text):
     return "".join(text)
 
 class Form:
-    
-    def __init__(self, endpoint, database_name, container_name, primary_key):
+    """
+    Class to manage the form
+
+    Parameters :
+        - endpoint : the endpoint of the database (string)
+        - database_name : the name of the database (string)
+        - container_name : the name of the container (string)
+        - primary_key : the primary key of the database (string)
+
+    Methods :
+        - run_gremlin_query : run a gremlin query
+        - close : close the connection to the database
+        - add_question : add question from db to form
+        - build_help_text : build the help text for a question
+        - add_open_question : add open question from db to form
+        - add_qcm_question : add qcm question from db to form
+        - add_qrm_question : add qrm question from db to form
+        - add_qcm_bool_question : add qcm bool question from db to form
+        - get_text_question : get the text of a question
+        - get_propositions_of_question : get the propositions of a question
+        - get_weight : get the weights of a question (for IA )
+        - calcul_best_IAs : calcul the 5 best IAs following the answers
+        - show_best_IA: show the best IAs following the answers
+        - add_qcm_select_form : display a qcm question with all the previous answered form
+        - save_answers : save the answers in the database
+        - change_answers : change the answers in the database
+        - save_feedback : save the feedback in the database
+        - get_all_feedbacks : get all the feedbacks in the database
+        - get_nb_selected_edges : get the number of selected edges in the database
+        - display_bar_graph : display a bar graph with the number of selected edges 
+
+
+    """
+    def __init__(self, endpoint:str, database_name:str, container_name:str, primary_key:str):
+        """
+        Initialize the class with the connection to the database
+        """
         self.gremlin_client = connect(endpoint, database_name, container_name, primary_key)
     
-    def run_gremlin_query(self, query):
+    def run_gremlin_query(self, query:str)->list:
         """
         Run a gremlin query
         
         Parameters :
             - query : the gremlin query to run (string) (Exemple : "g.V()")
+        
+        Return :
+            - result : the result of the query (list)
         """
         run = self.gremlin_client.submit(query).all()
         result = run.result()
@@ -50,9 +107,20 @@ class Form:
         """
         self.gremlin_client.close()
     
-    def add_question(self, node_id, modif_crypted, previous_answer=None):
+    def add_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
         """
         Add question from db to form
+
+        Parameters :
+            - node_id : the id of the node to add (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
+            - previous_answer : the previous answer to the question (string)
+
+        
+        Return :
+            - next_node_id : the id of the next node (string)
+            - answer : the answer to the question (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
         """
         q_type = self.run_gremlin_query("g.V('"+node_id+"').label()")
         if q_type[0] == "Q_Open":
@@ -70,9 +138,16 @@ class Form:
             print("Error: unknown question type")
         return next_node_id, answer, modif_crypted
     
-    def build_question_help_text(self, node_id, props_ids = None):
+    def build_question_help_text(self, node_id:str, props_ids:list(str) = None)->str:
         """
         Build the help text of a question
+
+        Parameters :
+            - node_id : the id of the node to add (string)
+            - props_ids : the ids of the propositions of the question (list of string)
+
+        Return :
+            - help_text : the help text of the question (string)
         """
         help_text = self.run_gremlin_query("g.V('"+node_id+"').properties('help text').value()")[0] + "\n"
         if props_ids is not None:
@@ -81,9 +156,19 @@ class Form:
                     help_text += self.run_gremlin_query("g.E('"+prop_id+"').properties('text').value()")[0] + ": "+self.run_gremlin_query("g.E('"+prop_id+"').properties('help text').value()")[0] + "\n"
         return help_text
 
-    def add_open_question(self, node_id, modif_crypted, previous_answer=None):
+    def add_open_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
         """
         Add open question from db to form
+
+        Parameters :
+            - node_id : the id of the node to add (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
+            - previous_answer : the previous answer to the question (string)
+        
+        Return :
+            - next_node_id : the id of the next node (string)
+            - answer : the answer to the question (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
         """
         question = self.get_text_question(node_id)
         next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
@@ -102,9 +187,19 @@ class Form:
         }]
         return next_node_id, answer, modif_crypted
     
-    def add_qcm_question(self, node_id, modif_crypted, previous_answer=None):
+    def add_qcm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
         """
         Add qcm question from db to form
+
+        Parameters :
+            - node_id : the id of the node to add (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
+            - previous_answer : the previous answer to the question (string)
+        
+        Return :
+            - next_node_id : the id of the next node (string)
+            - answer : the answer to the question (string)
+            - modif_crypted : the argument if the user will work with crypted data or not (string)
         """
         question = self.get_text_question(node_id)
         options = ['<Select an option>']
@@ -126,12 +221,19 @@ class Form:
             answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
 
-    def add_qrm_question(self, node_id, modif_crypted, previous_answer=None):
+    def add_qrm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
         """
         Add qrm question from db to form
 
         Parameters:
-            node_id (str): id of the node in the db
+            - node_id (str): id of the node in the db
+            - modif_crypted (str): argument if the user will work with crypted data or not
+            - previous_answer (str): previous answer to the question
+        
+        Return:
+            - next_node_id (str): id of the next node
+            - answer (str): answer to the question
+            - modif_crypted (str): argument if the user will work with crypted data or not
         """
         question = self.get_text_question(node_id)
         options = []
@@ -155,9 +257,19 @@ class Form:
                 answers_returned.append({'id': props_ids[index], 'text': text['value']})
         return next_node_id, answers_returned, modif_crypted
     
-    def add_qcm_bool_question(self, node_id, modif_crypted, previous_answer=None):
+    def add_qcm_bool_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple(str, str, str):
         """
         Add qcm bool question from db to form
+
+        Parameters:
+            - node_id (str): id of the node in the db
+            - modif_crypted (str): argument if the user will work with crypted data or not
+            - previous_answer (str): previous answer to the question
+        
+        Return:
+            - next_node_id (str): id of the next node
+            - answer (str): answer to the question
+            - modif_crypted (str): argument if the user will work with crypted data or not
         """
         question = self.get_text_question(node_id)
         options = ['<Select an option>']
@@ -180,16 +292,30 @@ class Form:
             answer = [{"id": props_ids[index], 'text': text['value']}]
         return next_node_id, answer, modif_crypted
     
-    def get_text_question(self, node_id):
+    def get_text_question(self, node_id:str)->str:
         """
         Get text of a question
+
+        Parameters:
+            - node_id (str): id of the node in the db
+        
+        Return:
+            - question (str): text of the question
         """
         question = self.run_gremlin_query("g.V('"+node_id+"').properties('text').value()")[0]
         return question
 
-    def get_propositions_of_question(self, node_id, modif_crypted):
+    def get_propositions_of_question(self, node_id:str, modif_crypted:str)->tuple(list(str), list(str)):
         """
         Get propositions of a question
+
+        Parameters:
+            - node_id (str): id of the node in the db
+            - modif_crypted (str): argument if the user will work with crypted data or not
+        
+        Return:
+            - propositions (list(str)): list of text of propositions
+            - props_ids (list(str)): list of ids of propositions
         """
         propositions = []
         props_ids = []
@@ -204,9 +330,15 @@ class Form:
         
         return propositions, props_ids
     
-    def get_weight(self, edge_id):
+    def get_weight(self, edge_id:str)->list(float):
         """
             Get the list_coef from the edge with edge_id id
+        
+        Parameters:
+            - edge_id (str): id of the edge in the db
+        
+        Return:
+            - list_weight (list(float)): list of the weights of the edge
         """
         list_weight = self.run_gremlin_query("g.E('"+edge_id+"').properties('list_coef').value()")[0].split(", ")
         i = 0
@@ -215,9 +347,16 @@ class Form:
             i += 1
         return list_weight
     
-    def calcul_best_AIs(self, nbAI, answers):
+    def calcul_best_AIs(self, nbAI:int, answers:list)->list:
         """
             Return the nbAI best AIs from a list of answers
+        
+        Parameters:
+            - nbAI (int): number of AIs to return
+            - answers (list): list of answers
+        
+        Return:
+            - list_bests_AIs (list): list of the nbAI best AIs
         """
         list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(",")
         coef_AI = [1] * len(list_AI)
@@ -246,11 +385,17 @@ class Form:
             i += 1
         return list_bests_AIs
     
-    def show_best_AI(self, list_bests_AIs):
+    def show_best_AI(self, list_bests_AIs:list)->None:
         """
             Method used to show the n best AI obtained after the user has completed the Form
             The number of AI choosen is based on the nbAI wanted by the user and the maximum of available AI for the use of the user
             (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
+
+        Parameters:
+            - list_bests_AIs (list): list of the n best AI
+        
+        Return:
+            - None
         """
         if len(list_bests_AIs) > 0:
             st.subheader("There is "+str(len(list_bests_AIs))+" IA corresponding to your specifications, here they are in order of the most efficient to the least:", anchor=None)
@@ -262,9 +407,15 @@ class Form:
             st.subheader("There is no AI corresponding to your request, please make other choices in the form", anchor=None)
         return None
 
-    def add_qcm_select_form(self, username):
+    def add_qcm_select_form(self, username:str)->str:
         """
             Display a qcm question with all the previous answered form
+
+        Parameters:
+            - username (str): username of the user
+        
+        Return:
+            - next_node_id (str): id of the next node to display
         """
         question = "Select the previous form you want to see again or edit"
         options = ['<Select a form>']
@@ -282,10 +433,18 @@ class Form:
             next_node_id = props_ids[index]
         return next_node_id
 
-    def save_answers(self, answers, username, list_bests_AIs, form_name=None):
+    def save_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str=None):
         """
         Save answers in db
-        Answers = list of list of dict {id: , text:}
+        
+        Parameters:
+            - answers (list): list of answers
+            - username (str): username of the user
+            - list_bests_AIs (list): list of the n best AI
+            - form_name (str): name of the form
+
+        Return:
+            - None
         """
         username_exist = self.run_gremlin_query("g.V('"+username+"').id()")
         if not username_exist:
@@ -326,9 +485,19 @@ class Form:
         list_bests_AIs = str(list_bests_AIs)[1:-1]
         self.run_gremlin_query("g.V('"+first_node_id+"').property('list_bests_AIs', '"+list_bests_AIs+"')")
 
-    def change_answers(self, answers, username, list_bests_AIs, form_name, new_form_name):
+    def change_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str, new_form_name:str):
         """
             Change the answer in db
+
+            Parameters:
+                - answers (list): list of answers
+                - username (str): username of the user
+                - list_bests_AIs (list): list of the n best AI
+                - form_name (str): name of the form
+                - new_form_name (str): new name of the form
+            
+            Return:
+                - None
         """
         # We first delete the existing graph
         node_id = username+'-answer1-'+str(form_name)
@@ -343,9 +512,16 @@ class Form:
                 node_id = next_node_id[0]['value']
         self.save_answers(answers, username, list_bests_AIs, new_form_name)
 
-    def save_feedback(self, text_feedback, username):
+    def save_feedback(self, text_feedback:str, username:str):
         """
         Save feedback in db
+
+        Parameters:
+            - text_feedback (str): text of the feedback
+            - username (str): username of the user
+        
+        Return:
+            - None
         """
         nb_feedback_by_user = len(self.run_gremlin_query("g.V('"+username+"').outE().hasLabel('Feedback')"))
         node_feedback_id = 'feedback'+username
@@ -354,9 +530,12 @@ class Form:
         edge_feedback_id = 'feedback'+username+str(nb_feedback_by_user+1)
         self.run_gremlin_query("g.V('"+username+"').addE('Feedback').to(g.V('"+node_feedback_id+"')).property('id', '"+edge_feedback_id+"').property('text', '"+text_feedback+"')")
     
-    def get_all_feedbacks(self):
+    def get_all_feedbacks(self)->None:
         """
-        Get all feedback in db
+        Get all feedback in db and display it
+
+        Return:
+            - None
         """
         all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
         for user_id in all_users_id:
@@ -366,11 +545,12 @@ class Form:
                     feedback = self.run_gremlin_query("g.E('"+feedback_id+"').properties('text').value()")
                     st.write(feedback_id + ': '+ feedback[0])
 
-    def get_nb_selected_edges(self):
+    def get_nb_selected_edges(self)->dict:
         """
         Get all answers in db
 
-        return list of dictionnary {proposition_id: nb_selected}
+        return:
+            - edges_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
         """
         edges_selected = {}
         all_selected_edges = self.run_gremlin_query("g.E().hasLabel('Answer').valueMap('proposition_id')")
@@ -381,9 +561,15 @@ class Form:
                 edges_selected[edge['proposition_id']] += 1
         return edges_selected
 
-    def display_bar_graph(self, edges_selected):
+    def display_bar_graph(self, edges_selected:dict)->None:
         """
         Display bar graph of edges selected
+
+        Parameters:
+            - edges_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
+
+        Return:
+            - None
         """
         # change the dictionnary in dict {proposition_id: {text: text, nb_selected: nb_selected}}
         edges_selected_with_text = {}
@@ -420,9 +606,15 @@ class Form:
             # Rotate x-axis labels, and set y-axis tick interval to 1 and 
             st.plotly_chart(fig)
 
-    def display_bar_graph_v2(self, edge_selected):
+    def display_bar_graph_v2(self, edge_selected)->None:
         """
-        Display bar graph of edges selected
+        Display bar graph of edges selected (v2)
+
+        Parameters:
+            - edge_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
+        
+        Return:
+            - None
         """
         with st.spinner("Loading..."):
             # sort the dict on keys
