@@ -83,12 +83,15 @@ def main():
 
             new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
             if new_form_name != "":
-                list_bests_AIs = form.calcul_best_AIs(5, answers)
-                form.show_best_AI(list_bests_AIs)
-                if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
-                    print("best AIs : " + str(list_bests_AIs))
-                    st.write('Change saved')
-                    st.write(answers)
+                if form.no_dash_in_my_text(new_form_name):
+                    list_bests_AIs = form.calcul_best_AIs(5, answers)
+                    form.show_best_AI(list_bests_AIs)
+                    if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
+                        print("best AIs : " + str(list_bests_AIs))
+                        st.write('Change saved')
+                        st.write(answers)
+                else:
+                    st.warning("The name of the form can't contain a dash.")
 
 
     else:  # Connected as an Admin

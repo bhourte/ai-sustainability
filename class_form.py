@@ -435,3 +435,9 @@ class Form:
                 yaxis = dict(dtick = 1),
                 )
             st.plotly_chart(fig)
+
+    def no_dash_in_my_text(self, text):
+        if '-' in text:
+            return False
+        else:
+            return True

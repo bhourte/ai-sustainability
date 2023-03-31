@@ -32,12 +32,16 @@ def main():
 
         form_name = st.text_input("Give a name to your form here")
         if form_name != "":
-            list_bests_AIs = form.calcul_best_AIs(5, answers)
-            if st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name)):
-                print("best AIs : " + str(list_bests_AIs))
-                st.write('Answers saved')
-                form.show_best_AI(list_bests_AIs)
-                st.write(answers)
+            txt_ok = form.no_dash_in_my_text(form_name)
+            if txt_ok:
+                list_bests_AIs = form.calcul_best_AIs(5, answers)
+                if st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name)):
+                    print("best AIs : " + str(list_bests_AIs))
+                    st.write('Answers saved')
+                    form.show_best_AI(list_bests_AIs)
+                    st.write(answers)
+            else:
+                st.warning("Please don't use dash in your form name")
 
 if __name__ == "__main__":
     main()  
