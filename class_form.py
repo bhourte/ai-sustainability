@@ -230,7 +230,6 @@ class Form:
                 index = list(coef_AI).index(best[i])
                 list_bests_AIs.append(list_AI[index])
             i += 1
-        self.show_best_AI(list_bests_AIs)
         return list_bests_AIs
     
     def show_best_AI(self, list_bests_AIs):
@@ -269,7 +268,7 @@ class Form:
             next_node_id = props_ids[index]
         return next_node_id
 
-    def save_answers(self, answers, username, form_name=None):
+    def save_answers(self, answers, username, list_bests_AIs, form_name=None):
         """
         Save answers in db
         Answers = list of list of dict {id: , text:}
@@ -311,7 +310,7 @@ class Form:
         first_node_id = username+'-'+'answer1'+nb_form
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
 
-    def change_answers(self, answers, username, form_name, new_form_name):
+    def change_answers(self, answers, username, list_bests_AIs, form_name, new_form_name):
         """
             Change the answer in db
         """
@@ -326,7 +325,7 @@ class Form:
                 end = False
             else:
                 node_id = next_node_id[0]['value']
-        self.save_answers(answers, username, new_form_name)
+        self.save_answers(answers, username, list_bests_AIs, new_form_name)
 
     def save_feedback(self, text_feedback, username):
         """
