@@ -28,7 +28,7 @@ def connect(endpoint:str, database_name:str, container_name:str, primary_key:str
         message_serializer=serializer.GraphSONSerializersV2d0()
     )
 
-# only string on 
+# only string on
 def validate_answer(text:str)->str:
     """
     Validate the answer to avoid errors in the gremlin query
@@ -79,15 +79,13 @@ class Form:
         - get_all_feedbacks : get all the feedbacks in the database
         - get_nb_selected_edges : get the number of selected edges in the database
         - display_bar_graph : display a bar graph with the number of selected edges 
-
-
     """
     def __init__(self, endpoint:str, database_name:str, container_name:str, primary_key:str):
         """
         Initialize the class with the connection to the database
         """
         self.gremlin_client = connect(endpoint, database_name, container_name, primary_key)
-    
+
     def run_gremlin_query(self, query:str)->list:
         """
         Run a gremlin query
