@@ -358,7 +358,7 @@ class Form:
         Return:
             - list_bests_AIs (list): list of the nbAI best AIs
         """
-        list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(",")
+        list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(", ")
         coef_AI = [1] * len(list_AI)
         i = 0
         while i < len(answers):
@@ -539,14 +539,20 @@ class Form:
         """
         all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
         if not all_users_id:
-            st.write("There is no feedback in the database")
+            st.write("There is no user registered in the database.")
             return None
+        print(all_users_id)
         for user_id in all_users_id:
             all_feedback = self.run_gremlin_query("g.V('"+user_id+"').outE().hasLabel('Feedback').id()")
+            is_no_feedback = True
             with st.expander('Feedbacks from '+ user_id):
                 for feedback_id in all_feedback:
+                    is_no_feedback = False
                     feedback = self.run_gremlin_query("g.E('"+feedback_id+"').properties('text').value()")
                     st.write(feedback_id + ': '+ feedback[0])
+            if is_no_feedback:
+                st.write("There is no feedback in the database.")
+                return None
 
     def get_nb_selected_edges(self)->dict:
         """

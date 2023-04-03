@@ -21,6 +21,7 @@ class DbGestion:
         - close : close the connection to the database
         - save_graph : save the graph in a json file 
         - create_script : create a script to create the graph from the json file created by save_graph
+        - create_script_with_weight : create a script to create the graph from the json file created by save_graph and the weight matrix.xlsx file (used to update the coefficient of the AIs for each edges)
         - import_graph : import a graph from a script created by create_script
     """
     def __init__(self, endpoint, database_name, container_name, primary_key):
@@ -110,7 +111,7 @@ class DbGestion:
         Parameters :
             - data_path : the path of the json file (string) (Exemple : "data/graph.json")
             - script_path : the path of the script file (string) (Exemple : "data/script.json")
-            - matrix_path : the path of the excel file where the weight matrix is stored
+            - matrix_path : the path of the excel file where the weight matrix is stored (Exemple : Weight_matrix.xlsx)
         """
         with open(data_path, 'r', encoding='utf-8') as file:
             json_data = json.load(file)
@@ -123,7 +124,7 @@ class DbGestion:
         AIs = str(list_AI[0])
         i = 1
         while i < len(list_AI):
-            AIs += "," + str(list_AI[i])
+            AIs += ", " + str(list_AI[i])
             i += 1
         df = df.drop(["id_edges", "text"], axis=1)
         matrix = df.to_numpy()
