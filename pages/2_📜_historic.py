@@ -6,6 +6,7 @@ from decouple import config
 # General variable, used to begin the main() function
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
+N_BEST_AI = 5
 
 def get_list_result(form:object, node_answer:str)->list:
     """
@@ -120,7 +121,7 @@ def main():
             return None
         
         if form.no_dash_in_my_text(new_form_name):  # No - in the name
-            list_bests_AIs = form.calcul_best_AIs(5, answers)  # get the N best AI (5 for now)
+            list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
             form.show_best_AI(list_bests_AIs)  # We show the N best AI to the user (5 for now)
             if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
                 print("best AIs : " + str(list_bests_AIs))

@@ -7,6 +7,7 @@ from decouple import config
 # General variable, used to begin the main() function
 FIRST_NODE_ID = '1'
 BASE_MODIF_CRYPTED = False
+N_BEST_AI = 5
 
 def main():
     """
@@ -38,6 +39,9 @@ def main():
 
     # If the form is not finish and simply wait the user to put answer, we continue to show it with a the last question
     if next_node_id != 'end':
+        st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
+        st.session_state.clicked = False
+        print("LAAAAAAAAAAAAAAAAAAAAAAAAA")
         return None
     
     # If the form is finish, we ask the user a name for the form, we calculate the N best AIs and we save it all
@@ -45,15 +49,34 @@ def main():
     if form_name == "":  # If the name is empty, we don't go further, we wait the user to fill it
         return None
     txt_ok = form.no_dash_in_my_text(form_name)
-    if txt_ok:  # No - in the text
-        list_bests_AIs = form.calcul_best_AIs(5, answers)
-        if st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name)):
-            print("best AIs : " + str(list_bests_AIs))
-            st.write('Answers saved')
-            form.show_best_AI(list_bests_AIs)  # We show de N best AI (5 by default)
-            st.write(answers)
-    else:
+    if not txt_ok:  # No - in the text
         st.warning("Please don't use dash in your form name")
+        return None
+
+    # We check if the form name already exist in the database
+    if form.run_gremlin_query("g.V('"+username+'-answer1-'+form_name+"')") and st.session_state.last_form_name != form_name:
+        st.warning("You already have a form with this name, please pick an other name or change your previous form in the historic page.")
+        return None
+
+    list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)
+    print("state : " + str(st.session_state.clicked))
+    # First time passing here, we show the "submit" button to save answers
+    if st.session_state.last_form_name is None and not st.session_state.clicked:
+        print("If")
+        print(st.session_state.last_form_name)
+        print(st.session_state.clicked)
+        st.session_state.last_form_name = form_name
+        st.session_state.clicked = st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name))
+    # Second time passing here, we show the result
+    else:
+        print("Else")
+        print(st.session_state.last_form_name)
+        print(st.session_state.clicked)
+        st.write('Answers saved')
+        form.show_best_AI(list_bests_AIs)  # We show de N best AI (5 by default)
+        st.write(answers)
+        st.session_state.last_form_name = None
+        st.session_state.clicked = False
 
 if __name__ == "__main__":
     main()  

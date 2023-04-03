@@ -459,6 +459,10 @@ class Form:
         nb_form = "-form"+str(nb_form)
         if form_name is not None:
             nb_form = "-"+str(form_name)
+        # If a node with the same name already exist, this means that a form with the same name already exist, so we exit without saving it again
+        if self.run_gremlin_query("g.V('"+username+'-answer1'+nb_form+"')"):
+            st.warning("You already have a form with this name, please pick an other name or change your previous form in the historic page.")
+            return None
 
         for list_answer in answers:
             for dict_answer in list_answer:
