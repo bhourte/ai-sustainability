@@ -538,6 +538,9 @@ class Form:
             - None
         """
         all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
+        if not all_users_id:
+            st.write("There is no feedback in the database")
+            return None
         for user_id in all_users_id:
             all_feedback = self.run_gremlin_query("g.V('"+user_id+"').outE().hasLabel('Feedback').id()")
             with st.expander('Feedbacks from '+ user_id):
