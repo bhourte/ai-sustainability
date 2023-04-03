@@ -15,10 +15,10 @@ def main():
     st.set_page_config(page_title="Form Page", page_icon="📝")
     st.title("📝Form")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the form, ask for connection
-        st.caption("You are not connected, please connect with your username in the Connection page.")
+        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
         return None
     username = st.session_state.username
-    st.caption("Connected as " + str(username))
+    st.caption("✅ Connected as " + str(username))
     # Connection to the online gremlin database via class_from.py
     form = Form(
                 endpoint = "questions-db.gremlin.cosmos.azure.com",

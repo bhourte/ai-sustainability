@@ -73,7 +73,7 @@ def main():
     st.set_page_config(page_title="Historic Page", page_icon="📜")
     st.title("📜Historic")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the historics, ask for connection
-        st.caption("You are not connected, please connect with your username in the Connection page.")
+        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
         return None
     username = st.session_state.username
     # Connection to the online gremlin database via class_from.py
@@ -85,7 +85,7 @@ def main():
             )
     # Connected as an User
     if username != 'Admin':
-        st.caption("Connected as " + str(username))
+        st.caption("✅ Connected as " + str(username))
 
         node_answer = form.add_qcm_select_form(username)
         if node_answer == None:  # if none form selected, don't show the rest
@@ -131,7 +131,7 @@ def main():
 
     # Connected as an Admin
     else:
-        st.caption("Connected as an Admin")
+        st.caption("🔑 Connected as an Admin")
         all_user = ["<Select an User>"] + form.run_gremlin_query("g.V().haslabel('user')")
         i = 1
         while i < len(all_user):

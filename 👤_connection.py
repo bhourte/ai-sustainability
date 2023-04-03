@@ -27,7 +27,10 @@ def main():
             st.session_state.username = username
 
     if st.session_state.username != "":  # User connected
-        st.caption("✅Connected as " + str(st.session_state.username))
+        if st.session_state.username == 'Admin':
+            st.caption("🔑Connected as an " + str(st.session_state.username))
+        else :
+            st.caption("✅Connected as " + str(st.session_state.username))
     else:
         st.caption("❌Not connected")
 
