@@ -1,3 +1,7 @@
+"""
+This file is the main file
+launch it with: streamlit run 👤_connection.py
+"""
 import streamlit as st
 
 
@@ -14,12 +18,19 @@ def main():
             st.warning("You can't use '-' in your username")
         else:
             st.session_state.username = username
+
     else:  # User already connected, but can switch
         username = st.text_input("Put your username here to connect :", st.session_state.username)
         if '-' in username:
             st.warning("You can't use '-' in your username")
         else:
             st.session_state.username = username
+
+    if st.session_state.username != "":  # User connected
+        st.caption("✅Connected as " + str(st.session_state.username))
+    else:
+        st.caption("❌Not connected")
+
     
 if __name__ == "__main__":
     main()
