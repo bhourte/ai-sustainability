@@ -23,8 +23,10 @@ def main():
         st.write("Welcome Admin")
         st.write("You can now see the statistic of the form")
         selected_edges = form.get_nb_selected_edges()
-        form.display_bar_graph(selected_edges)  # graph 1 of stat
-        form.display_bar_graph_v2(selected_edges)  # graph 2 of stat
+        with st.spinner("Loading..."):
+            form.display_bar_graph(selected_edges)  # graph 1 of stat
+        with st.spinner("Loading..."):
+            form.display_bar_graph_v2(selected_edges)  # graph 2 of stat
 
 if __name__ == "__main__":
     main()
