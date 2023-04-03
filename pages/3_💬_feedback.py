@@ -10,7 +10,7 @@ def main():
     st.set_page_config(page_title="Feedback Page", page_icon="💬")
     st.title("💬Feedback")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the page, ask for connection
-        st.caption("You are not connected, please connect with your username in the Connection page.")
+        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
         return None
     username = st.session_state.username
     # Connection to the online gremlin database via class_from.py
@@ -22,7 +22,7 @@ def main():
         )
     # Connected as an User
     if username != 'Admin':
-        st.caption("Connected as " + str(st.session_state.username))
+        st.caption("✅ Connected as " + str(st.session_state.username))
         username = st.session_state.username
         
         username_exists = form.run_gremlin_query("g.V('"+username+"')")  # check if the user already exist in the database
@@ -40,7 +40,7 @@ def main():
             st.write("Thank you")
     # Connected as an Admin
     else:
-        st.caption("Connected as an Admin")
+        st.caption("🔑 Connected as an Admin")
         form.get_all_feedbacks()
 
 if __name__ == "__main__":

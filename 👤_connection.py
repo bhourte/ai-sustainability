@@ -1,3 +1,7 @@
+"""
+This file is the main file
+launch it with: streamlit run 👤_connection.py
+"""
 import streamlit as st
 
 
@@ -23,6 +27,15 @@ def main():
         else:
             st.session_state.username = username
             st.session_state.last_form_name = None
+
+    if st.session_state.username != "":  # User connected
+        if st.session_state.username == 'Admin':
+            st.caption("🔑Connected as an " + str(st.session_state.username))
+        else :
+            st.caption("✅Connected as " + str(st.session_state.username))
+    else:
+        st.caption("❌Not connected")
+
     
 if __name__ == "__main__":
     main()

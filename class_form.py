@@ -28,7 +28,7 @@ def connect(endpoint:str, database_name:str, container_name:str, primary_key:str
         message_serializer=serializer.GraphSONSerializersV2d0()
     )
 
-# only string on 
+# only string on
 def validate_answer(text:str)->str:
     """
     Validate the answer to avoid errors in the gremlin query
@@ -79,15 +79,13 @@ class Form:
         - get_all_feedbacks : get all the feedbacks in the database
         - get_nb_selected_edges : get the number of selected edges in the database
         - display_bar_graph : display a bar graph with the number of selected edges 
-
-
     """
     def __init__(self, endpoint:str, database_name:str, container_name:str, primary_key:str):
         """
         Initialize the class with the connection to the database
         """
         self.gremlin_client = connect(endpoint, database_name, container_name, primary_key)
-    
+
     def run_gremlin_query(self, query:str)->list:
         """
         Run a gremlin query
@@ -629,25 +627,24 @@ class Form:
         Return:
             - None
         """
-        with st.spinner("Loading..."):
-            # sort the dict on keys
-            edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
-            hover_text = []
-            text = []
-            for key in edge_selected.keys():
-                hover_text.append("Q"+self.run_gremlin_query("g.E('"+key+"').outV().id()")[0]+" to Q"+self.run_gremlin_query("g.E('"+key+"').inV().id()")[0])
-                if self.run_gremlin_query("g.E('"+key+"').properties('text').value()"):
-                    text.append(self.run_gremlin_query("g.E('"+key+"').properties('text').value()")[0])
-                else:
-                    text.append(self.run_gremlin_query("g.E('"+key+"').label()")[0])
-            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()), hovertext=text, text=hover_text)])
-            fig.update_layout(
-                title='Number of times each edge was selected',
-                xaxis_title='Edges/Propositions id',
-                yaxis_title='Number of times selected',
-                yaxis = dict(dtick = 1),
-                )
-            st.plotly_chart(fig)
+        # sort the dict on keys
+        edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
+        hover_text = []
+        text = []
+        for key in edge_selected.keys():
+            hover_text.append("Q"+self.run_gremlin_query("g.E('"+key+"').outV().id()")[0]+" to Q"+self.run_gremlin_query("g.E('"+key+"').inV().id()")[0])
+            if self.run_gremlin_query("g.E('"+key+"').properties('text').value()"):
+                text.append(self.run_gremlin_query("g.E('"+key+"').properties('text').value()")[0])
+            else:
+                text.append(self.run_gremlin_query("g.E('"+key+"').label()")[0])
+        fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()), hovertext=text, text=hover_text)])
+        fig.update_layout(
+            title='Number of times each edge was selected',
+            xaxis_title='Edges/Propositions id',
+            yaxis_title='Number of times selected',
+            yaxis = dict(dtick = 1),
+            )
+        st.plotly_chart(fig)
 
     def no_dash_in_my_text(self, text:str)->bool:
         """
