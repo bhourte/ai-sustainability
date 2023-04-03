@@ -27,7 +27,7 @@ def main():
                 container_name = config('DATABASENAME'),
                 primary_key= config('PRIMARYKEY'),
            )
-    
+
     # We show the first question here, in order to get the id of the next node
     next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED)
     answers = [answer]  # List of all aswers
@@ -43,7 +43,7 @@ def main():
         st.session_state.clicked = False
         print("LAAAAAAAAAAAAAAAAAAAAAAAAA")
         return None
-    
+
     # If the form is finish, we ask the user a name for the form, we calculate the N best AIs and we save it all
     form_name = st.text_input("Give a name to your form here")
     if form_name == "":  # If the name is empty, we don't go further, we wait the user to fill it
@@ -61,12 +61,12 @@ def main():
     list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)
     print("state : " + str(st.session_state.clicked))
     # First time passing here, we show the "submit" button to save answers
-    if st.session_state.last_form_name is None and not st.session_state.clicked:
+    if not st.session_state.clicked:
         print("If")
         print(st.session_state.last_form_name)
         print(st.session_state.clicked)
         st.session_state.last_form_name = form_name
-        st.session_state.clicked = st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name))
+        st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name))
     # Second time passing here, we show the result
     else:
         print("Else")

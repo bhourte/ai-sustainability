@@ -487,6 +487,7 @@ class Form:
         self.run_gremlin_query("g.V('"+username+"').addE('Answer').to(g.V('"+first_node_id+"')).property('partitionKey', 'Answer')")
         list_bests_AIs = str(list_bests_AIs)[1:-1]
         self.run_gremlin_query("g.V('"+first_node_id+"').property('list_bests_AIs', '"+list_bests_AIs+"')")
+        st.session_state.clicked = True  # global variable used to tell the form page that the button ("submit") has been clicked
 
     def change_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str, new_form_name:str)->None:
         """

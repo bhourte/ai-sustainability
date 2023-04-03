@@ -120,15 +120,23 @@ def main():
         if new_form_name == "":  # The name can not be empty
             return None
         
-        if form.no_dash_in_my_text(new_form_name):  # No - in the name
-            list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
-            form.show_best_AI(list_bests_AIs)  # We show the N best AI to the user (5 for now)
-            if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
-                print("best AIs : " + str(list_bests_AIs))
-                st.write('Change saved')
-                st.write(answers)
-        else:
+        if not form.no_dash_in_my_text(new_form_name):  # No - in the name
             st.warning("The name of the form can't contain a dash.")
+            return None
+        
+        print(form_name)
+        print(new_form_name)
+        if form.run_gremlin_query("g.V('"+username+'-answer1-'+new_form_name+"')") and new_form_name != form_name:
+            st.warning("You already have a form with this name, please pick an other name or select it above if you want to change it.")
+            return None
+
+        list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
+        form.show_best_AI(list_bests_AIs)  # We show the N best AI to the user (5 for now)
+        if st.button('Save Change', on_click=form.change_answers, args=(answers,username,list_bests_AIs,form_name,new_form_name)):
+            st.session_state.clicked = False  # Put to False to be sure it does not bug in the Form page
+            print("best AIs : " + str(list_bests_AIs))
+            st.write('Change saved')
+            st.write(answers)
 
     # Connected as an Admin
     else:
