@@ -15,7 +15,7 @@ def main():
     # Connection to the online gremlin database via class_from.py
     form = Form(endpoint="questions-db.gremlin.cosmos.azure.com", database_name="graphdb", container_name=config('DATABASENAME'), primary_key= config('PRIMARYKEY'),)
     if username != 'Admin':  # Not a admin, we don't show anything
-        st.caption("❌ Connected as " + str(username))
+        st.caption("✅ Connected as " + str(username))
         st.write("You are not an Admin")
         st.write("You can't access to this page")
     else:  # connected as an Admin
