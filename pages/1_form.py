@@ -12,8 +12,8 @@ def main():
     """
         This is the code used to show the form and used by the user to fill it
     """
-
-    st.title("Form")
+    st.set_page_config(page_title="Form Page", page_icon="📝")
+    st.title("📝Form")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the form, ask for connection
         st.caption("You are not connected, please connect with your username in the Connection page.")
         return None

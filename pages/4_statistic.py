@@ -6,8 +6,8 @@ def main():
     """
         This is the code used by the admin to see statistics from the answers of the users
     """
-
-    st.title("Statistic")
+    st.set_page_config(page_title="Statistic Page", page_icon="📊")
+    st.title("📊Statistic")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the stat, ask for connection
         st.caption("You are not connected, please connect with your username in the Connection page.")
         return None

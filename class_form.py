@@ -630,9 +630,14 @@ class Form:
             # sort the dict on keys
             edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
             hover_text = []
+            text = []
             for key in edge_selected.keys():
                 hover_text.append("Q"+self.run_gremlin_query("g.E('"+key+"').outV().id()")[0]+" to Q"+self.run_gremlin_query("g.E('"+key+"').inV().id()")[0])
-            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()), hovertext=hover_text, text=hover_text)])
+                if self.run_gremlin_query("g.E('"+key+"').properties('text').value()"):
+                    text.append(self.run_gremlin_query("g.E('"+key+"').properties('text').value()")[0])
+                else:
+                    text.append(self.run_gremlin_query("g.E('"+key+"').label()")[0])
+            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()), hovertext=text, text=hover_text)])
             fig.update_layout(
                 title='Number of times each edge was selected',
                 xaxis_title='Edges/Propositions id',

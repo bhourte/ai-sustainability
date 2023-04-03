@@ -70,8 +70,8 @@ def main():
         This is the code used to show the previous form completed by an User
         Different usage if User or Admin
     """
-
-    st.title("Historic")
+    st.set_page_config(page_title="Historic Page", page_icon="📜")
+    st.title("📜Historic")
     if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the historics, ask for connection
         st.caption("You are not connected, please connect with your username in the Connection page.")
         return None

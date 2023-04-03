@@ -6,8 +6,8 @@ def main():
         This is the code used to show the "Connection" page
         The user will connect here and be able to acces to the rest of the application after that
     """
-
-    st.title("Connection")
+    st.set_page_config(page_title="Connection Page", page_icon="👤")
+    st.title("👤Connection")
     if 'username' not in st.session_state:  # User not already connected
         username = st.text_input("Put your username here to connect :")
         if '-' in username:
