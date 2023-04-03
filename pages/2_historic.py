@@ -152,7 +152,7 @@ def main():
 
         # The admin select a form of the choosen user
         form_name = st.selectbox(label="Select a Form", options=all_form)
-        if form_name != "<Select a Form>":
+        if form_name == "<Select a Form>":
             return None
         
         first_node = str(user) + "-answer1-" + str(form_name)
