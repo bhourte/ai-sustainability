@@ -9,24 +9,25 @@ statics.load_statics(globals())
 
 @st.cache_resource
 def connect(endpoint:str, database_name:str, container_name:str, primary_key:str) -> client.Client:
-        """
-        Connect to the database and return the client (made only once thanks to the cache)
+    """
+    Connect to the database and return the client (made only once thanks to the cache)
 
-        Parameters :
-            - endpoint : the endpoint of the database (string)
-            - database_name : the name of the database (string)
-            - container_name : the name of the container (string)
-            - primary_key : the primary key of the database (string)
-        
-        Return :
-            - client : the client to connect to the database
-        """
-        return client.Client(
-            'wss://' + endpoint + ':443/', 'g',
-            username="/dbs/" + database_name + "/colls/" + container_name,
-            password=primary_key,
-            message_serializer=serializer.GraphSONSerializersV2d0()
-        )
+    Parameters :
+        - endpoint : the endpoint of the database (string)
+        - database_name : the name of the database (string)
+        - container_name : the name of the container (string)
+        - primary_key : the primary key of the database (string)
+    
+    Return :
+        - client : the client to connect to the database
+    """
+    return client.Client(
+        'wss://' + endpoint + ':443/', 'g',
+        username="/dbs/" + database_name + "/colls/" + container_name,
+        password=primary_key,
+        message_serializer=serializer.GraphSONSerializersV2d0()
+    )
+
 # only string on 
 def validate_answer(text:str)->str:
     """
@@ -487,17 +488,17 @@ class Form:
 
     def change_answers(self, answers:list, username:str, list_bests_AIs:list, form_name:str, new_form_name:str)->None:
         """
-            Change the answer in db
+        Change the answer in db
 
-            Parameters:
-                - answers (list): list of answers
-                - username (str): username of the user
-                - list_bests_AIs (list): list of the n best AI
-                - form_name (str): name of the form
-                - new_form_name (str): new name of the form
-            
-            Return:
-                - None
+        Parameters:
+            - answers (list): list of answers
+            - username (str): username of the user
+            - list_bests_AIs (list): list of the n best AI
+            - form_name (str): name of the form
+            - new_form_name (str): new name of the form
+        
+        Return:
+            - None
         """
         # We first delete the existing graph
         node_id = username+'-answer1-'+str(form_name)
@@ -628,10 +629,13 @@ class Form:
         with st.spinner("Loading..."):
             # sort the dict on keys
             edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
-            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()))])
+            hover_text = []
+            for key in edge_selected.keys():
+                hover_text.append("Q"+self.run_gremlin_query("g.E('"+key+"').outV().id()")[0]+" to Q"+self.run_gremlin_query("g.E('"+key+"').inV().id()")[0])
+            fig = go.Figure(data=[go.Bar(x=list(edge_selected.keys()), y=list(edge_selected.values()), hovertext=hover_text, text=hover_text)])
             fig.update_layout(
                 title='Number of times each edge was selected',
-                xaxis_title='Question',
+                xaxis_title='Edges/Propositions id',
                 yaxis_title='Number of times selected',
                 yaxis = dict(dtick = 1),
                 )
