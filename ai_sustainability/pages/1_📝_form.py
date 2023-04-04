@@ -5,6 +5,7 @@ import streamlit as st
 from decouple import config
 
 from ai_sustainability.class_form import Form
+from ai_sustainability.utils import checkcheck_username
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
