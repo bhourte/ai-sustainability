@@ -2,6 +2,7 @@
 This file is used to create the form and to connect to the gremlin database
 """
 import heapq
+import time
 from typing import Optional
 
 import numpy as np
@@ -536,27 +537,24 @@ class Form:
                             + next_question_node["id"]
                             + "')"
                         )
-                while (
-                    self.run_gremlin_query(
-                        "g.V('" + new_node_id + "').outE().has('answer', '" + dict_answer["text"] + "').id()"
-                    )
-                    == []
-                ):
-                    self.run_gremlin_query(
-                        "g.V('"
-                        + new_node_id
-                        + "').addE('Answer').to(g.V('"
-                        + next_new_node_id
-                        + "')).property('answer', '"
-                        + dict_answer["text"]
-                        + "').property('proposition_id', '"
-                        + dict_answer["id"]
-                        + "').property('id', '"
-                        + username
-                        + form_name
-                        + dict_answer["id"]
-                        + "')"
-                    )
+
+                while self.run_gremlin_query("g.V('" + new_node_id + "')") == []:
+                    time.sleep(0.05)
+                self.run_gremlin_query(
+                    "g.V('"
+                    + new_node_id
+                    + "').addE('Answer').to(g.V('"
+                    + next_new_node_id
+                    + "')).property('answer', '"
+                    + dict_answer["text"]
+                    + "').property('proposition_id', '"
+                    + dict_answer["id"]
+                    + "').property('id', '"
+                    + username
+                    + form_name
+                    + dict_answer["id"]
+                    + "')"
+                )
         first_node_id = username + "-" + "answer1" + form_name
         self.run_gremlin_query(
             "g.V('" + username + "').addE('Answer').to(g.V('" + first_node_id + "')).property('partitionKey', 'Answer')"
