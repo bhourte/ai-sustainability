@@ -406,9 +406,9 @@ class Form:
                 list_coef = self.get_weight(j["id"])
                 coef_ai = np.multiply(coef_ai, list_coef)
         # We put all NaN value to -1
-        for i in coef_ai:
-            if i != i:  # if a NaN value is encounter, we put it to -1
-                i = -1
+        for i, val_i in enumerate(coef_ai):
+            if val_i != val_i:  # if a NaN value is encounter, we put it to -1
+                coef_ai[i] = -1
         best = list(heapq.nlargest(nbai, np.array(coef_ai)))
         # We put the nbai best AI in list_bests_ais
         list_bests_ais = []
