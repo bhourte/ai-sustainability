@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
+_range = range
+
 statics.load_statics(globals())
 
 @st.cache_resource
@@ -39,14 +41,7 @@ def validate_answer(text:str)->str:
     Return :
         - text : the validated answer (string)
     """
-    text = list(text)
-    i = 0
-    while i < len(text):
-        if text[i] == "'":
-            text.insert(i, "\\")
-            i += 1
-        i += 1
-    return "".join(text)
+    return text.replace("'", "\\'")
 
 class Form:
     """
@@ -171,20 +166,20 @@ class Form:
         """
         question = self.get_text_question(node_id)
         next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
-        if previous_answer is not None:
+        if previous_answer is not None:  # If it has to be auto-completed before
             answer = st.text_area(label=question, height=100,label_visibility="visible", value=previous_answer[0], help=self.build_question_help_text(node_id))
         else:
             answer = st.text_area(label=question, height=100,label_visibility="visible", help=self.build_question_help_text(node_id))
+        # If no answer given, we return None
         if not answer:
-            answer = None
-            next_node_id = None
-        else:
-            answer = validate_answer(answer)
-        answer = [{
-            "text": answer,
+            return None, None, modif_crypted
+        
+        validated_answer = validate_answer(answer)
+        dict_answer = [{
+            "text": validated_answer,
             "id": self.run_gremlin_query("g.V('"+node_id+"').outE().id()")[0],
         }]
-        return next_node_id, answer, modif_crypted
+        return next_node_id, dict_answer, modif_crypted
     
     def add_qcm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
@@ -205,20 +200,20 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        if previous_answer is not None:
+        if previous_answer is not None:  # If it has to be auto-completed before
             previous_index = options.index(previous_answer[0])
             answer = st.selectbox(label=question, options=options, index=previous_index, help=self.build_question_help_text(node_id, props_ids))
         else:
             answer = st.selectbox(label=question, options=options, index=0, help=self.build_question_help_text(node_id, props_ids))
+        # If no answer given, we return None
         if answer == '<Select an option>':
-            answer = None
-            next_node_id = None
-        else:
-            index = propositions.index(answer)
-            next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
-            text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
-            answer = [{"id": props_ids[index], 'text': text['value']}]
-        return next_node_id, answer, modif_crypted
+            return None, None, modif_crypted
+        
+        index = propositions.index(answer)
+        next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
+        text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
+        dict_answer = [{"id": props_ids[index], 'text': text['value']}]
+        return next_node_id, dict_answer, modif_crypted
 
     def add_qrm_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
         """
@@ -239,21 +234,20 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        if previous_answer is not None:
+        if previous_answer is not None:  # If it has to be auto-completed before
             answers = st.multiselect(label=question, options=options, default=previous_answer, help=self.build_question_help_text(node_id, props_ids))
         else:
             answers = st.multiselect(label=question, options=options, default=None, help=self.build_question_help_text(node_id, props_ids))
-        answers_returned = []
+        # If no answer given, we return None
         if answers == []:
-            answers = None
-            next_node_id = None
-            
-        else:
-            next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
-            for answer in answers:
-                index = propositions.index(answer)
-                text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
-                answers_returned.append({'id': props_ids[index], 'text': text['value']})
+            return None, None, modif_crypted
+        
+        next_node_id = self.run_gremlin_query("g.V('"+node_id+"').outE().inV().id()")[0]
+        answers_returned = []
+        for answer in answers:
+            index = propositions.index(answer)
+            text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
+            answers_returned.append({'id': props_ids[index], 'text': text['value']})
         return next_node_id, answers_returned, modif_crypted
     
     def add_qcm_bool_question(self, node_id:str, modif_crypted:str, previous_answer:str=None)->tuple:
@@ -275,21 +269,21 @@ class Form:
         propositions, props_ids = self.get_propositions_of_question(node_id, modif_crypted)
         for option in propositions:
             options.append(option)
-        if previous_answer is not None:
+        if previous_answer is not None:  # If it has to be auto-completed before
             previous_index = options.index(previous_answer[0])
             answer = st.selectbox(label=question, options=options, index=previous_index, help=self.build_question_help_text(node_id, props_ids))
         else:
             answer = st.selectbox(label=question, options=options, index=0, help=self.build_question_help_text(node_id, props_ids))
+        # If no answer given, we return None
         if answer == '<Select an option>':
-            answer = None
-            next_node_id = None
-        else:
-            index = propositions.index(answer)
-            next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
-            text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
-            modif_crypted = answer == 'Yes'
-            answer = [{"id": props_ids[index], 'text': text['value']}]
-        return next_node_id, answer, modif_crypted
+            return None, None, modif_crypted
+
+        index = propositions.index(answer)
+        next_node_id = self.run_gremlin_query("g.E('"+props_ids[index]+"').inV().id()")[0]
+        text = self.run_gremlin_query("g.E('"+props_ids[index]+"').properties('text')")[0]
+        modif_crypted = (answer == 'Yes')
+        dict_answer = [{"id": props_ids[index], 'text': text['value']}]
+        return next_node_id, dict_answer, modif_crypted
     
     def get_text_question(self, node_id:str)->str:
         """
@@ -318,12 +312,12 @@ class Form:
         """
         propositions = []
         props_ids = []
-        if modif_crypted:
+        if modif_crypted:  # If there is some proposition we can not show because it's impossible to implement the AI doing it (because data are crypted)
             for edges in self.run_gremlin_query("g.V('"+node_id+"').outE().id()"):
                 if self.run_gremlin_query("g.E('"+edges+"').properties('modif_crypted').value()")[0] == 'false':
                     props_ids.append(edges)
                     propositions.append(self.run_gremlin_query("g.E('"+edges+"').properties('text').value()")[0])
-        else:
+        else:  # If not, we return all existing propositions
             propositions = self.run_gremlin_query("g.V('"+node_id+"').outE().properties('text').value()")
             props_ids = self.run_gremlin_query("g.V('"+node_id+"').outE().id()")
         
@@ -348,7 +342,7 @@ class Form:
     
     def calcul_best_AIs(self, nbAI:int, answers:list)->list:
         """
-            Return the nbAI best AIs from a list of answers
+            Return the nbAI best AIs from a list of answers, but show less if there is less than nbAI possible
         
         Parameters:
             - nbAI (int): number of AIs to return
@@ -356,6 +350,8 @@ class Form:
         
         Return:
             - list_bests_AIs (list): list of the nbAI best AIs
+
+            TODO: check if 2 AI have the same coef what append
         """
         list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]['value'].split(", ")
         coef_AI = [1] * len(list_AI)
@@ -402,9 +398,9 @@ class Form:
             while i < len(list_bests_AIs):
                 st.caption(str(i+1)+") "+list_bests_AIs[i])
                 i += 1
+        # If no AI corresponding the the choices
         else:
             st.subheader("There is no AI corresponding to your request, please make other choices in the form", anchor=None)
-        return None
 
     def add_qcm_select_form(self, username:str)->str:
         """
@@ -417,18 +413,18 @@ class Form:
             - next_node_id (str): id of the next node to display
         """
         question = "Select the previous form you want to see again or edit"
-        options = ['<Select a form>']
+        list_form_name = ['<Select a form>']
         edges_answers = self.run_gremlin_query("g.V('"+str(username)+"').outE('Answer')")
         props_ids = []
         for edge in edges_answers:
-            text = edge['inV'].split("-")
-            options.append(text[-1])  # TODO replace this ligne by a custom name for the form stored in the edge between the usename's vertice and the first question vertice
+            text = edge['inV'].split("-")  # we split the name between the "-", and the last item is the form name
+            list_form_name.append(text[-1])  # We get the form name and we append it to the list of all forms names
             props_ids.append(edge['inV'])
-        answer = st.selectbox(label=question, options=options, index=0)
+        answer = st.selectbox(label=question, options=list_form_name, index=0)
         if answer == '<Select a form>':
             next_node_id = None
-        else:
-            index = options.index(answer)-1
+        else:  # We get the index of the form
+            index = list_form_name.index(answer)-1
             next_node_id = props_ids[index]
         return next_node_id
 
