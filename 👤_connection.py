@@ -17,19 +17,21 @@ def main():
     else: # User already connected, but can switch
         username = st.text_input("Put your username here to connect :", st.session_state.username)
 
-    if username != "":  # User connected
-        if '-' in username:
-            st.warning("You can't use '-' in your username")
-        else :
-            if username == 'Admin':
-                st.caption("🔑Connected as an " + str(username))
-            else :
-                st.caption("✅Connected as " + str(username))
-            st.session_state.username = username
-            st.session_state.last_form_name = None  # To detect if the user create a form with the same name as the previous one
-            st.session_state.clicked = False
-    else:
+    if username == "":  # User not connected
         st.caption("❌Not connected")
+        return None
+    
+    if '-' in username:
+        st.warning("You can't use '-' in your username")
+        return None
+    
+    if username == 'Admin':
+        st.caption("🔑Connected as an " + str(username))
+    else :
+        st.caption("✅Connected as " + str(username))
+    st.session_state.username = username
+    st.session_state.last_form_name = None  # To detect if the user create a form with the same name as the previous one
+    st.session_state.clicked = False
 
     
 if __name__ == "__main__":
