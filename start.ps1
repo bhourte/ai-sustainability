@@ -1,0 +1,1 @@
+﻿python -m streamlit run .\ai_sustainability\👤_connection.py
