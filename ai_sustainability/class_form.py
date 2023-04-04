@@ -382,8 +382,8 @@ class Form:
             - list_weight (list(float)): list of the weights of the edge
         """
         list_weight = self.run_gremlin_query("g.E('" + edge_id + "').properties('list_coef').value()")[0].split(", ")
-        for i in list_weight:
-            i = float(i)
+        for i, val_i in enumerate(list_weight):
+            list_weight[i] = float(val_i)
         return list_weight
 
     def calcul_best_ais(self, nbai: int, answers: list) -> list:
@@ -550,6 +550,10 @@ class Form:
                         + "')).property('answer', '"
                         + dict_answer["text"]
                         + "').property('proposition_id', '"
+                        + dict_answer["id"]
+                        + "').property('id', '"
+                        + username
+                        + form_name
                         + dict_answer["id"]
                         + "')"
                     )
