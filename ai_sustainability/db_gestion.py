@@ -30,7 +30,7 @@ class DbGestion:
         - import_graph : import a graph from a script created by create_script
     """
 
-    def __init__(self, endpoint, database_name, container_name, primary_key) -> None:
+    def __init__(self, endpoint: str, database_name: str, container_name: str, primary_key: str) -> None:
         self.endpoint = endpoint
         self.database_name = database_name
         self.container_name = container_name
@@ -43,7 +43,7 @@ class DbGestion:
             message_serializer=serializer.GraphSONSerializersV2d0(),
         )
 
-    def run_gremlin_query(self, query):
+    def run_gremlin_query(self, query: str) -> list:
         """
         Run a gremlin query
 
@@ -54,13 +54,13 @@ class DbGestion:
         result = run.result()
         return result
 
-    def close(self):
+    def close(self) -> None:
         """
         Close the connection to the database, must be called at the end of the program
         """
         self.gremlin_client.close()
 
-    def save_graph(self, path):
+    def save_graph(self, path: str) -> None:
         """
         Save the graph in a json file
 
@@ -79,7 +79,7 @@ class DbGestion:
             file.close()
         print(f"File {path} created")
 
-    def create_script(self, data_path, script_path):
+    def create_script(self, data_path: str, script_path: str) -> None:
         """
         Create a script to create the graph from a json file
 
@@ -120,7 +120,7 @@ class DbGestion:
             file.close()
         print(f"Script {script_path} created")
 
-    def create_script_with_weight(self, data_path, script_path, matrix_path):
+    def create_script_with_weight(self, data_path: str, script_path: str, matrix_path: str) -> None:
         """
         Create a script to create the graph from a json file and update all weight from a local weight_matrix excel file
         and put the list of all AI's name in the node with id=1
@@ -185,7 +185,7 @@ class DbGestion:
             file.close()
         print(f"Script {script_path} created")
 
-    def import_graph(self, script_path) -> None:
+    def import_graph(self, script_path: str) -> None:
         """
         Import a graph from a script
 
