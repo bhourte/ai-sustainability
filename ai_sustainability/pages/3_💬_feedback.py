@@ -4,7 +4,7 @@ This file is used to show the Feedback page
 import streamlit as st
 from decouple import config
 
-from ai_sustainability.class_form import Form
+from ai_sustainability.class_form_old import Form
 
 
 def main() -> None:

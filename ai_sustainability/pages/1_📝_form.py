@@ -4,8 +4,8 @@ This file is used to show the From page
 import streamlit as st
 from decouple import config
 
-from ai_sustainability.class_form import Form
-from ai_sustainability.utils import checkcheck_username
+from ai_sustainability.class_form_old import Form
+from ai_sustainability.classes.class_form import FormStreamlit
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
@@ -17,15 +17,11 @@ def main() -> None:
     """
     This is the code used to show the form and used by the user to fill it
     """
-    st.set_page_config(page_title="Form Page", page_icon="📝")
-    st.title("📝Form")
-    if (
-        "username" not in st.session_state or st.session_state.username == ""
-    ):  # User not connected, don't show the form, ask for connection
-        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
-        return
-    username = st.session_state.username
-    st.caption("✅ Connected as " + str(username))
+
+    database = None  # TODO mettre ici le lien vers la database
+    st_form = FormStreamlit(database)
+    username = st_form.username
+
     # Connection to the online gremlin database via class_from.py
     form = Form(
         endpoint="questions-db.gremlin.cosmos.azure.com",
