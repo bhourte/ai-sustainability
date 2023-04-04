@@ -177,8 +177,7 @@ def main() -> None:
 
         all_form = ["<Select a Form>"] + form.run_gremlin_query("g.V('" + str(user) + "').out().haslabel('Answer')")
         # Shaping of the texts
-        i = 1
-        while i < len(all_form):
+        for i in range(1, len(all_form)):
             all_form[i] = all_form[i]["id"].split("-")[-1]
             i += 1
 

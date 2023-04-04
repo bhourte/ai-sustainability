@@ -10,8 +10,7 @@ import streamlit as st
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
-_range = range
-_map = map
+_range = range  # range is overwrithe by the line below
 
 statics.load_statics(globals())
 
