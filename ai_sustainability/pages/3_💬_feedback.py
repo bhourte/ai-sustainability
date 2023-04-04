@@ -1,10 +1,13 @@
+"""
+This file is used to show the Feedback page
+"""
 import streamlit as st
 from decouple import config
 
 from ai_sustainability.class_form import Form
 
 
-def main():
+def main() -> None:
     """
     This is the code used by the user to give feedback and by the Admin to see all feedback
     """

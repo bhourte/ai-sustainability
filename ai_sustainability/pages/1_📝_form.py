@@ -67,7 +67,7 @@ def main() -> None:
         )
         return None
 
-    list_bests_ais = form.calcul_best_AIs(N_BEST_AI, answers)
+    list_bests_ais = form.calcul_best_ais(N_BEST_AI, answers)
     # First time passing here, we show the "submit" button to save answers
     if not st.session_state.clicked:
         st.session_state.last_form_name = form_name
@@ -75,7 +75,7 @@ def main() -> None:
     # Second time passing here, we show the result
     else:
         st.write("Answers saved")
-        form.show_best_AI(list_bests_ais)  # We show de N best AI (5 by default)
+        form.show_best_ai(list_bests_ais)  # We show de N best AI (5 by default)
         st.write(answers)
         st.session_state.last_form_name = None
         st.session_state.clicked = False

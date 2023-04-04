@@ -1,4 +1,8 @@
+"""
+This file is used to create the form and to connect to the gremlin database
+"""
 import heapq
+from typing import Optional
 
 import numpy as np
 import plotly.graph_objects as go
@@ -101,13 +105,13 @@ class Form:
         result = run.result()
         return result
 
-    def close(self):
+    def close(self) -> None:
         """
         Close the connection to the database, must be called at the end of the program
         """
         self.gremlin_client.close()
 
-    def add_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
+    def add_question(self, node_id: str, modif_crypted: bool, previous_answer: Optional[list] = None) -> tuple:
         """
         Add question from db to form
 
@@ -138,7 +142,7 @@ class Form:
             print("Error: unknown question type")
         return next_node_id, answer, modif_crypted
 
-    def build_question_help_text(self, node_id: str, props_ids: list = None) -> str:
+    def build_question_help_text(self, node_id: str, props_ids: Optional[list] = None) -> str:
         """
         Build the help text of a question
 
@@ -161,7 +165,7 @@ class Form:
                     )
         return help_text
 
-    def add_open_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
+    def add_open_question(self, node_id: str, modif_crypted: bool, previous_answer: Optional[list] = None) -> tuple:
         """
         Add open question from db to form
 
@@ -202,7 +206,7 @@ class Form:
         ]
         return next_node_id, dict_answer, modif_crypted
 
-    def add_qcm_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
+    def add_qcm_question(self, node_id: str, modif_crypted: bool, previous_answer: Optional[list] = None) -> tuple:
         """
         Add qcm question from db to form
 
@@ -243,7 +247,7 @@ class Form:
         dict_answer = [{"id": props_ids[index], "text": text["value"]}]
         return next_node_id, dict_answer, modif_crypted
 
-    def add_qrm_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
+    def add_qrm_question(self, node_id: str, modif_crypted: bool, previous_answer: Optional[list] = None) -> tuple:
         """
         Add qrm question from db to form
 
@@ -285,7 +289,7 @@ class Form:
             answers_returned.append({"id": props_ids[index], "text": text["value"]})
         return next_node_id, answers_returned, modif_crypted
 
-    def add_qcm_bool_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
+    def add_qcm_bool_question(self, node_id: str, modif_crypted: bool, previous_answer: Optional[list] = None) -> tuple:
         """
         Add qcm bool question from db to form
 
@@ -340,7 +344,7 @@ class Form:
         question = self.run_gremlin_query("g.V('" + node_id + "').properties('text').value()")[0]
         return question
 
-    def get_propositions_of_question(self, node_id: str, modif_crypted: str) -> tuple:
+    def get_propositions_of_question(self, node_id: str, modif_crypted: bool) -> tuple:
         """
         Get propositions of a question
 
@@ -354,9 +358,9 @@ class Form:
         """
         propositions = []
         props_ids = []
-        if (
-            modif_crypted
-        ):  # If there is some proposition we can not show because it's impossible to implement the AI doing it (because data are crypted)
+        # If there is some proposition we can not show,
+        # -because it's impossible to implement the AI doing it (because data are crypted)
+        if modif_crypted:
             for edges in self.run_gremlin_query("g.V('" + node_id + "').outE().id()"):
                 if self.run_gremlin_query("g.E('" + edges + "').properties('modif_crypted').value()")[0] == "false":
                     props_ids.append(edges)
@@ -384,68 +388,67 @@ class Form:
             i += 1
         return list_weight
 
-    def calcul_best_AIs(self, nbAI: int, answers: list) -> list:
+    def calcul_best_ais(self, nbai: int, answers: list) -> list:
         """
-            Return the nbAI best AIs from a list of answers, but show less if there is less than nbAI possible
+            Return the nbai best AIs from a list of answers, but show less if there is less than nbai possible
 
         Parameters:
-            - nbAI (int): number of AIs to return
+            - nbai (int): number of AIs to return
             - answers (list): list of answers
 
         Return:
-            - list_bests_AIs (list): list of the nbAI best AIs
+            - list_bests_ais (list): list of the nbai best AIs
 
             TODO: check if 2 AI have the same coef what append
         """
-        list_AI = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
-        coef_AI = [1] * len(list_AI)
+        list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
+        coef_ai = np.array([1] * len(list_ai))
         i = 0
         while i < len(answers):
             j = 0
             while j < len(answers[i]):
                 list_coef = self.get_weight(answers[i][j]["id"])
-                coef_AI = np.multiply(coef_AI, list_coef)
+                coef_ai = np.multiply(coef_ai, list_coef)
                 j += 1
             i += 1
         # We put all NaN value to -1
         i = 0
-        while i < len(coef_AI):
-            if coef_AI[i] != coef_AI[i]:  # if a NaN value is encounter, we put it to -1
-                coef_AI[i] = -1
+        while i < len(coef_ai):
+            if coef_ai[i] != coef_ai[i]:  # if a NaN value is encounter, we put it to -1
+                coef_ai[i] = -1
             i += 1
-        best = list(heapq.nlargest(nbAI, np.array(coef_AI)))
-        # We put the nbAI best AI in list_bests_AIs
-        list_bests_AIs = []
+        best = list(heapq.nlargest(nbai, np.array(coef_ai)))
+        # We put the nbai best AI in list_bests_ais
+        list_bests_ais = []
         i = 0
-        while i < nbAI:
+        while i < nbai:
             if best[i] > 0:
-                index = list(coef_AI).index(best[i])
-                list_bests_AIs.append(list_AI[index])
+                index = list(coef_ai).index(best[i])
+                list_bests_ais.append(list_ai[index])
             i += 1
-        return list_bests_AIs
+        return list_bests_ais
 
-    def show_best_AI(self, list_bests_AIs: list) -> None:
+    def show_best_ai(self, list_bests_ais: list) -> None:
         """
             Method used to show the n best AI obtained after the user has completed the Form
-            The number of AI choosen is based on the nbAI wanted by the user and the maximum of available AI for the use of the user
+            The number of AI choosen is based on the nbai wanted by the user and
+            the maximum of available AI for the use of the user
             (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
 
         Parameters:
-            - list_bests_AIs (list): list of the n best AI
+            - list_bests_ais (list): list of the n best AI
 
         Return:
             - None
         """
-        if len(list_bests_AIs) > 0:
+        if len(list_bests_ais) > 0:
             st.subheader(
-                "There is "
-                + str(len(list_bests_AIs))
-                + " IA corresponding to your specifications, here they are in order of the most efficient to the least:",
+                f"There is {str(len(list_bests_ais))} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
                 anchor=None,
             )
             i = 0
-            while i < len(list_bests_AIs):
-                st.caption(str(i + 1) + ") " + list_bests_AIs[i])
+            while i < len(list_bests_ais):
+                st.caption(str(i + 1) + ") " + list_bests_ais[i])
                 i += 1
         # If no AI corresponding the the choices
         else:
@@ -453,7 +456,7 @@ class Form:
                 "There is no AI corresponding to your request, please make other choices in the form", anchor=None
             )
 
-    def add_qcm_select_form(self, username: str) -> str:
+    def add_qcm_select_form(self, username: str) -> Optional[str]:
         """
             Display a qcm question with all the previous answered form
 
@@ -471,22 +474,22 @@ class Form:
             text = edge["inV"].split("-")  # we split the name between the "-", and the last item is the form name
             list_form_name.append(text[-1])  # We get the form name and we append it to the list of all forms names
             props_ids.append(edge["inV"])
-        answer = st.selectbox(label=question, options=list_form_name, index=0)
+        answer = str(st.selectbox(label=question, options=list_form_name, index=0))
         if answer == "<Select a form>":
-            next_node_id = None
-        else:  # We get the index of the form
-            index = list_form_name.index(answer) - 1
-            next_node_id = props_ids[index]
+            return None
+        # We get the index of the form
+        index = list_form_name.index(answer) - 1
+        next_node_id = props_ids[index]
         return next_node_id
 
-    def save_answers(self, answers: list, username: str, list_bests_AIs: list, form_name: str = None) -> None:
+    def save_answers(self, answers: list, username: str, list_bests_ais: list, form_name: str = "") -> None:
         """
         Save answers in db
 
         Parameters:
             - answers (list): list of answers
             - username (str): username of the user
-            - list_bests_AIs (list): list of the n best AI
+            - list_bests_ais (list): list of the n best AI
             - form_name (str): name of the form
 
         Return:
@@ -497,17 +500,10 @@ class Form:
             self.run_gremlin_query(
                 "g.addV('user').property('partitionKey', 'Answer').property('id', '" + username + "')"
             )
-            nb_form = 1
-
-        else:
-            # count number of edges from user
-            nb_edges = len(self.run_gremlin_query("g.V('" + username + "').outE().hasLabel('Answer').id()"))
-            nb_form = nb_edges + 1
-        nb_form = "-form" + str(nb_form)
-        if form_name is not None:
-            nb_form = "-" + str(form_name)
-        # If a node with the same name already exist, this means that a form with the same name already exist, so we exit without saving it again
-        if self.run_gremlin_query("g.V('" + username + "-answer1" + nb_form + "')"):
+        form_name = "-" + str(form_name)
+        # If a node with the same name already exist,
+        # this means that a form with the same name already exist, so we exit without saving it again
+        if self.run_gremlin_query("g.V('" + username + "-answer1" + form_name + "')"):
             st.warning(
                 "You already have a form with this name, please pick an other name or change your previous form in the historic page."
             )
@@ -518,8 +514,8 @@ class Form:
                 actual_node = self.run_gremlin_query("g.E('" + str(dict_answer["id"]) + "').outV()")[0]
                 next_question_node = self.run_gremlin_query("g.E('" + dict_answer["id"] + "').inV()")[0]
 
-                new_node_id = username + "-" + "answer" + actual_node["id"] + nb_form
-                next_new_node_id = username + "-" + "answer" + next_question_node["id"] + nb_form
+                new_node_id = username + "-" + "answer" + actual_node["id"] + form_name
+                next_new_node_id = username + "-" + "answer" + next_question_node["id"] + form_name
 
                 new_node_id_exist = self.run_gremlin_query("g.V('" + new_node_id + "').id()")
                 next_new_node_id_exist = self.run_gremlin_query("g.V('" + next_new_node_id + "').id()")
@@ -569,18 +565,20 @@ class Form:
                         + dict_answer["id"]
                         + "')"
                     )
-        first_node_id = username + "-" + "answer1" + nb_form
+        first_node_id = username + "-" + "answer1" + form_name
         self.run_gremlin_query(
             "g.V('" + username + "').addE('Answer').to(g.V('" + first_node_id + "')).property('partitionKey', 'Answer')"
         )
-        list_bests_AIs = str(list_bests_AIs)[1:-1]
-        self.run_gremlin_query("g.V('" + first_node_id + "').property('list_bests_AIs', '" + list_bests_AIs + "')")
+        list_bests_ais_string = str(list_bests_ais)[1:-1]
+        self.run_gremlin_query(
+            "g.V('" + first_node_id + "').property('list_bests_AIs', '" + list_bests_ais_string + "')"
+        )
         st.session_state.clicked = (
             True  # global variable used to tell the form page that the button ("submit") has been clicked
         )
 
     def change_answers(
-        self, answers: list, username: str, list_bests_AIs: list, form_name: str, new_form_name: str
+        self, answers: list, username: str, list_bests_ais: list, form_name: str, new_form_name: str
     ) -> None:
         """
         Change the answer in db
@@ -588,7 +586,7 @@ class Form:
         Parameters:
             - answers (list): list of answers
             - username (str): username of the user
-            - list_bests_AIs (list): list of the n best AI
+            - list_bests_ais (list): list of the n best AI
             - form_name (str): name of the form
             - new_form_name (str): new name of the form
 
@@ -606,7 +604,7 @@ class Form:
                 end = False
             else:
                 node_id = next_node_id[0]["value"]
-        self.save_answers(answers, username, list_bests_AIs, new_form_name)
+        self.save_answers(answers, username, list_bests_ais, new_form_name)
 
     def save_feedback(self, text_feedback: str, username: str) -> None:
         """
@@ -668,11 +666,11 @@ class Form:
         return:
             - edges_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
         """
-        edges_selected = {}
+        edges_selected: dict[str, int] = {}
         all_selected_edges = self.run_gremlin_query("g.E().hasLabel('Answer').valueMap('proposition_id')")
         for edge in all_selected_edges:
-            if "proposition_id" in edge.keys():
-                if edge["proposition_id"] not in edges_selected.keys():
+            if "proposition_id" in edge:
+                if edge["proposition_id"] not in edges_selected:
                     edges_selected[edge["proposition_id"]] = 0
                 edges_selected[edge["proposition_id"]] += 1
         return edges_selected
@@ -699,7 +697,8 @@ class Form:
                     "nb_selected": value,
                 }
 
-        # sort the dict on x_axis (keys), display on x_label only the id of the proposition, and on the hover text the label and the text of the proposition
+        # sort the dict on x_axis (keys), display on x_label only the id of the proposition,
+        # and on the hover text the label and the text of the proposition
         # add in hover text the id of the proposition
 
         with st.spinner("Loading..."):

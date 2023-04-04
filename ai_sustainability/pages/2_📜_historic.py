@@ -72,7 +72,7 @@ def show_form(form: Form, node_answer: str) -> None:
         node_answer = form.run_gremlin_query("g.V('" + str(node_answer) + "').out().properties('id')")[0][
             "value"
         ]  # We go to the next vertice
-    form.show_best_AI(list_bests_ais)
+    form.show_best_ai(list_bests_ais)
 
 
 def main() -> None:
@@ -150,8 +150,8 @@ def main() -> None:
             )
             return
 
-        list_bests_ais = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
-        form.show_best_AI(list_bests_ais)  # We show the N best AI to the user (5 for now)
+        list_bests_ais = form.calcul_best_ais(N_BEST_AI, answers)  # get the N best AI (5 for now)
+        form.show_best_ai(list_bests_ais)  # We show the N best AI to the user (5 for now)
         if st.button(
             "Save Change",
             on_click=form.change_answers,

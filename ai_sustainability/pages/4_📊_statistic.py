@@ -1,10 +1,13 @@
+"""
+This file is used to show the Statistic page
+"""
 import streamlit as st
 from decouple import config
 
 from ai_sustainability.class_form import Form
 
 
-def main():
+def main() -> None:
     """
     This is the code used by the admin to see statistics from the answers of the users
     """
@@ -14,7 +17,7 @@ def main():
         "username" not in st.session_state or st.session_state.username == ""
     ):  # User not connected, don't show the stat, ask for connection
         st.caption("❌ You are not connected, please connect with your username in the Connection page.")
-        return None
+        return
     username = st.session_state.username
     # Connection to the online gremlin database via class_from.py
     form = Form(
