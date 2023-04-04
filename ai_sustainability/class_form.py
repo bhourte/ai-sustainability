@@ -11,6 +11,7 @@ from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
 _range = range
+_map = map
 
 statics.load_statics(globals())
 
@@ -382,10 +383,8 @@ class Form:
             - list_weight (list(float)): list of the weights of the edge
         """
         list_weight = self.run_gremlin_query("g.E('" + edge_id + "').properties('list_coef').value()")[0].split(", ")
-        i = 0
-        while i < len(list_weight):
-            list_weight[i] = float(list_weight[i])
-            i += 1
+        for i in list_weight:
+            i = float(i)
         return list_weight
 
     def calcul_best_ais(self, nbai: int, answers: list) -> list:
@@ -403,29 +402,21 @@ class Form:
         """
         list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
         coef_ai = np.array([1] * len(list_ai))
-        i = 0
-        while i < len(answers):
-            j = 0
-            while j < len(answers[i]):
-                list_coef = self.get_weight(answers[i][j]["id"])
+        for i in answers:
+            for j in i:
+                list_coef = self.get_weight(j["id"])
                 coef_ai = np.multiply(coef_ai, list_coef)
-                j += 1
-            i += 1
         # We put all NaN value to -1
-        i = 0
-        while i < len(coef_ai):
-            if coef_ai[i] != coef_ai[i]:  # if a NaN value is encounter, we put it to -1
-                coef_ai[i] = -1
-            i += 1
+        for i in coef_ai:
+            if i != i:  # if a NaN value is encounter, we put it to -1
+                i = -1
         best = list(heapq.nlargest(nbai, np.array(coef_ai)))
         # We put the nbai best AI in list_bests_ais
         list_bests_ais = []
-        i = 0
-        while i < nbai:
+        for i in _range(nbai):
             if best[i] > 0:
                 index = list(coef_ai).index(best[i])
                 list_bests_ais.append(list_ai[index])
-            i += 1
         return list_bests_ais
 
     def show_best_ai(self, list_bests_ais: list) -> None:
@@ -446,10 +437,8 @@ class Form:
                 f"There is {str(len(list_bests_ais))} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
                 anchor=None,
             )
-            i = 0
-            while i < len(list_bests_ais):
-                st.caption(str(i + 1) + ") " + list_bests_ais[i])
-                i += 1
+            for i, val_i in enumerate(list_bests_ais):
+                st.caption(str(i + 1) + ") " + val_i)
         # If no AI corresponding the the choices
         else:
             st.subheader(

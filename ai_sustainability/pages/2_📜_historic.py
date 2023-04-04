@@ -167,9 +167,8 @@ def main() -> None:
         st.caption("🔑 Connected as an Admin")
         all_user = ["<Select an User>"] + form.run_gremlin_query("g.V().haslabel('user')")
         i = 1
-        while i < len(all_user):
+        for i in range(1, len(all_user)):
             all_user[i] = all_user[i]["id"]
-            i += 1
 
         # The admin select an user
         user = st.selectbox(label="Select an user", options=all_user)
