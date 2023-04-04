@@ -613,6 +613,7 @@ class Form:
             self.run_gremlin_query(
                 "g.addV('Feedback').property('partitionKey', 'Feedback').property('id', '" + node_feedback_id + "')"
             )
+            time.sleep(0.2)
         edge_feedback_id = "feedback" + username + str(nb_feedback_by_user + 1)
         self.run_gremlin_query(
             "g.V('"
