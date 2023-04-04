@@ -107,7 +107,7 @@ class Form:
         """
         self.gremlin_client.close()
 
-    def add_question(self, node_id: str, modif_crypted: str, previous_answer: str = None) -> tuple:
+    def add_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
         """
         Add question from db to form
 
@@ -161,7 +161,7 @@ class Form:
                     )
         return help_text
 
-    def add_open_question(self, node_id: str, modif_crypted: str, previous_answer: str = None) -> tuple:
+    def add_open_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
         """
         Add open question from db to form
 
@@ -202,7 +202,7 @@ class Form:
         ]
         return next_node_id, dict_answer, modif_crypted
 
-    def add_qcm_question(self, node_id: str, modif_crypted: str, previous_answer: str = None) -> tuple:
+    def add_qcm_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
         """
         Add qcm question from db to form
 
@@ -243,7 +243,7 @@ class Form:
         dict_answer = [{"id": props_ids[index], "text": text["value"]}]
         return next_node_id, dict_answer, modif_crypted
 
-    def add_qrm_question(self, node_id: str, modif_crypted: str, previous_answer: str = None) -> tuple:
+    def add_qrm_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
         """
         Add qrm question from db to form
 
@@ -285,7 +285,7 @@ class Form:
             answers_returned.append({"id": props_ids[index], "text": text["value"]})
         return next_node_id, answers_returned, modif_crypted
 
-    def add_qcm_bool_question(self, node_id: str, modif_crypted: str, previous_answer: str = None) -> tuple:
+    def add_qcm_bool_question(self, node_id: str, modif_crypted: bool, previous_answer: str = None) -> tuple:
         """
         Add qcm bool question from db to form
 

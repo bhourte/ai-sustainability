@@ -1,44 +1,46 @@
-from class_form import Form
 import streamlit as st
-
 from decouple import config
 
+from ai_sustainability.class_form import Form
 
 # General variable, used to begin the main() function
-FIRST_NODE_ID = '1'
+FIRST_NODE_ID = "1"
 BASE_MODIF_CRYPTED = False
 N_BEST_AI = 5
 
-def main():
+
+def main() -> None:
     """
-        This is the code used to show the form and used by the user to fill it
+    This is the code used to show the form and used by the user to fill it
     """
     st.set_page_config(page_title="Form Page", page_icon="📝")
     st.title("📝Form")
-    if 'username' not in st.session_state or st.session_state.username == "":  # User not connected, don't show the form, ask for connection
+    if (
+        "username" not in st.session_state or st.session_state.username == ""
+    ):  # User not connected, don't show the form, ask for connection
         st.caption("❌ You are not connected, please connect with your username in the Connection page.")
         return None
     username = st.session_state.username
     st.caption("✅ Connected as " + str(username))
     # Connection to the online gremlin database via class_from.py
     form = Form(
-                endpoint = "questions-db.gremlin.cosmos.azure.com",
-                database_name = "graphdb",
-                container_name = config('DATABASENAME'),
-                primary_key= config('PRIMARYKEY'),
-           )
+        endpoint="questions-db.gremlin.cosmos.azure.com",
+        database_name="graphdb",
+        container_name=config("DATABASENAME"),
+        primary_key=config("PRIMARYKEY"),
+    )
 
     # We show the first question here, in order to get the id of the next node
     next_node_id, answer, modif_crypted = form.add_question(FIRST_NODE_ID, BASE_MODIF_CRYPTED)
     answers = [answer]  # List of all aswers
     # And we iterate from the id of the first node to the last
-    while next_node_id != 'end' and next_node_id is not None:
+    while next_node_id != "end" and next_node_id is not None:
         next_node_id, answer, modif_crypted = form.add_question(next_node_id, modif_crypted)
         if answer is not None:
             answers.append(answer)
 
     # If the form is not finish and simply wait the user to put answer, we continue to show it with a the last question
-    if next_node_id != 'end':
+    if next_node_id != "end":
         st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
         st.session_state.clicked = False
         print("LAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -54,8 +56,13 @@ def main():
         return None
 
     # We check if the form name already exist in the database
-    if form.run_gremlin_query("g.V('"+username+'-answer1-'+form_name+"')") and st.session_state.last_form_name != form_name:
-        st.warning("You already have a form with this name, please pick an other name or change your previous form in the historic page.")
+    if (
+        form.run_gremlin_query("g.V('" + username + "-answer1-" + form_name + "')")
+        and st.session_state.last_form_name != form_name
+    ):
+        st.warning(
+            "You already have a form with this name, please pick an other name or change your previous form in the historic page."
+        )
         return None
 
     list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)
@@ -66,17 +73,18 @@ def main():
         print(st.session_state.last_form_name)
         print(st.session_state.clicked)
         st.session_state.last_form_name = form_name
-        st.button('Submit', on_click=form.save_answers, args=(answers,username,list_bests_AIs,form_name))
+        st.button("Submit", on_click=form.save_answers, args=(answers, username, list_bests_AIs, form_name))
     # Second time passing here, we show the result
     else:
         print("Else")
         print(st.session_state.last_form_name)
         print(st.session_state.clicked)
-        st.write('Answers saved')
+        st.write("Answers saved")
         form.show_best_AI(list_bests_AIs)  # We show de N best AI (5 by default)
         st.write(answers)
         st.session_state.last_form_name = None
         st.session_state.clicked = False
 
+
 if __name__ == "__main__":
-    main()  
+    main()
