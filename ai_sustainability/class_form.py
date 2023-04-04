@@ -538,6 +538,8 @@ class Form:
                             + "')"
                         )
 
+                        
+
                 while self.run_gremlin_query("g.V('" + new_node_id + "')") == []:
                     time.sleep(0.05)
                 self.run_gremlin_query(
