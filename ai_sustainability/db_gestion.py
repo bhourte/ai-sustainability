@@ -211,14 +211,14 @@ if __name__ == "__main__":
 
     ENDPOINT = "questions-db.gremlin.cosmos.azure.com"
     DATABASE = "graphdb"
-    COLLECTION = "Persons"
+    COLLECTION = "Form"
     PRIMARYKEY = config("PRIMARYKEY")
 
     db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
-    db_gestion.save_graph("../data.json")
+    # db_gestion.save_graph("../data_weight.json")
     # db_gestion.run_gremlin_query("g.V().drop()")
     # db_gestion.run_gremlin_query("g.E().drop()")
-    db_gestion.create_script("../data.json", "../script.json")
-    # db_gestion.create_script_with_weight("data_weight.json","script_weight.json", "Weight_matrix.xlsx")
+    # db_gestion.create_script("../data.json", "../script.json")
+    db_gestion.create_script_with_weight("../data_weight.json", "../script_weight.json", "../Weight_matrix.xlsx")
     # db_gestion.import_graph("script_weight.json")
     db_gestion.close()

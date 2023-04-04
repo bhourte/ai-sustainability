@@ -538,8 +538,6 @@ class Form:
                             + "')"
                         )
 
-                        
-
                 while self.run_gremlin_query("g.V('" + new_node_id + "')") == []:
                     time.sleep(0.05)
                 self.run_gremlin_query(
@@ -637,7 +635,7 @@ class Form:
         """
         all_users_id = self.run_gremlin_query("g.V().hasLabel('user').id()")
         if not all_users_id:
-            st.write("There is no user registered in the database.")
+            st.write("There is no registered user in the database.")
             return None
         is_no_feedback = True
         for user_id in all_users_id:

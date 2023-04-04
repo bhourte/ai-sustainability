@@ -418,19 +418,6 @@
                     }
                 ]
             }
-        },
-        {
-            "id": "Arnauld",
-            "label": "user",
-            "type": "vertex",
-            "properties": {
-                "partitionKey": [
-                    {
-                        "id": "Arnauld|partitionKey",
-                        "value": "Answer"
-                    }
-                ]
-            }
         }
     ],
     [
