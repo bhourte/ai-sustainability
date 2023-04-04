@@ -1,3 +1,6 @@
+"""
+This file is used to show the From page
+"""
 import streamlit as st
 from decouple import config
 
@@ -19,7 +22,7 @@ def main() -> None:
         "username" not in st.session_state or st.session_state.username == ""
     ):  # User not connected, don't show the form, ask for connection
         st.caption("❌ You are not connected, please connect with your username in the Connection page.")
-        return None
+        return
     username = st.session_state.username
     st.caption("✅ Connected as " + str(username))
     # Connection to the online gremlin database via class_from.py
@@ -43,17 +46,16 @@ def main() -> None:
     if next_node_id != "end":
         st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
         st.session_state.clicked = False
-        print("LAAAAAAAAAAAAAAAAAAAAAAAAA")
-        return None
+        return
 
     # If the form is finish, we ask the user a name for the form, we calculate the N best AIs and we save it all
     form_name = st.text_input("Give a name to your form here")
     if form_name == "":  # If the name is empty, we don't go further, we wait the user to fill it
-        return None
+        return
     txt_ok = form.no_dash_in_my_text(form_name)
     if not txt_ok:  # No - in the text
         st.warning("Please don't use dash in your form name")
-        return None
+        return
 
     # We check if the form name already exist in the database
     if (
@@ -65,22 +67,15 @@ def main() -> None:
         )
         return None
 
-    list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)
-    print("state : " + str(st.session_state.clicked))
+    list_bests_ais = form.calcul_best_AIs(N_BEST_AI, answers)
     # First time passing here, we show the "submit" button to save answers
     if not st.session_state.clicked:
-        print("If")
-        print(st.session_state.last_form_name)
-        print(st.session_state.clicked)
         st.session_state.last_form_name = form_name
-        st.button("Submit", on_click=form.save_answers, args=(answers, username, list_bests_AIs, form_name))
+        st.button("Submit", on_click=form.save_answers, args=(answers, username, list_bests_ais, form_name))
     # Second time passing here, we show the result
     else:
-        print("Else")
-        print(st.session_state.last_form_name)
-        print(st.session_state.clicked)
         st.write("Answers saved")
-        form.show_best_AI(list_bests_AIs)  # We show de N best AI (5 by default)
+        form.show_best_AI(list_bests_ais)  # We show de N best AI (5 by default)
         st.write(answers)
         st.session_state.last_form_name = None
         st.session_state.clicked = False

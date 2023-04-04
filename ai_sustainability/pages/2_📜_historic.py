@@ -1,3 +1,6 @@
+"""
+This file is used to show the Historic page
+"""
 import streamlit as st
 from decouple import config
 
@@ -41,7 +44,7 @@ def get_list_result(form: Form, node_answer: str) -> list:
     return previous_answers
 
 
-def show_form(form: Form, node_answer: str):
+def show_form(form: Form, node_answer: str) -> None:
     """
     Specific function used by the "Historic" page to show the form in the Admin section of the Historic page
     Parameters :
@@ -53,7 +56,7 @@ def show_form(form: Form, node_answer: str):
     """
 
     next_node_id = None
-    list_bests_AIs = form.run_gremlin_query("g.V('" + str(node_answer) + "').properties('list_bests_AIs')")[0]["value"]
+    list_bests_ais = form.run_gremlin_query("g.V('" + str(node_answer) + "').properties('list_bests_AIs')")[0]["value"]
     while next_node_id != "end":
         node_answer_label = form.run_gremlin_query("g.V('" + str(node_answer) + "').properties('label')")[0]["value"]
         # if we have reach the end
@@ -69,11 +72,10 @@ def show_form(form: Form, node_answer: str):
         node_answer = form.run_gremlin_query("g.V('" + str(node_answer) + "').out().properties('id')")[0][
             "value"
         ]  # We go to the next vertice
-    form.show_best_AI(list_bests_AIs)
-    return None
+    form.show_best_AI(list_bests_ais)
 
 
-def main():
+def main() -> None:
     """
     This is the code used to show the previous form completed by an User
     Different usage if User or Admin
@@ -98,8 +100,8 @@ def main():
         st.caption("✅ Connected as " + str(username))
 
         node_answer = form.add_qcm_select_form(username)
-        if node_answer == None:  # if none form selected, don't show the rest
-            return None
+        if node_answer is None:  # if none form selected, don't show the rest
+            return
         form_name = node_answer.split("-")[-1]
         next_node_id = node_answer
 
@@ -118,7 +120,7 @@ def main():
                     "value"
                 ]
                 answers.append(answer)
-                if previous_answers[i] != None and answer[0]["text"] != previous_answers[i][0]:
+                if previous_answers[i] is not None and answer[0]["text"] != previous_answers[i][0]:
                     previous_answers = [None] * len(previous_answers)
             i += 1
             if i == len(previous_answers):
@@ -126,16 +128,16 @@ def main():
 
         # If the form is not finish, we continue to show it with a new question
         if label_next_node != "end":
-            return None
+            return
 
         # We ask the user if he want to change the name of his form
         new_form_name = st.text_input("If you want to change the name of the form, change it here:", form_name)
         if new_form_name == "":  # The name can not be empty
-            return None
+            return
 
         if not form.no_dash_in_my_text(new_form_name):  # No - in the name
             st.warning("The name of the form can't contain a dash.")
-            return None
+            return
 
         print(form_name)
         print(new_form_name)
@@ -146,17 +148,17 @@ def main():
             st.warning(
                 "You already have a form with this name, please pick an other name or select it above if you want to change it."
             )
-            return None
+            return
 
-        list_bests_AIs = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
-        form.show_best_AI(list_bests_AIs)  # We show the N best AI to the user (5 for now)
+        list_bests_ais = form.calcul_best_AIs(N_BEST_AI, answers)  # get the N best AI (5 for now)
+        form.show_best_AI(list_bests_ais)  # We show the N best AI to the user (5 for now)
         if st.button(
             "Save Change",
             on_click=form.change_answers,
-            args=(answers, username, list_bests_AIs, form_name, new_form_name),
+            args=(answers, username, list_bests_ais, form_name, new_form_name),
         ):
             st.session_state.clicked = False  # Put to False to be sure it does not bug in the Form page
-            print("best AIs : " + str(list_bests_AIs))
+            print("best AIs : " + str(list_bests_ais))
             st.write("Change saved")
             st.write(answers)
 
@@ -172,7 +174,7 @@ def main():
         # The admin select an user
         user = st.selectbox(label="Select an user", options=all_user)
         if user == "<Select an User>":
-            return None
+            return
 
         all_form = ["<Select a Form>"] + form.run_gremlin_query("g.V('" + str(user) + "').out().haslabel('Answer')")
         # Shaping of the texts
@@ -182,9 +184,9 @@ def main():
             i += 1
 
         # The admin select a form of the choosen user
-        form_name = st.selectbox(label="Select a Form", options=all_form)
+        form_name = str(st.selectbox(label="Select a Form", options=all_form))
         if form_name == "<Select a Form>":
-            return None
+            return
 
         first_node = str(user) + "-answer1-" + str(form_name)
         show_form(form, first_node)  # We show the form below the selection boxes
