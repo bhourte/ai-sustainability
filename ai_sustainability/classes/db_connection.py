@@ -35,7 +35,6 @@ Make the connection to the database, run the querys and close the connection
 import heapq
 
 import numpy as np
-import streamlit as st
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -185,7 +184,7 @@ class DbConnection:
         result = self.run_gremlin_query(query)
         return bool(result)
 
-    def create_user(self, username: str):
+    def create_user_node(self, username: str):
         query = f"g.addV('user').property('partitionKey', 'Answer').property('id', '{username}')"
         self.run_gremlin_query(query)
 
@@ -291,112 +290,137 @@ class DbConnection:
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    def calcul_best_ais(self, nbai: int, answers: list) -> list:
-        """
-            Return the nbai best AIs from a list of answers, but show less if there is less than nbai possible
-
-        Parameters:
-            - nbai (int): number of AIs to return
-            - answers (list): list of answers
-
-        Return:
-            - list_bests_ais (list): list of the nbai best AIs
-
-            TODO: check if 2 AI have the same coef what append
-        """
+    def calcul_best_ais(self, nb_ai: int, answers: list):
         list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
+        edges_id = self.get_edges_id(answers)
         coef_ai = np.array([1] * len(list_ai))
-        for answer in answers:
-            for ans in answer:
-                list_coef = self.get_weight(ans["id"])
-                coef_ai = np.multiply(coef_ai, list_coef)
-        # We put all NaN value to -1
+        for edge_id in edges_id:
+            list_coef = self.get_weight(edge_id)
+            coef_ai = np.multiply(coef_ai, list_coef)
+        # we put all NaN value to -1
         for i_coef, coef in enumerate(coef_ai):
-            if coef != coef:  # if a NaN value is encounter, we put it to -1
+            if coef != coef:
                 coef_ai[i_coef] = -1
-        best = list(heapq.nlargest(nbai, np.array(coef_ai)))
-        # We put the nbai best AI in list_bests_ais
+        best = list(heapq.nlargest(nb_ai, np.array(coef_ai)))
+        # we put the best nb_ai in list_bests_ais
         list_bests_ais = []
-        for i_nb in _range(nbai):
-            if best[i_nb] > 0:
-                index = list(coef_ai).index(best[i_nb])
+        for i_ai in range(nb_ai):
+            if best[i_ai] > 0:
+                index = list(coef_ai).index(best[i_ai])
                 list_bests_ais.append(list_ai[index])
         return list_bests_ais
+
+    def get_edges_id(self, answers: list):
+        """
+        answers: list of list of answers [ [answer1, answer2], [answer3]
+        """
+        edges_id = []
+        for i_question, question_id in enumerate(self.list_questions_id):
+            label = self.get_question_label(question_id)
+            if label == "Q_Open":
+                edges_id.append(self.run_gremlin_query(f"g.V('{question_id}').outE().id()"))
+            else:
+                for answer in answers[i_question]:
+                    edges_id.append(self.run_gremlin_query(f"g.V('{question_id}').outE().has('text', '{answer}').id()"))
+
+        return edges_id
+
+    def save_answers(self, username: str, form_name: str, answers: list):
+        """
+        Save the answers of a user in the database
+        answers: list of list of answers [ [answer1, answer2], [answer3]
+        """
+        if not self.check_user_exist(username):
+            self.create_user_node(username)
+
+        if not self.check_form_exist(username, form_name):
+            return False
+
+        form_name = f"-{form_name}"
+        return True
 
 
 def main():
     database = DbConnection()
-    # print(database.get_one_question([]))
-    # print(database.get_one_question([["oui"]]))
-    # print(database.get_one_question([["oui"], ["Yes"]]))
-    # print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]]))
-    # print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]]))
-    # print(
-    #     database.get_one_question(
-    #         [
-    #             ["oui"],
-    #             ["Yes"],
-    #             ["DataSet, CSV or Data Base"],
-    #             ["Predict a numerical value"],
-    #             ["Minimize the average error. "],
-    #         ]
-    #     )
-    # )
-    # print(
-    #     database.get_one_question(
-    #         [
-    #             ["oui"],
-    #             ["Yes"],
-    #             ["DataSet, CSV or Data Base"],
-    #             ["Predict a numerical value"],
-    #             ["Minimize the average error. "],
-    #             ["Higher speed"],
-    #         ]
-    #     )
-    # )
-    # print(
-    #     database.get_one_question(
-    #         [
-    #             ["oui"],
-    #             ["Yes"],
-    #             ["DataSet, CSV or Data Base"],
-    #             ["Predict a numerical value"],
-    #             ["Minimize the average error. "],
-    #             ["Higher speed"],
-    #             ["No"],
-    #         ]
-    #     )
-    # )
-    # print(
-    #     database.get_one_question(
-    #         [
-    #             ["oui"],
-    #             ["Yes"],
-    #             ["DataSet, CSV or Data Base"],
-    #             ["Predict a numerical value"],
-    #             ["Minimize the average error. "],
-    #             ["Higher speed"],
-    #             ["No"],
-    #             ["Internal User"],
-    #         ]
-    #     )
-    # )
-    # print(
-    #     database.get_one_question(
-    #         [
-    #             ["oui"],
-    #             ["Yes"],
-    #             ["DataSet, CSV or Data Base"],
-    #             ["Predict a numerical value"],
-    #             ["Minimize the average error. "],
-    #             ["Higher speed"],
-    #             ["No"],
-    #             ["Internal User"],
-    #             ["Diagram"],
-    #         ]
-    #     )
-    # )
-    print()
+    database.get_one_question([])
+    database.get_one_question([["oui"]])
+    database.get_one_question([["oui"], ["Yes"]])
+    database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]])
+    database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]])
+
+    database.get_one_question(
+        [
+            ["oui"],
+            ["Yes"],
+            ["DataSet, CSV or Data Base"],
+            ["Predict a numerical value"],
+            ["Minimize the average error. "],
+        ]
+    )
+
+    database.get_one_question(
+        [
+            ["oui"],
+            ["Yes"],
+            ["DataSet, CSV or Data Base"],
+            ["Predict a numerical value"],
+            ["Minimize the average error. "],
+            ["Higher speed"],
+        ]
+    )
+
+    database.get_one_question(
+        [
+            ["oui"],
+            ["Yes"],
+            ["DataSet, CSV or Data Base"],
+            ["Predict a numerical value"],
+            ["Minimize the average error. "],
+            ["Higher speed"],
+            ["No"],
+        ]
+    )
+
+    database.get_one_question(
+        [
+            ["oui"],
+            ["Yes"],
+            ["DataSet, CSV or Data Base"],
+            ["Predict a numerical value"],
+            ["Minimize the average error. "],
+            ["Higher speed"],
+            ["No"],
+            ["Internal User"],
+        ]
+    )
+    database.get_one_question(
+        [
+            ["oui"],
+            ["Yes"],
+            ["DataSet, CSV or Data Base"],
+            ["Predict a numerical value"],
+            ["Minimize the average error. "],
+            ["Higher speed"],
+            ["No"],
+            ["Internal User"],
+            ["Diagram"],
+        ]
+    )
+    print(
+        database.get_edges_id(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+                ["Higher speed"],
+                ["No"],
+                ["Internal User"],
+                ["Diagram"],
+            ]
+        )
+    )
 
     database.close()
 

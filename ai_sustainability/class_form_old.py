@@ -402,20 +402,20 @@ class Form:
         """
         list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
         coef_ai = np.array([1] * len(list_ai))
-        for i in answers:
-            for j in i:
-                list_coef = self.get_weight(j["id"])
+        for answer in answers:
+            for ans in answer:
+                list_coef = self.get_weight(ans["id"])
                 coef_ai = np.multiply(coef_ai, list_coef)
         # We put all NaN value to -1
-        for i, val_i in enumerate(coef_ai):
-            if val_i != val_i:  # if a NaN value is encounter, we put it to -1
-                coef_ai[i] = -1
+        for i_coef, coef in enumerate(coef_ai):
+            if coef != coef:  # if a NaN value is encounter, we put it to -1
+                coef_ai[i_coef] = -1
         best = list(heapq.nlargest(nbai, np.array(coef_ai)))
         # We put the nbai best AI in list_bests_ais
         list_bests_ais = []
-        for i in _range(nbai):
-            if best[i] > 0:
-                index = list(coef_ai).index(best[i])
+        for i_nb in _range(nbai):
+            if best[i_nb] > 0:
+                index = list(coef_ai).index(best[i_nb])
                 list_bests_ais.append(list_ai[index])
         return list_bests_ais
 
