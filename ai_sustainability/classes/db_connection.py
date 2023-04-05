@@ -32,11 +32,14 @@ Make the connection to the database, run the querys and close the connection
     get_all_users() -> list(str)
 
 """
+import heapq
 
+import numpy as np
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
+_range = range
 statics.load_statics(globals())
 
 FIRST_NODE_ID = "1"
@@ -112,7 +115,7 @@ class DbConnection:
                 4: question_label
             }
         """
-        question = {}
+        question = {}  # type: dict
         self.truncate_questions(answers)
         question_id = self.get_next_question(answers)
         if question_id == LAST_NODE_ID:
@@ -269,79 +272,127 @@ class DbConnection:
         """
         return self.check_node_exist(f"{username}-answer1-{form_name}")
 
+    def get_weight(self, edge_id: str) -> list:
+        """
+            Get the list_coef from the edge with edge_id id
+
+        Parameters:
+            - edge_id (str): id of the edge in the db
+
+        Return:
+            - list_weight (list(float)): list of the weights of the edge
+        """
+        list_weight = self.run_gremlin_query(f"g.E('{edge_id}').properties('list_coef').value()")[0].split(", ")
+        for i_weight, weight in enumerate(list_weight):
+            list_weight[i_weight] = float(weight)
+        return list_weight
+
+    def calcul_best_ais(self, nbai: int, answers: list) -> list:
+        """
+            Return the nbai best AIs from a list of answers, but show less if there is less than nbai possible
+
+        Parameters:
+            - nbai (int): number of AIs to return
+            - answers (list): list of answers
+
+        Return:
+            - list_bests_ais (list): list of the nbai best AIs
+
+            TODO: check if 2 AI have the same coef what append
+        """
+        list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
+        coef_ai = np.array([1] * len(list_ai))
+        for answer in answers:
+            for ans in answer:
+                list_coef = self.get_weight(ans["id"])
+                coef_ai = np.multiply(coef_ai, list_coef)
+        # We put all NaN value to -1
+        for i_coef, coef in enumerate(coef_ai):
+            if coef != coef:  # if a NaN value is encounter, we put it to -1
+                coef_ai[i_coef] = -1
+        best = list(heapq.nlargest(nbai, np.array(coef_ai)))
+        # We put the nbai best AI in list_bests_ais
+        list_bests_ais = []
+        for i in _range(nbai):
+            if best[i] > 0:
+                index = list(coef_ai).index(best[i])
+                list_bests_ais.append(list_ai[index])
+        return list_bests_ais
+
 
 def main():
     database = DbConnection()
-    print(database.get_one_question([]))
-    print(database.get_one_question([["oui"]]))
-    print(database.get_one_question([["oui"], ["Yes"]]))
-    print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]]))
-    print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]]))
-    print(
-        database.get_one_question(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-            ]
-        )
-    )
-    print(
-        database.get_one_question(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-                ["Higher speed"],
-            ]
-        )
-    )
-    print(
-        database.get_one_question(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-                ["Higher speed"],
-                ["No"],
-            ]
-        )
-    )
-    print(
-        database.get_one_question(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-                ["Higher speed"],
-                ["No"],
-                ["Internal User"],
-            ]
-        )
-    )
-    print(
-        database.get_one_question(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-                ["Higher speed"],
-                ["No"],
-                ["Internal User"],
-                ["Diagram"],
-            ]
-        )
-    )
+    # print(database.get_one_question([]))
+    # print(database.get_one_question([["oui"]]))
+    # print(database.get_one_question([["oui"], ["Yes"]]))
+    # print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]]))
+    # print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]]))
+    # print(
+    #     database.get_one_question(
+    #         [
+    #             ["oui"],
+    #             ["Yes"],
+    #             ["DataSet, CSV or Data Base"],
+    #             ["Predict a numerical value"],
+    #             ["Minimize the average error. "],
+    #         ]
+    #     )
+    # )
+    # print(
+    #     database.get_one_question(
+    #         [
+    #             ["oui"],
+    #             ["Yes"],
+    #             ["DataSet, CSV or Data Base"],
+    #             ["Predict a numerical value"],
+    #             ["Minimize the average error. "],
+    #             ["Higher speed"],
+    #         ]
+    #     )
+    # )
+    # print(
+    #     database.get_one_question(
+    #         [
+    #             ["oui"],
+    #             ["Yes"],
+    #             ["DataSet, CSV or Data Base"],
+    #             ["Predict a numerical value"],
+    #             ["Minimize the average error. "],
+    #             ["Higher speed"],
+    #             ["No"],
+    #         ]
+    #     )
+    # )
+    # print(
+    #     database.get_one_question(
+    #         [
+    #             ["oui"],
+    #             ["Yes"],
+    #             ["DataSet, CSV or Data Base"],
+    #             ["Predict a numerical value"],
+    #             ["Minimize the average error. "],
+    #             ["Higher speed"],
+    #             ["No"],
+    #             ["Internal User"],
+    #         ]
+    #     )
+    # )
+    # print(
+    #     database.get_one_question(
+    #         [
+    #             ["oui"],
+    #             ["Yes"],
+    #             ["DataSet, CSV or Data Base"],
+    #             ["Predict a numerical value"],
+    #             ["Minimize the average error. "],
+    #             ["Higher speed"],
+    #             ["No"],
+    #             ["Internal User"],
+    #             ["Diagram"],
+    #         ]
+    #     )
+    # )
+    print(database.check_form_exist("Canary", "Test2"))
 
     database.close()
 
