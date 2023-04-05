@@ -98,19 +98,25 @@ def main_new() -> None:
         dict_question = database.get_one_question(list_answers)
         selected_answer = st_form.show_question(dict_question)
         if not selected_answer[0]:
+            print("LAAAAAAAAAAAAAAAAAAAA")
             return
         if dict_question["question_label"] == "end":
             end = False
         else:
             list_answers.append(selected_answer)
 
+    print("ICIIIIIIIIIIIIIIIIIIIII")
+
     form_name = st_form.input_form_name()
     if not form_name:
         return
-    if database.check_form_exist(username, form_name) and st.session_state.last_form_name != form_name:
-        st_form.error_name_already_taken()
-        return
-    list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
+    if database.check_form_exist(username, form_name):
+        if st_form.error_name_already_taken(username):
+            return
+    # list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
+    if st_form.show_submission(list_answers):
+        st_form.show_best_ai([])
+        # database.save_answers(list_answers, username, form_name)
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ class FeedbackStreamlit:
         st.set_page_config(page_title="Feedback Page", page_icon="💬")
         st.title("💬Feedback")
         self.username = check_user_connection()
+        st.session_state.clicked = False
 
     def show_all_feedbacks(self, all_feedbacks: dict) -> None:
         if len(all_feedbacks.keys()) == 0:
