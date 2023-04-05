@@ -6,6 +6,7 @@ from decouple import config
 
 from ai_sustainability.class_form_old import Form
 from ai_sustainability.classes.class_statistic import StatisticStreamlit
+from ai_sustainability.classes.db_connection import DbConnection
 
 
 def main() -> None:
@@ -44,7 +45,7 @@ def main_new() -> None:
     This is the code used by the admin to see statistics from the answers of the users
     """
 
-    database = object()  # TODO mettre ici le lien vers la database
+    database = DbConnection()
     st_statistic = StatisticStreamlit(database)
     username = st_statistic.username
     if not username:

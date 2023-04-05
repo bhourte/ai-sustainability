@@ -24,3 +24,7 @@ def check_user_connection() -> str:
         st.caption("🔑 Connected as an Admin")
     # To detect if the user create a form with the same name as the previous one (used in Historic)
     return st.session_state.username
+
+
+def dash_error() -> None:
+    st.warning("Please don't use dash in your form name")

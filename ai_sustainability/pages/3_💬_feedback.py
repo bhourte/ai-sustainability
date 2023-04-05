@@ -65,14 +65,12 @@ def main_new() -> None:
 
     # Connected as an User
     if username != "Admin":
-        """
         username_exists = database.check_user_exist(username)  # check if the user already exist in the database
         if not username_exists:
             st_feedback.user_dont_exist()
             return
         feedback_text = st_feedback.feedback_box(username)
         database.save_feedback(feedback_text, username)  # we save the feedback
-        """
     # Connected as an Admin
     else:
         all_feedbacks = database.get_all_feedbacks()

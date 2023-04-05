@@ -23,7 +23,7 @@ from typing import Optional
 
 import streamlit as st
 
-from ai_sustainability.classes.utils import validate_text_input
+from ai_sustainability.classes.utils import no_dash_in_my_text, validate_text_input
 from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
@@ -43,16 +43,20 @@ class FormStreamlit:
         self.username = check_user_connection()
 
     def show_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
-        if dict_question["label"] == "Q_Open":
-            return self.show_open_question(dict_question, previous_answer)
-        if dict_question["label"] == "Q_QCM" or dict_question["label"] == "Q_QCM_Bool":
-            return self.show_qcm_question(dict_question, previous_answer)
-        if dict_question["label"] == "Q_QRM":
-            return self.show_qrm_question(dict_question, previous_answer)
-        if dict_question["label"] == "end":
-            return [""]
-        print("Error, question label no recognised")
-        return [""]
+        answer = [""]
+        if dict_question["question_label"] == "Q_Open":
+            answer = self.show_open_question(dict_question, previous_answer)
+        elif dict_question["question_label"] == "Q_QCM" or dict_question["question_label"] == "Q_QCM_Bool":
+            answer = self.show_qcm_question(dict_question, previous_answer)
+        elif dict_question["question_label"] == "Q_QRM":
+            answer = self.show_qrm_question(dict_question, previous_answer)
+        elif dict_question["question_label"] == "end":  # This is the end (of the form (and my life (and the universe (and so on))))
+            return answer
+        else:
+            print("Error, question label no recognised")
+        st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
+        st.session_state.clicked = False
+        return answer
 
     def show_open_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         if previous_answer is None:  # If it has to be auto-completed before
@@ -107,3 +111,44 @@ class FormStreamlit:
         if not answers:
             return [""]
         return answers
+
+    def check_name(self, string: str) -> str:
+        if no_dash_in_my_text(string):
+            st.warning("Please don't use dash in your form name")
+            return ""
+        return validate_text_input(string)
+
+    def input_form_name(self, previous_answer: str = "") -> str:
+        form_name = st.text_input("Give a name to your form here", previous_answer)
+        return self.check_name((form_name))
+
+    def error_name_already_taken(self) -> None:
+        st.warning(
+            "You already have a form with this name, please pick an other name or change your previous form in the historic page."
+        )
+
+    def show_best_ai(self, list_bests_ais: list) -> None:
+        """
+            Method used to show the n best AI obtained after the user has completed the Form
+            The number of AI choosen is based on the nbai wanted by the user and
+            the maximum of available AI for the use of the user
+            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
+
+        Parameters:
+            - list_bests_ais (list): list of the n best AI
+
+        Return:
+            - None
+        """
+        if len(list_bests_ais) > 0:
+            st.subheader(
+                f"There is {str(len(list_bests_ais))} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
+                anchor=None,
+            )
+            for i, val_i in enumerate(list_bests_ais):
+                st.caption(str(i + 1) + ") " + val_i)
+        # If no AI corresponding the the choices
+        else:
+            st.subheader(
+                "There is no AI corresponding to your request, please make other choices in the form", anchor=None
+            )
