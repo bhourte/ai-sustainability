@@ -21,7 +21,7 @@ methods:
 """
 import streamlit as st
 
-from ai_sustainability.classes.utils_streamlit import check_user_connected
+from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
 class FormStreamlit:
@@ -37,4 +37,4 @@ class FormStreamlit:
 
         st.set_page_config(page_title="Form Page", page_icon="📝")
         st.title("📝Form")
-        self.username = check_user_connected()
+        self.username = check_user_connection()

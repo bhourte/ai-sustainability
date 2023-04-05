@@ -9,7 +9,7 @@ methods:
 """
 import streamlit as st
 
-from ai_sustainability.classes.utils_streamlit import check_user_connected
+from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
 class StatisticStreamlit:
@@ -25,4 +25,4 @@ class StatisticStreamlit:
 
         st.set_page_config(page_title="Statistic Page", page_icon="📊")
         st.title("📊Statistic")
-        self.username = check_user_connected()
+        self.username = check_user_connection()

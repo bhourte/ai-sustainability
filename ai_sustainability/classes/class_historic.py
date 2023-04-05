@@ -11,7 +11,7 @@ methods:
 """
 import streamlit as st
 
-from ai_sustainability.classes.utils_streamlit import check_user_connected
+from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
 class HistoricStreamlit:
@@ -27,4 +27,4 @@ class HistoricStreamlit:
 
         st.set_page_config(page_title="Historic Page", page_icon="📜")
         st.title("📜Historic")
-        self.username = check_user_connected()
+        self.username = check_user_connection()
