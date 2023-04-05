@@ -13,7 +13,7 @@ def main() -> None:
     This is the code used by the user to give feedback and by the Admin to see all feedback
     """
 
-    database = None  # TODO mettre ici le lien vers la database
+    database = object()  # TODO mettre ici le lien vers la database
     st_form = FeedbackStreamlit(database)
     username = st_form.username
     if not username:
@@ -51,5 +51,38 @@ def main() -> None:
         form.get_all_feedbacks()
 
 
+def main_new() -> None:
+    """
+    This is the code used by the user to give feedback and by the Admin to see all feedback
+    """
+
+    database = object()  # TODO mettre ici le lien vers la database
+    st_feedback = FeedbackStreamlit(database)
+    username = st_feedback.username
+    if not username:
+        return
+
+    # Connected as an User
+    if username != "Admin":
+        """
+        username_exists = database.check_user_exist(username)  # check if the user already exist in the database
+        if not username_exists:
+            st_feedback.user_dont_exist()
+            return
+        feedback_text = st_feedback.feedback_box(username)
+        database.save_feedback(feedback_text, username)  # we save the feedback
+        """
+    # Connected as an Admin
+    else:
+        # all_feedbacks = database.get_all_feedbacks()
+        all_feedbacks = {
+            "user1": ["feed1", "feed2"],
+            "user2": [],
+            "user3": ["feed1", "feed2", "feed3"],
+            "user4": ["test"],
+        }
+        st_feedback.show_all_feedbacks(all_feedbacks)
+
+
 if __name__ == "__main__":
-    main()
+    main_new()

@@ -23,6 +23,4 @@ def check_user_connection() -> str:
     else:
         st.caption("🔑 Connected as an Admin")
     # To detect if the user create a form with the same name as the previous one (used in Historic)
-    st.session_state.last_form_name = None
-    st.session_state.clicked = False
     return st.session_state.username
