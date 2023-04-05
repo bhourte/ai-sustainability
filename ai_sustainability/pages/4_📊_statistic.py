@@ -13,7 +13,7 @@ def main() -> None:
     This is the code used by the admin to see statistics from the answers of the users
     """
 
-    database = None  # TODO mettre ici le lien vers la database
+    database = object()  # TODO mettre ici le lien vers la database
     st_form = StatisticStreamlit(database)
     username = st_form.username
     if not username:
@@ -37,6 +37,24 @@ def main() -> None:
             form.display_bar_graph(selected_edges)  # graph 1 of stat
         with st.spinner("Loading..."):
             form.display_bar_graph_v2(selected_edges)  # graph 2 of stat
+
+
+def main_new() -> None:
+    """
+    This is the code used by the admin to see statistics from the answers of the users
+    """
+
+    database = object()  # TODO mettre ici le lien vers la database
+    st_statistic = StatisticStreamlit(database)
+    username = st_statistic.username
+    if not username:
+        return
+
+    if not st_statistic.check_if_admin(username):
+        return
+    # selected_edges = database.get_nb_selected_edges()
+    selected_edges = {"1-2-1": ["", 5], "2-3-1": ["No", 4], "2-3-2": ["Yes", 1]}
+    st_statistic.display_statistic_edges(selected_edges)
 
 
 if __name__ == "__main__":

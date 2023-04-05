@@ -27,7 +27,7 @@ class FeedbackStreamlit:
         st.title("💬Feedback")
         self.username = check_user_connection()
 
-    def show_all_feedbacks(self, all_feedbacks) -> None:
+    def show_all_feedbacks(self, all_feedbacks: dict) -> None:
         if len(all_feedbacks.keys()) == 0:
             st.write("There is no feedback in the database.")
             return
@@ -43,7 +43,7 @@ class FeedbackStreamlit:
         st.write("Please fill the form first and come back to give us your feedback.")
         st.write("Thank you")
 
-    def feedback_box(self, username) -> str:
+    def feedback_box(self, username: str) -> str:
         st.write("Welcome back " + username)
         st.write("You can now give us your feedback")
         text = st.text_area("Your feedback: ")  # text area for the feedback
