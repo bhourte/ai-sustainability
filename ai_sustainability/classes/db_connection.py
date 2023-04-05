@@ -33,6 +33,8 @@ Make the connection to the database, run the querys and close the connection
 
 """
 
+from tkinter import LAST
+
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -40,6 +42,7 @@ from gremlin_python.driver import client, serializer
 statics.load_statics(globals())
 
 FIRST_NODE_ID = "1"
+LAST_NODE_ID = "9"
 
 
 def connect(endpoint: str, database_name: str, container_name: str, primary_key: str) -> client.Client:
@@ -114,6 +117,12 @@ class DbConnection:
         question = {}
         self.truncate_questions(answers)
         question_id = self.get_next_question(answers)
+        if question_id == LAST_NODE_ID:
+            question["question_text"] = ""
+            question["answers"] = []
+            question["help_text"] = ""
+            question["question_label"] = "end"
+            return question
         self.list_questions_id.append(question_id)
         question["question_text"] = self.get_question_text(question_id)
         question["answers"] = self.get_answers_text(question_id)
@@ -250,9 +259,10 @@ class DbConnection:
 
         nb_selected_edge = {}
         for edge in result:
-            if edge["proposition_id"] not in nb_selected_edge:
-                nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
-            nb_selected_edge[edge["proposition_id"]][1] += 1
+            if "proposition_id" in edge:
+                if edge["proposition_id"] not in nb_selected_edge:
+                    nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+                nb_selected_edge[edge["proposition_id"]][1] += 1
         return nb_selected_edge
 
 
@@ -261,8 +271,74 @@ def main():
     print(database.get_one_question([]))
     print(database.get_one_question([["oui"]]))
     print(database.get_one_question([["oui"], ["Yes"]]))
-    print(database.get_all_feedbacks())
-    print(database.get_nb_selected_edge())
+    print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]]))
+    print(database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]]))
+    print(
+        database.get_one_question(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+            ]
+        )
+    )
+    print(
+        database.get_one_question(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+                ["Higher speed"],
+            ]
+        )
+    )
+    print(
+        database.get_one_question(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+                ["Higher speed"],
+                ["No"],
+            ]
+        )
+    )
+    print(
+        database.get_one_question(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+                ["Higher speed"],
+                ["No"],
+                ["Internal User"],
+            ]
+        )
+    )
+    print(
+        database.get_one_question(
+            [
+                ["oui"],
+                ["Yes"],
+                ["DataSet, CSV or Data Base"],
+                ["Predict a numerical value"],
+                ["Minimize the average error. "],
+                ["Higher speed"],
+                ["No"],
+                ["Internal User"],
+                ["Diagram"],
+            ]
+        )
+    )
+
     database.close()
 
 
