@@ -188,5 +188,18 @@ def main() -> None:
         show_form(form, first_node)  # We show the form below the selection boxes
 
 
+def main_new() -> None:
+    """
+    This is the code used to show the previous form completed by an User
+    Different usage if User or Admin
+    """
+
+    database = DbConnection()
+    st_form = HistoricStreamlit(database)
+    username = st_form.username
+    if not username:
+        return
+
+
 if __name__ == "__main__":
-    main()
+    main_new()
