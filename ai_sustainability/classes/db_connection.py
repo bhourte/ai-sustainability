@@ -262,7 +262,7 @@ def main():
     print(database.get_one_question([["oui"]]))
     print(database.get_one_question([["oui"], ["Yes"]]))
     print(database.get_all_feedbacks())
-    print(database.get_nb_selected_edge())
+    # print(database.get_nb_selected_edge())
     database.close()
 
 

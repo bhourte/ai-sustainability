@@ -6,6 +6,7 @@ from decouple import config
 
 from ai_sustainability.class_form_old import Form
 from ai_sustainability.classes.class_feedback import FeedbackStreamlit
+from ai_sustainability.classes.db_connection import DbConnection
 
 
 def main() -> None:
@@ -56,7 +57,7 @@ def main_new() -> None:
     This is the code used by the user to give feedback and by the Admin to see all feedback
     """
 
-    database = object()  # TODO mettre ici le lien vers la database
+    database = DbConnection()
     st_feedback = FeedbackStreamlit(database)
     username = st_feedback.username
     if not username:
@@ -74,15 +75,9 @@ def main_new() -> None:
         """
     # Connected as an Admin
     else:
-        # all_feedbacks = database.get_all_feedbacks()
-        all_feedbacks = {
-            "user1": ["feed1", "feed2"],
-            "user2": [],
-            "user3": ["feed1", "feed2", "feed3"],
-            "user4": ["test"],
-        }
+        all_feedbacks = database.get_all_feedbacks()
         st_feedback.show_all_feedbacks(all_feedbacks)
 
 
 if __name__ == "__main__":
-    main()
+    main_new()
