@@ -20,6 +20,7 @@ class ConnectionStreamlit:
         st.set_page_config(page_title="Connection Page", page_icon="👤")
         st.title("👤Connection")
         self.username = ""
+        st.session_state.clicked = False
 
     def setup_username(self) -> str:
         username = st.text_input(

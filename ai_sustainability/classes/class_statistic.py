@@ -29,6 +29,7 @@ class StatisticStreamlit:
         st.set_page_config(page_title="Statistic Page", page_icon="📊")
         st.title("📊Statistic")
         self.username = check_user_connection()
+        st.session_state.clicked = False
 
     def check_if_admin(self, username: str) -> bool:
         if username != "Admin":

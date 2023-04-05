@@ -28,3 +28,4 @@ class HistoricStreamlit:
         st.set_page_config(page_title="Historic Page", page_icon="📜")
         st.title("📜Historic")
         self.username = check_user_connection()
+        st.session_state.clicked = False

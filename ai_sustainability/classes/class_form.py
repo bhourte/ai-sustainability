@@ -44,18 +44,21 @@ class FormStreamlit:
 
     def show_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         answer = [""]
+        print("LABELLLLLLL " + str(dict_question["question_label"]))
         if dict_question["question_label"] == "Q_Open":
             answer = self.show_open_question(dict_question, previous_answer)
         elif dict_question["question_label"] == "Q_QCM" or dict_question["question_label"] == "Q_QCM_Bool":
             answer = self.show_qcm_question(dict_question, previous_answer)
         elif dict_question["question_label"] == "Q_QRM":
             answer = self.show_qrm_question(dict_question, previous_answer)
-        elif dict_question["question_label"] == "end":  # This is the end (of the form (and my life (and the universe (and so on))))
-            return answer
+        elif dict_question["question_label"] == "end":  # This is the end (of the form)
+            print("JTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+            return ["end"]
         else:
             print("Error, question label no recognised")
-        st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
-        st.session_state.clicked = False
+        if answer == [""]:
+            st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
+            st.session_state.clicked = False
         return answer
 
     def show_open_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
@@ -69,6 +72,7 @@ class FormStreamlit:
                 label_visibility="visible",
                 value=previous_answer[0],
                 help=dict_question["help_text"],
+                disabled=st.session_state.clicked,
             )
         )
         # If no answer given, we return None
@@ -90,6 +94,7 @@ class FormStreamlit:
                 options=options,
                 index=previous_index,
                 help=dict_question["help_text"],
+                disabled=st.session_state.clicked,
             )
         )
         # If no answer given, we return None
@@ -106,6 +111,7 @@ class FormStreamlit:
             options=dict_question["answers"],
             default=default,
             help=dict_question["help_text"],
+            disabled=st.session_state.clicked,
         )
         # If no answer given, we return None
         if not answers:
@@ -119,13 +125,27 @@ class FormStreamlit:
         return validate_text_input(string)
 
     def input_form_name(self, previous_answer: str = "") -> str:
-        form_name = st.text_input("Give a name to your form here", previous_answer)
+        form_name = st.text_input("Give a name to your form here", previous_answer, disabled=st.session_state.clicked)
         return self.check_name((form_name))
 
-    def error_name_already_taken(self) -> None:
-        st.warning(
-            "You already have a form with this name, please pick an other name or change your previous form in the historic page."
-        )
+    def error_name_already_taken(self, form_name) -> bool:
+        if st.session_state.last_form_name != form_name:
+            st.warning(
+                "You already have a form with this name, please pick an other name or change your previous form in the historic page."
+            )
+            return True
+        return False
+
+    def show_submission(self, answers) -> bool:
+        if st.button("Submit", disabled=st.session_state.clicked):
+            st.write("Answers saved")
+            st.write(answers)
+            st.session_state.last_form_name = None
+            print("state = " + str(st.session_state.clicked))
+            return True
+        st.session_state.clicked = True
+        print("state = " + str(st.session_state.clicked))
+        return False
 
     def show_best_ai(self, list_bests_ais: list) -> None:
         """
