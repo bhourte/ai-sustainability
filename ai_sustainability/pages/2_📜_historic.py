@@ -6,6 +6,7 @@ from decouple import config
 
 from ai_sustainability.class_form_old import Form
 from ai_sustainability.classes.class_historic import HistoricStreamlit
+from ai_sustainability.classes.db_connection import DbConnection
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
@@ -82,7 +83,7 @@ def main() -> None:
     Different usage if User or Admin
     """
 
-    database = None  # TODO mettre ici le lien vers la database
+    database = DbConnection()
     st_form = HistoricStreamlit(database)
     username = st_form.username
     if not username:

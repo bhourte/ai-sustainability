@@ -17,9 +17,9 @@ def no_dash_in_my_text(text: str) -> bool:
         - text (str): text to check
 
     Return:
-        - bool: True if there is no dash, False otherwise
+        - bool: True if there is a special caracter (" ' - or backslash), False otherwise
     """
-    return "-" in text
+    return "-" in text or "'" in text or "\\" in text or '"' in text
 
 
 def validate_text_input(text: str) -> str:
