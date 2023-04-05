@@ -304,7 +304,7 @@ class DbConnection:
         best = list(heapq.nlargest(nb_ai, np.array(coef_ai)))
         # we put the best nb_ai in list_bests_ais
         list_bests_ais = []
-        for i_ai in range(nb_ai):
+        for i_ai in _range(nb_ai):
             if best[i_ai] > 0:
                 index = list(coef_ai).index(best[i_ai])
                 list_bests_ais.append(list_ai[index])
