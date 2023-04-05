@@ -6,6 +6,7 @@ from decouple import config
 
 from ai_sustainability.class_form_old import Form
 from ai_sustainability.classes.class_form import FormStreamlit
+from ai_sustainability.classes.db_connection import DbConnection
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
@@ -78,6 +79,36 @@ def main() -> None:
         st.write(answers)
         st.session_state.last_form_name = None
         st.session_state.clicked = False
+
+
+def main_new() -> None:
+    """
+    This is the code used to show the form and used by the user to fill it
+    """
+    # Connection to the online gremlin database via db_connection.py
+    database = DbConnection(
+        endpoint="questions-db.gremlin.cosmos.azure.com",
+        database_name="graphdb",
+        container_name=config("DATABASENAME"),
+        primary_key=config("PRIMARYKEY"),
+    )
+    st_form = FormStreamlit(database)
+    username = st_form.username
+    if not username:
+        return
+
+    end = True
+    list_answers: list[str] = []
+    while end:
+        dict_question = database.get_one_question(list_answers)
+        print(dict_question)
+        selected_answer = st_form.show_question(dict_question)
+        if not selected_answer:
+            return
+        if dict_question["label"] == "end":
+            end = False
+        else:
+            list_answers.append(selected_answer)
 
 
 if __name__ == "__main__":

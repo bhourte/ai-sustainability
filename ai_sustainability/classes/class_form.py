@@ -38,3 +38,15 @@ class FormStreamlit:
         st.set_page_config(page_title="Form Page", page_icon="📝")
         st.title("📝Form")
         self.username = check_user_connection()
+
+    def show_question(self, dict_question) -> str:
+        return ""
+
+    def show_open_question(self, dict_question) -> str:
+        return ""
+
+    def show_qcm_question(self, dict_question) -> str:
+        return ""
+
+    def show_qrm_question(self, dict_question) -> str:
+        return ""
