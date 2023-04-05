@@ -110,9 +110,9 @@ def main_new() -> None:
     if database.check_form_exist(username, form_name):
         if st_form.error_name_already_taken(username):
             return
-    # list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
+    list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
     if st_form.show_submission(list_answers):
-        st_form.show_best_ai([])
+        st_form.show_best_ai(list_bests_ais)
         # database.save_answers(list_answers, username, form_name)
 
 
