@@ -35,6 +35,7 @@ Make the connection to the database, run the querys and close the connection
 import heapq
 
 import numpy as np
+import streamlit as st
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -219,9 +220,12 @@ class DbConnection:
         """
         Save a feedback from a user in the database
         """
+        print("save_feedback")
         if not self.check_feedback_exist(username):
             self.create_feedback_node(username)
+            print("create_feedback_node")
         self.create_feedback_edge(username, feedback)
+        print("create_feedback_edge")
 
     def check_feedback_exist(self, username: str):
         """
@@ -238,7 +242,7 @@ class DbConnection:
 
     def create_feedback_edge(self, username, feedback):
         nb_feedback = self.get_nb_feedback_from_user(username)
-        feedback_edge_id = f"feedback{username}{nb_feedback}"
+        feedback_edge_id = f"Feedback-{username}-{nb_feedback+1}"
         self.run_gremlin_query(
             f"g.V('{username}').addE('Feedback').to(g.V('feedback{username}')).property('id', '{feedback_edge_id}').property('text', '{feedback}')"
         )
@@ -392,7 +396,7 @@ def main():
     #         ]
     #     )
     # )
-    print(database.check_form_exist("Canary", "Test2"))
+    print()
 
     database.close()
 
