@@ -263,6 +263,12 @@ class DbConnection:
                 nb_selected_edge[edge["proposition_id"]][1] += 1
         return nb_selected_edge
 
+    def check_form_exist(self, username: str, form_name: str):
+        """
+        Check if a form exist in the database
+        """
+        return self.check_node_exist(f"{username}-answer1-{form_name}")
+
 
 def main():
     database = DbConnection()
