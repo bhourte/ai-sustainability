@@ -35,16 +35,18 @@ class FormStreamlit:
         - __init__ : initialise the UI and check if the user is connected
     """
 
-    def __init__(self, database_link) -> None:
+    def __init__(self, database_link, set_page: bool = True) -> None:
         self.database_link = database_link
+        if set_page:
+            self.set_atribute()
 
+    def set_atribute(self) -> None:
         st.set_page_config(page_title="Form Page", page_icon="📝")
         st.title("📝Form")
         self.username = check_user_connection()
 
     def show_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         answer = [""]
-        print("LABELLLLLLL " + str(dict_question["question_label"]))
         if dict_question["question_label"] == "Q_Open":
             answer = self.show_open_question(dict_question, previous_answer)
         elif dict_question["question_label"] == "Q_QCM" or dict_question["question_label"] == "Q_QCM_Bool":
@@ -52,7 +54,6 @@ class FormStreamlit:
         elif dict_question["question_label"] == "Q_QRM":
             answer = self.show_qrm_question(dict_question, previous_answer)
         elif dict_question["question_label"] == "end":  # This is the end (of the form)
-            print("JTTTTTTTTTTTTTTTTTTTTTTTTTTT")
             return ["end"]
         else:
             print("Error, question label no recognised")
@@ -141,10 +142,8 @@ class FormStreamlit:
             st.write("Answers saved")
             st.write(answers)
             st.session_state.last_form_name = None
-            print("state = " + str(st.session_state.clicked))
             return True
         st.session_state.clicked = True
-        print("state = " + str(st.session_state.clicked))
         return False
 
     def show_best_ai(self, list_bests_ais: list) -> None:

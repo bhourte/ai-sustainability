@@ -11,10 +11,11 @@ methods:
 """
 import streamlit as st
 
+from ai_sustainability.classes.class_form import FormStreamlit
 from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
-class HistoricStreamlit:
+class HistoricStreamlit(FormStreamlit):
     """
     Class used to show all the streamlit UI for the Form page
 
@@ -23,9 +24,13 @@ class HistoricStreamlit:
     """
 
     def __init__(self, database_link) -> None:
-        self.database_link = database_link
+        super().__init__(database_link, False)
+        self.set_atribute()
 
+    def set_atribute(self) -> None:
         st.set_page_config(page_title="Historic Page", page_icon="📜")
         st.title("📜Historic")
         self.username = check_user_connection()
-        st.session_state.clicked = False
+
+    def show_choice_form(self, list_answered_form) -> str:
+        return ""

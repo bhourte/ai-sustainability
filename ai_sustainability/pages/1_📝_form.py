@@ -98,14 +98,11 @@ def main_new() -> None:
         dict_question = database.get_one_question(list_answers)
         selected_answer = st_form.show_question(dict_question)
         if not selected_answer[0]:
-            print("LAAAAAAAAAAAAAAAAAAAA")
             return
         if dict_question["question_label"] == "end":
             end = False
         else:
             list_answers.append(selected_answer)
-
-    print("ICIIIIIIIIIIIIIIIIIIIII")
 
     form_name = st_form.input_form_name()
     if not form_name:
