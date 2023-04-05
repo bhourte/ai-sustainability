@@ -85,4 +85,4 @@ def main_new() -> None:
 
 
 if __name__ == "__main__":
-    main_new()
+    main()
