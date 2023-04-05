@@ -295,7 +295,7 @@ class DbConnection:
         edges_id = self.get_edges_id(answers)
         coef_ai = np.array([1] * len(list_ai))
         for edge_id in edges_id:
-            list_coef = self.get_weight(edge_id)
+            list_coef = self.get_weight(edge_id[0])
             coef_ai = np.multiply(coef_ai, list_coef)
         # we put all NaN value to -1
         for i_coef, coef in enumerate(coef_ai):
