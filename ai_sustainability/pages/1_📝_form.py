@@ -86,19 +86,14 @@ def main_new() -> None:
     This is the code used to show the form and used by the user to fill it
     """
     # Connection to the online gremlin database via db_connection.py
-    database = DbConnection(
-        endpoint="questions-db.gremlin.cosmos.azure.com",
-        database_name="graphdb",
-        container_name=config("DATABASENAME"),
-        primary_key=config("PRIMARYKEY"),
-    )
+    database = DbConnection()
     st_form = FormStreamlit(database)
     username = st_form.username
     if not username:
         return
 
     end = True
-    list_answers: list[str] = []
+    list_answers: list[list[str]] = []
     while end:
         dict_question = database.get_one_question(list_answers)
         print(dict_question)
@@ -109,6 +104,7 @@ def main_new() -> None:
             end = False
         else:
             list_answers.append(selected_answer)
+            print(list_answers)
 
 
 if __name__ == "__main__":

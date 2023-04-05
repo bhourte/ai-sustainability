@@ -33,8 +33,6 @@ Make the connection to the database, run the querys and close the connection
 
 """
 
-from tkinter import LAST
-
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
