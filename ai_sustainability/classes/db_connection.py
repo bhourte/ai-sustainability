@@ -69,11 +69,16 @@ def connect(endpoint: str, database_name: str, container_name: str, primary_key:
 
 
 class DbConnection:
-    def __init__(self, endpoint: str, database_name: str, container_name: str, primary_key: str):
+    def __init__(self):
         """
         Initialize the class with the connection to the database
         """
-        self.gremlin_client = connect(endpoint, database_name, container_name, primary_key)
+        self.gremlin_client = connect(
+            endpoint="questions-db.gremlin.cosmos.azure.com",
+            database_name="graphdb",
+            container_name=config("DATABASENAME"),
+            primary_key=config("PRIMARYKEY"),
+        )
         self.list_questions_id = []
 
     def close(self) -> None:
@@ -163,18 +168,50 @@ class DbConnection:
         if len(answers) < len(self.list_questions_id):
             self.list_questions_id = self.list_questions_id[: len(answers)]
 
+    def check_user_exist(self, username: str):
+        query = f"g.V('{username}')"
+        result = self.run_gremlin_query(query)
+        return bool(result)
+
+    def create_user(self, username: str):
+        query = "g.addV('user').property('partitionKey', 'Answer').property('id', '" + username + "')"
+        self.run_gremlin_query(query)
+
+    def get_all_users(self):
+        query = "g.V().hasLabel('user').id()"
+        result = self.run_gremlin_query(query)
+        return result
+
+    def get_all_feedbacks(self):
+        """
+        Return all feedbacks from all users in the database
+            return : Dict {
+                username: [feedback1, feedback2, ...]
+            }
+        """
+        all_users = self.get_all_users()
+        all_feedbacks = {}
+        for user in all_users:
+            all_feedbacks[user] = self.get_user_feedbacks(user)
+        return all_feedbacks
+
+    def get_user_feedbacks(self, username: str):
+        """
+        Return all feedbacks from a user in the database
+            return : List of feedbacks
+        """
+        query = f"g.V('{username}').outE().hasLabel('Feedback').values('text')"
+        result = self.run_gremlin_query(query)
+        return result
+
 
 def main():
-    db = DbConnection(
-        endpoint="questions-db.gremlin.cosmos.azure.com",
-        database_name="graphdb",
-        container_name=config("DATABASENAME"),
-        primary_key=config("PRIMARYKEY"),
-    )
-    print(db.get_one_question([]))
-    print(db.get_one_question(["oui"]))
-    print(db.get_one_question(["oui", "Yes"]))
-    print(db.get_one_question(["et bah non en fait"]))
+    db = DbConnection()
+    # print(db.get_one_question([]))
+    # print(db.get_one_question(["oui"]))
+    # print(db.get_one_question(["oui", "Yes"]))
+    # print(db.get_one_question(["et bah non en fait"]))
+    print(db.get_all_feedbacks())
     db.close()
 
 
