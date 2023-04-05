@@ -9,6 +9,7 @@ methods:
 """
 import streamlit as st
 
+from ai_sustainability.classes.utils import validate_text_input
 from ai_sustainability.classes.utils_streamlit import check_user_connection
 
 
@@ -51,4 +52,4 @@ class FeedbackStreamlit:
             return ""
         st.write("Your feedback has been saved")
         st.write("Thank you for your this !")
-        return text
+        return validate_text_input(text)

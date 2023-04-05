@@ -70,8 +70,9 @@ def main_new() -> None:
             st_feedback.user_dont_exist()
             return
         feedback_text = st_feedback.feedback_box(username)
-        if feedback_text:
-            database.save_feedback(username, feedback_text)  # we save the feedback
+        if not feedback_text:
+            return
+        database.save_feedback(username, feedback_text)  # we save the feedback
     # Connected as an Admin
     else:
         all_feedbacks = database.get_all_feedbacks()
