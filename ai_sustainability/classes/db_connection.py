@@ -33,8 +33,6 @@ Make the connection to the database, run the querys and close the connection
 
 """
 
-from operator import le
-
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -108,7 +106,7 @@ class DbConnection:
         Return :
             - question : dict {
                 1: question_text
-                2: answers
+                2: answers (list of str)
                 3: help_text
                 4: question_label
             }
@@ -169,12 +167,15 @@ class DbConnection:
             self.list_questions_id = self.list_questions_id[: len(answers)]
 
     def check_user_exist(self, username: str):
-        query = f"g.V('{username}')"
+        return self.check_node_exist(username)
+
+    def check_node_exist(self, node_id: str):
+        query = f"g.V('{node_id}')"
         result = self.run_gremlin_query(query)
         return bool(result)
 
     def create_user(self, username: str):
-        query = "g.addV('user').property('partitionKey', 'Answer').property('id', '" + username + "')"
+        query = f"g.addV('user').property('partitionKey', 'Answer').property('id', '{username}')"
         self.run_gremlin_query(query)
 
     def get_all_users(self):
@@ -204,15 +205,51 @@ class DbConnection:
         result = self.run_gremlin_query(query)
         return result
 
+    def save_feedback(self, username: str, feedback: str):
+        """
+        Save a feedback from a user in the database
+        """
+        if not self.check_feedback_exist(username):
+            self.create_feedback_node(username)
+        self.create_feedback_edge(username, feedback)
+
+    def check_feedback_exist(self, username: str):
+        """
+        Check if a feedback exist in the database
+        """
+        return self.check_node_exist(f"feedback{username}")
+
+    def create_feedback_node(self, username: str):
+        """
+        Create a feedback node in the database
+        """
+        query = f"g.addV('Feedback').property('partitionKey', 'Feedback').property('id', 'feedback{username}')"
+        self.run_gremlin_query(query)
+
+    def create_feedback_edge(self, username, feedback):
+        nb_feedback = self.get_nb_feedback_from_user(username)
+        feedback_edge_id = f"feedback{username}{nb_feedback}"
+        self.run_gremlin_query(
+            f"g.V('{username}').addE('Feedback').to(g.V('feedback{username}')).property('id', '{feedback_edge_id}').property('text', '{feedback}')"
+        )
+
+    def get_nb_feedback_from_user(self, username: str) -> int:
+        """
+        Return the number of feedbacks from a user
+        """
+        query = f"g.V('{username}').outE().hasLabel('Feedback').count()"
+        result = self.run_gremlin_query(query)
+        return result[0]
+
 
 def main():
-    db = DbConnection()
-    # print(db.get_one_question([]))
-    # print(db.get_one_question(["oui"]))
-    # print(db.get_one_question(["oui", "Yes"]))
-    # print(db.get_one_question(["et bah non en fait"]))
-    print(db.get_all_feedbacks())
-    db.close()
+    database = DbConnection()
+    print(database.get_one_question([]))
+    print(database.get_one_question(["oui"]))
+    print(database.get_one_question(["oui", "Yes"]))
+    print(database.get_one_question(["et bah non en fait"]))
+    print(database.get_all_feedbacks())
+    database.close()
 
 
 if __name__ == "__main__":
