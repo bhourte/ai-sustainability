@@ -7,7 +7,6 @@ from decouple import config
 from ai_sustainability.class_form_old import Form
 from ai_sustainability.classes.class_form import FormStreamlit
 from ai_sustainability.classes.db_connection import DbConnection
-from ai_sustainability.classes.utils import no_dash_in_my_text
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
