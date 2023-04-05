@@ -5,6 +5,7 @@ import streamlit as st
 from decouple import config
 
 from ai_sustainability.class_form_old import Form
+from ai_sustainability.classes.class_historic import HistoricStreamlit
 
 # General variable, used to begin the main() function
 FIRST_NODE_ID = "1"
@@ -80,14 +81,13 @@ def main() -> None:
     This is the code used to show the previous form completed by an User
     Different usage if User or Admin
     """
-    st.set_page_config(page_title="Historic Page", page_icon="📜")
-    st.title("📜Historic")
-    if (
-        "username" not in st.session_state or st.session_state.username == ""
-    ):  # User not connected, don't show the historics, ask for connection
-        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
-        return None
-    username = st.session_state.username
+
+    database = None  # TODO mettre ici le lien vers la database
+    st_form = HistoricStreamlit(database)
+    username = st_form.username
+    if not username:
+        return
+
     # Connection to the online gremlin database via class_from.py
     form = Form(
         endpoint="questions-db.gremlin.cosmos.azure.com",
@@ -97,8 +97,6 @@ def main() -> None:
     )
     # Connected as an User
     if username != "Admin":
-        st.caption("✅ Connected as " + str(username))
-
         node_answer = form.add_qcm_select_form(username)
         if node_answer is None:  # if none form selected, don't show the rest
             return
@@ -164,7 +162,6 @@ def main() -> None:
 
     # Connected as an Admin
     else:
-        st.caption("🔑 Connected as an Admin")
         all_user = ["<Select an User>"] + form.run_gremlin_query("g.V().haslabel('user')")
         i = 1
         for i in range(1, len(all_user)):
