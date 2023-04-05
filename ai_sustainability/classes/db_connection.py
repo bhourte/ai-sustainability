@@ -157,7 +157,7 @@ class DbConnection:
             result = self.run_gremlin_query(query)
 
         if previous_question_label == "Q_QCM" or previous_question_label == "Q_QCM_Bool":
-            query = f"g.V('{previous_question_id}').outE().has('text', '{answers[-1]}').inV().id()"
+            query = f"g.V('{previous_question_id}').outE().has('text', '{answers[-1][0]}').inV().id()"
             result = self.run_gremlin_query(query)
 
         return result[0]
@@ -241,14 +241,28 @@ class DbConnection:
         result = self.run_gremlin_query(query)
         return result[0]
 
+    def get_nb_selected_edge(self):
+        """
+        return : Dict{ edge_id: [text, nb_selected]}
+        """
+        query = "g.E().hasLabel('Answer').valueMap()"
+        result = self.run_gremlin_query(query)
+
+        nb_selected_edge = {}
+        for edge in result:
+            if edge["proposition_id"] not in nb_selected_edge:
+                nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+            nb_selected_edge[edge["proposition_id"]][1] += 1
+        return nb_selected_edge
+
 
 def main():
     database = DbConnection()
     print(database.get_one_question([]))
-    print(database.get_one_question(["oui"]))
-    print(database.get_one_question(["oui", "Yes"]))
-    print(database.get_one_question(["et bah non en fait"]))
+    print(database.get_one_question([["oui"]]))
+    print(database.get_one_question([["oui"], ["Yes"]]))
     print(database.get_all_feedbacks())
+    print(database.get_nb_selected_edge())
     database.close()
 
 
