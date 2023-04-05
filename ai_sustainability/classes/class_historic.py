@@ -9,3 +9,22 @@ methods:
     - get_list_results
     - ...
 """
+import streamlit as st
+
+from ai_sustainability.classes.utils_streamlit import check_user_connection
+
+
+class HistoricStreamlit:
+    """
+    Class used to show all the streamlit UI for the Form page
+
+    Methods :
+        - __init__ : initialise the UI and check if the user is connected
+    """
+
+    def __init__(self, database_link) -> None:
+        self.database_link = database_link
+
+        st.set_page_config(page_title="Historic Page", page_icon="📜")
+        st.title("📜Historic")
+        self.username = check_user_connection()

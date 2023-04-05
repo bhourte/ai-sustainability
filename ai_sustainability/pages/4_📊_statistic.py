@@ -5,20 +5,20 @@ import streamlit as st
 from decouple import config
 
 from ai_sustainability.class_form_old import Form
+from ai_sustainability.classes.class_statistic import StatisticStreamlit
 
 
 def main() -> None:
     """
     This is the code used by the admin to see statistics from the answers of the users
     """
-    st.set_page_config(page_title="Statistic Page", page_icon="📊")
-    st.title("📊Statistic")
-    if (
-        "username" not in st.session_state or st.session_state.username == ""
-    ):  # User not connected, don't show the stat, ask for connection
-        st.caption("❌ You are not connected, please connect with your username in the Connection page.")
+
+    database = None  # TODO mettre ici le lien vers la database
+    st_form = StatisticStreamlit(database)
+    username = st_form.username
+    if not username:
         return
-    username = st.session_state.username
+
     # Connection to the online gremlin database via class_from.py
     form = Form(
         endpoint="questions-db.gremlin.cosmos.azure.com",
@@ -27,11 +27,9 @@ def main() -> None:
         primary_key=config("PRIMARYKEY"),
     )
     if username != "Admin":  # Not a admin, we don't show anything
-        st.caption("✅ Connected as " + str(username))
         st.write("You are not an Admin")
         st.write("You can't access to this page")
     else:  # connected as an Admin
-        st.caption("🔑 Connected as an " + str(username))
         st.write("Welcome Admin")
         st.write("You can now see the statistic of the form")
         selected_edges = form.get_nb_selected_edges()

@@ -21,6 +21,8 @@ def main() -> None:
     database = None  # TODO mettre ici le lien vers la database
     st_form = FormStreamlit(database)
     username = st_form.username
+    if not username:
+        return
 
     # Connection to the online gremlin database via class_from.py
     form = Form(
