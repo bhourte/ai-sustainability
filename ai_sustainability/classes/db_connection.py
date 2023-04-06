@@ -285,6 +285,7 @@ class DbConnection:
 
         nb_selected_edge = {}
         for edge in result:
+            print("edddge", edge)
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
                     nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
@@ -420,7 +421,7 @@ class DbConnection:
         time.sleep(0.05)
         for answer in answers:
             self.run_gremlin_query(
-                f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('text', '{answer}').property('proposition_id', '{self.get_proposition_id(question_id, answer)}')"
+                f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('answer', '{answer}').property('proposition_id', '{self.get_proposition_id(question_id, answer)}')"
             )
 
     def change_answers(self, answers: list, username: str, form_name: str, new_form_name: str) -> bool:
@@ -459,12 +460,13 @@ class DbConnection:
         else:
             return self.run_gremlin_query(f"g.V('{source_node_id}').outE().has('text', '{answer}').id()")[0]
 
-    def get_all_forms(self, username):
+    def get_all_forms(self, username: str):
         return self.run_gremlin_query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()")
 
     def get_list_answers(self, selected_form: str) -> list:
         answers = []
         node = selected_form
+        print("node", node)
         node_label = self.get_question_label(node)
         while node_label != "end":
             answer = self.run_gremlin_query(f"g.V('{node}').outE().properties('answer').value()")
