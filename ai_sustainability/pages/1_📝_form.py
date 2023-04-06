@@ -24,7 +24,7 @@ def main() -> None:
 
     end = True
     list_answers: list[list[str]] = []
-    while end:
+    while end:  # While we are not in the last question node
         dict_question = database.get_one_question(list_answers)
         selected_answer = st_form.show_question(dict_question)
         if not selected_answer[0]:
