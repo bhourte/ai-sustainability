@@ -33,7 +33,6 @@ Make the connection to the database, run the querys and close the connection
 
 """
 import heapq
-import re
 import time
 
 import numpy as np
@@ -41,7 +40,6 @@ import streamlit as st
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
-from requests import get
 
 _range = range
 statics.load_statics(globals())
@@ -82,6 +80,7 @@ class DbConnection:
         """
         self.gremlin_client = None
         self.list_questions_id = []
+        self.modif_crypted = False
 
     def make_connection(self):
         """
@@ -148,7 +147,10 @@ class DbConnection:
         return result[0]
 
     def get_answers_text(self, question_id: str) -> list:
-        query = f"g.V('{question_id}').outE().properties('text').value()"
+        if not self.modif_crypted :
+            query = f"g.V('{question_id}').outE().properties('text').value()"
+        else:
+            query = f"g.V('{question_id}').outE().has('modif_crypted','false').properties('text').value()"
         result = self.run_gremlin_query(query)
         return result
 
