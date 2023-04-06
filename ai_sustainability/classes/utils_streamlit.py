@@ -16,12 +16,12 @@ def check_user_connection() -> str:
         st.caption("❌ You are not connected, please connect with your username in the Connection page.")
         return ""
     username = st.session_state.username
-    # Connected as an User
-    if username != "Admin":
-        st.caption("✅ Connected as " + str(username))
     # Connected as an Admin
-    else:
+    if username == "Admin":
         st.caption("🔑 Connected as an Admin")
+    # Connected as an User
+    else:
+        st.caption("✅ Connected as " + str(username))
     # To detect if the user create a form with the same name as the previous one (used in Historic)
     return st.session_state.username
 
