@@ -240,12 +240,9 @@ class DbConnection:
         """
         Save a feedback from a user in the database
         """
-        print("save_feedback")
         if not self.check_feedback_exist(username):
             self.create_feedback_node(username)
-            print("create_feedback_node")
         self.create_feedback_edge(username, feedback)
-        print("create_feedback_edge")
 
     def check_feedback_exist(self, username: str):
         """
@@ -285,7 +282,6 @@ class DbConnection:
 
         nb_selected_edge = {}
         for edge in result:
-            print("edddge", edge)
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
                     nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
@@ -466,7 +462,6 @@ class DbConnection:
     def get_list_answers(self, selected_form: str) -> list:
         answers = []
         node = selected_form
-        print("node", node)
         node_label = self.get_question_label(node)
         while node_label != "end":
             answer = self.run_gremlin_query(f"g.V('{node}').outE().properties('answer').value()")
