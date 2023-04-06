@@ -3,6 +3,9 @@ Class for connection page,
 Streamlit class
 """
 import streamlit as st
+from matplotlib import use
+
+from ai_sustainability.classes.utils import no_dash_in_my_text
 
 
 class ConnectionStreamlit:
@@ -29,8 +32,12 @@ class ConnectionStreamlit:
             st.caption("❌Not connected")
             return ""
 
-        if "-" in username:
-            st.warning("You can't use '-' in your username")
+        no_dash, elmt = no_dash_in_my_text(username)
+        if no_dash:
+            st.warning(f"You can't use {elmt} in your username")
+            return ""
+        if "'" in username:
+            st.warning("You can't use ' in your username")
             return ""
 
         st.caption(f"🔑Connected as an {username}" if username == "Admin" else f"✅Connected as {username}")
