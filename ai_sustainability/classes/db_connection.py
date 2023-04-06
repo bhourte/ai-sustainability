@@ -258,6 +258,7 @@ class DbConnection:
         """
         query = f"g.addV('Feedback').property('partitionKey', 'Feedback').property('id', 'feedback{username}')"
         self.run_gremlin_query(query)
+        time.sleep(0.2)
 
     def create_feedback_edge(self, username, feedback):
         nb_feedback = self.get_nb_feedback_from_user(username)
