@@ -403,6 +403,9 @@ class DbConnection:
         else:
             return self.run_gremlin_query(f"g.V('{source_node_id}').outE().has('text', '{answer}').id()")[0]
 
+    def get_all_forms(self, username):
+        return self.run_gremlin_query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()")
+
 
 def main():
     database = DbConnection()
@@ -486,8 +489,8 @@ def main():
             ]
         )
     )
-    print(database.get_proposition_id("1"))
-
+    print(database.get_proposition_id("2", "Yes"))
+    print(database.get_all_forms("Canary"))
     database.close()
 
 
