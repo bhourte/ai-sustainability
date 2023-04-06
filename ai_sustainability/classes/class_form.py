@@ -58,7 +58,7 @@ class FormStreamlit:
         return answer
 
     def show_open_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
-        if previous_answer is None:  # If it has to be auto-completed before
+        if previous_answer is None:  # If it has not to be auto-completed before
             previous_answer = [""]
         # We show the question text area
         answer = str(
@@ -71,7 +71,7 @@ class FormStreamlit:
                 disabled=st.session_state.clicked,
             )
         )
-        # If no answer given, we return None
+        # If no answer given, we return an empty string
         if not answer:
             st.session_state.clicked = False
             return [""]
@@ -94,10 +94,8 @@ class FormStreamlit:
                 disabled=st.session_state.clicked,
             )
         )
-        # If no answer given, we return None
-        if answer == "<Select an option>":
-            return [""]
-        return [answer]
+        # If no answer given, we return an empty string
+        return [answer] if answer != "<Select an option>" else [""]
 
     def show_qrm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         default = []
@@ -111,9 +109,7 @@ class FormStreamlit:
             disabled=st.session_state.clicked,
         )
         # If no answer given, we return None
-        if not answers:
-            return [""]
-        return answers
+        return [""] if not answers else answers
 
     def check_name(self, string: str) -> str:
         no_dash, char = no_dash_in_my_text(string)
@@ -128,7 +124,7 @@ class FormStreamlit:
         else:
             text = "Give a name to your form here"
         form_name = st.text_input(text, previous_answer, disabled=st.session_state.clicked)
-        return self.check_name((form_name))
+        return self.check_name(form_name)
 
     def error_name_already_taken(self, form_name: str) -> bool:
         if st.session_state.last_form_name != form_name:

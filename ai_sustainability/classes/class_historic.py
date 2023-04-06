@@ -35,9 +35,7 @@ class HistoricStreamlit(FormStreamlit):
         list_username = ["<Select a user>"] + list_username
         question = "Select an user"
         answer = str(st.selectbox(label=question, options=list_username, index=0))
-        if answer == "<Select a user>":
-            return ""
-        return answer
+        return answer if answer != "<Select a user>" else ""
 
     def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
         new_list_answered_form = [""] * len(list_answered_form)
