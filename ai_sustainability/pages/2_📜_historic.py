@@ -55,7 +55,6 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission(list_answers):
         database.change_answers(list_answers, username, form_name, new_form_name)
-        print(list_answers)
 
 
 def historic_admin(st_historic: HistoricStreamlit, database: DbConnection) -> None:

@@ -45,7 +45,6 @@ def main() -> None:
     if st_form.show_submission(list_answers):
         st_form.show_best_ai(list_bests_ais)
         database.save_answers(username, form_name, list_answers)
-        print(list_answers)
 
 
 if __name__ == "__main__":
