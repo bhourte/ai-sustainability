@@ -50,15 +50,15 @@ class DbConnection:
         - modif_crypted : boolean to know if the user has already modified the crypted question (bool)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the class with the connection to the database
         """
-        self.gremlin_client = None
-        self.list_questions_id = []
+        self.gremlin_client = None  # type: client.Client
+        self.list_questions_id = []  # type: list
         self.modif_crypted = False
 
-    def make_connection(self):
+    def make_connection(self) -> None:
         """
         Make the connection to the database
         """
@@ -622,94 +622,3 @@ class DbConnection:
             node = self.run_gremlin_query(f"g.V('{node}').outE().inV().id()")[0]
             node_label = self.get_question_label(node)
         return answers
-
-
-def main():
-    database = DbConnection()
-    database.make_connection()
-    database.get_one_question([])
-    database.get_one_question([["oui"]])
-    database.get_one_question([["oui"], ["Yes"]])
-    database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"]])
-    database.get_one_question([["oui"], ["Yes"], ["DataSet, CSV or Data Base"], ["Predict a numerical value"]])
-
-    database.get_one_question(
-        [
-            ["oui"],
-            ["Yes"],
-            ["DataSet, CSV or Data Base"],
-            ["Predict a numerical value"],
-            ["Minimize the average error. "],
-        ]
-    )
-
-    database.get_one_question(
-        [
-            ["oui"],
-            ["Yes"],
-            ["DataSet, CSV or Data Base"],
-            ["Predict a numerical value"],
-            ["Minimize the average error. "],
-            ["Higher speed"],
-        ]
-    )
-
-    database.get_one_question(
-        [
-            ["oui"],
-            ["Yes"],
-            ["DataSet, CSV or Data Base"],
-            ["Predict a numerical value"],
-            ["Minimize the average error. "],
-            ["Higher speed"],
-            ["No"],
-        ]
-    )
-
-    database.get_one_question(
-        [
-            ["oui"],
-            ["Yes"],
-            ["DataSet, CSV or Data Base"],
-            ["Predict a numerical value"],
-            ["Minimize the average error. "],
-            ["Higher speed"],
-            ["No"],
-            ["Internal User"],
-        ]
-    )
-    database.get_one_question(
-        [
-            ["oui"],
-            ["Yes"],
-            ["DataSet, CSV or Data Base"],
-            ["Predict a numerical value"],
-            ["Minimize the average error. "],
-            ["Higher speed"],
-            ["No"],
-            ["Internal User"],
-            ["Diagram"],
-        ]
-    )
-    print(
-        database.get_edges_id(
-            [
-                ["oui"],
-                ["Yes"],
-                ["DataSet, CSV or Data Base"],
-                ["Predict a numerical value"],
-                ["Minimize the average error. "],
-                ["Higher speed"],
-                ["No"],
-                ["Internal User"],
-                ["Diagram", "Tables"],
-            ]
-        )
-    )
-    print(database.get_proposition_id("2", "Yes"))
-    print(database.get_list_answers("Canary-answer1-Test2"))
-    database.close()
-
-
-if __name__ == "__main__":
-    main()
