@@ -19,8 +19,9 @@ def main() -> None:
     This is the code used to show the form and used by the user to fill it
     """
 
-    database = None  # TODO mettre ici le lien vers la database
+    database = DbConnection()
     st_form = FormStreamlit(database)
+    database.make_connection()
     username = st_form.username
     if not username:
         return
@@ -88,6 +89,7 @@ def main_new() -> None:
     # Connection to the online gremlin database via db_connection.py
     database = DbConnection()
     st_form = FormStreamlit(database)
+    database.make_connection()
     username = st_form.username
     if not username:
         return
@@ -114,6 +116,7 @@ def main_new() -> None:
     if st_form.show_submission(list_answers):
         st_form.show_best_ai(list_bests_ais)
         # database.save_answers(list_answers, username, form_name)
+        print(list_answers)
 
 
 if __name__ == "__main__":

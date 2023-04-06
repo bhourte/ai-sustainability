@@ -9,6 +9,8 @@ methods:
     - get_list_results
     - ...
 """
+from typing import Optional
+
 import streamlit as st
 
 from ai_sustainability.classes.class_form import FormStreamlit
@@ -32,6 +34,40 @@ class HistoricStreamlit(FormStreamlit):
         st.title("📜Historic")
         self.username = check_user_connection()
 
-    def show_choice_form(self, list_answered_form) -> str:
+    def show_choice_user(self, list_username: list[str]) -> str:
+        list_username = ["<Select a user>"] + list_username
+        question = "Select an user"
+        answer = str(st.selectbox(label=question, options=list_username, index=0))
+        if answer == "<Select a user>":
+            return ""
+        return answer
+
+    def show_choice_form(self, list_answered_form, admin: bool = False) -> str:
         list_form_name = ["<Select a form>"] + list_answered_form
-        return ""
+        question = "Select the previous form you want to see again or edit"
+        if admin:
+            question = "Select a form"
+        answer = str(st.selectbox(label=question, options=list_form_name, index=0))
+        if answer == "<Select a form>":
+            # we put that here, so it's executed only one time and the form is not blocked
+            st.session_state.clicked = False
+            return ""
+        return answer
+
+    def show_submission(self, answers: list[list[str]]) -> bool:
+        if st.button("Change answer", disabled=st.session_state.clicked):
+            st.write("Answers saved")
+            st.write(answers)
+            st.session_state.last_form_name = None
+            return True
+        return False
+
+    def show_question_as_admin(self, dict_question: dict, previous_answers: Optional[list[str]]) -> None:
+        if dict_question["question_label"] == "end":
+            return
+        question = dict_question["question_text"]
+        answers = ""
+        for i in previous_answers:
+            answers += i + "<br>"
+        st.subheader(question + " :")
+        st.caption(answers, unsafe_allow_html=True)

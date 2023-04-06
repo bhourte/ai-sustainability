@@ -39,6 +39,8 @@ class FormStreamlit:
         self.database_link = database_link
         if set_page:
             self.set_atribute()
+        if "clicked" not in st.session_state:
+            st.session_state.clicked = False
 
     def set_atribute(self) -> None:
         st.set_page_config(page_title="Form Page", page_icon="📝")
@@ -78,6 +80,7 @@ class FormStreamlit:
         )
         # If no answer given, we return None
         if not answer:
+            st.session_state.clicked = False
             return [""]
 
         validated_answer = validate_text_input(answer)
@@ -126,7 +129,11 @@ class FormStreamlit:
         return validate_text_input(string)
 
     def input_form_name(self, previous_answer: str = "") -> str:
-        form_name = st.text_input("Give a name to your form here", previous_answer, disabled=st.session_state.clicked)
+        if previous_answer:
+            text = "If you want to change the name of the form, change it here:"
+        else:
+            text = "Give a name to your form here"
+        form_name = st.text_input(text, previous_answer, disabled=st.session_state.clicked)
         return self.check_name((form_name))
 
     def error_name_already_taken(self, form_name) -> bool:

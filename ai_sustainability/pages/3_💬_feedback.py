@@ -14,8 +14,10 @@ def main() -> None:
     This is the code used by the user to give feedback and by the Admin to see all feedback
     """
 
-    database = object()  # TODO mettre ici le lien vers la database
+    # Connection to the online gremlin database via db_connection.py
+    database = DbConnection()
     st_form = FeedbackStreamlit(database)
+    database.make_connection()
     username = st_form.username
     if not username:
         return
