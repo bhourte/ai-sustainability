@@ -66,7 +66,7 @@ def main() -> None:
         list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
         if st_historic.show_submission(list_answers):
             st_historic.show_best_ai(list_bests_ais)
-            # database.change_answers(list_answers, username, form_name, new_form_name)
+            database.change_answers(list_answers, username, form_name, new_form_name)
             print(list_answers)
 
     # Connected as an Admin
@@ -80,7 +80,7 @@ def main() -> None:
 
         # The admin select a form of the choosen user
         list_answered_form = database.get_all_forms(choosen_user)
-        selected_form = st_historic.show_choice_form(list_answered_form, admin=True)
+        selected_form = st_historic.show_choice_form(list_answered_form, is_admin=True)
         if not selected_form:  # if none form selected, don't show the rest
             return
 
