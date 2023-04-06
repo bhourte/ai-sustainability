@@ -9,8 +9,6 @@ methods:
     - get_list_results
     - ...
 """
-from typing import Optional
-
 import streamlit as st
 
 from ai_sustainability.classes.class_form import FormStreamlit
@@ -62,7 +60,7 @@ class HistoricStreamlit(FormStreamlit):
             return True
         return False
 
-    def show_question_as_admin(self, dict_question: dict, previous_answers: Optional[list[str]]) -> None:
+    def show_question_as_admin(self, dict_question: dict, previous_answers: list[str]) -> None:
         if dict_question["question_label"] == "end":
             return
         question = dict_question["question_text"]
