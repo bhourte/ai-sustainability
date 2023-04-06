@@ -33,4 +33,5 @@ class HistoricStreamlit(FormStreamlit):
         self.username = check_user_connection()
 
     def show_choice_form(self, list_answered_form) -> str:
+        list_form_name = ["<Select a form>"] + list_answered_form
         return ""
