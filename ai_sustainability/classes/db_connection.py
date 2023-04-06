@@ -34,6 +34,7 @@ Make the connection to the database, run the querys and close the connection
 """
 import heapq
 import time
+from hmac import new
 
 import numpy as np
 import streamlit as st
@@ -355,29 +356,42 @@ class DbConnection:
         """
         if not self.check_user_exist(username):
             self.create_user_node(username)
-
-        if not self.check_form_exist(username, form_name):
+        if self.check_form_exist(username, form_name):
             return False
 
-        for i_question, question_id in enumerate(self.list_questions_id):
-            new_node_name = f"{username}-answer{question_id}-{form_name}"
-            next_new_node_name = f"{username}-answer{self.list_questions_id[i_question+1]}-{form_name}"
+        self.list_questions_id.append("end")
+        i = 0
+        while self.list_questions_id[i] != "end":
+            new_node_name = f"{username}-answer{self.list_questions_id[i]}-{form_name}"
             if not self.check_node_exist(new_node_name):
-                self.create_answer_node(question_id, new_node_name)
+                self.create_answer_node(self.list_questions_id[i], new_node_name)
+            next_new_node_name = f"{username}-answer{self.list_questions_id[i+1]}-{form_name}"
             if not self.check_node_exist(next_new_node_name):
-                question_label = self.get_question_label(self.list_questions_id[i_question + 1])
-                if question_label == "end":
-                    self.run_gremlin_query(
-                        f"g.addV('end').property('partitionKey', 'Answer').property('id', '{next_new_node_name}')"
-                    )
-                else:
-                    self.create_answer_node(self.list_questions_id[i_question + 1], next_new_node_name)
-            self.create_answer_edge(new_node_name, next_new_node_name, answers[i_question])
+                self.create_answer_node(self.list_questions_id[i + 1], next_new_node_name)
+            self.create_answer_edge(new_node_name, next_new_node_name, answers[i], self.list_questions_id[i])
+            i += 1
+
+        # for i_question, question_id in enumerate(self.list_questions_id):
+        #     print(self.list_questions_id)
+        #     new_node_name = f"{username}-answer{question_id}-{form_name}"
+        #     next_new_node_name = f"{username}-answer{self.list_questions_id[i_question+1]}-{form_name}"
+
+        #     if not self.check_node_exist(new_node_name):
+        #         self.create_answer_node(question_id, new_node_name)
+        #         print("create node")
+
+        #     if not self.check_node_exist(next_new_node_name):
+        #         self.create_answer_node(self.list_questions_id[i_question + 1], next_new_node_name)
+        #         print("create next_node")
+
+        #     self.create_answer_edge(new_node_name, next_new_node_name, answers[i_question], question_id)
+        #     print("create edge")
         # link between the first node of answers and the user
         first_node_id = f"{username}-answer{self.list_questions_id[0]}-{form_name}"
         self.run_gremlin_query(
             "g.V('" + username + "').addE('Answer').to(g.V('" + first_node_id + "')).property('partitionKey', 'Answer')"
         )
+        self.list_questions_id.remove("end")
         list_bests_ais = self.calcul_best_ais(5, answers)
         list_bests_ais_string = str(list_bests_ais)[1:-1]
         self.run_gremlin_query(
@@ -389,19 +403,24 @@ class DbConnection:
         """
         Create a question node in the database
         """
-        question_text = self.get_question_text(question_id)
-        self.run_gremlin_query(
-            f"g.addV('Answer').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question', '{question_text}').property('question_id', '{question_id}')"
-        )
+        if "end" in new_node_id:
+            self.run_gremlin_query(
+                f"g.addV('end').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question_id', '{question_id}')"
+            )
+        else:
+            question_text = self.get_question_text(question_id)
+            self.run_gremlin_query(
+                f"g.addV('Answer').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question', '{question_text}').property('question_id', '{question_id}')"
+            )
 
-    def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: list):
+    def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: list, question_id: str):
         """
         Create an edge between two nodes
         """
         time.sleep(0.05)
         for answer in answers:
             self.run_gremlin_query(
-                f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('text', '{answer}').property('proposition_id', {self.get_proposition_id(source_node_id, answer)})"
+                f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('text', '{answer}').property('proposition_id', '{self.get_proposition_id(question_id, answer)}')"
             )
 
     def get_proposition_id(self, source_node_id: str, answer: str):
