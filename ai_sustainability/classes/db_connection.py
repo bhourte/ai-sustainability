@@ -41,6 +41,7 @@ import streamlit as st
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
+from requests import get
 
 _range = range
 statics.load_statics(globals())
@@ -406,6 +407,17 @@ class DbConnection:
     def get_all_forms(self, username):
         return self.run_gremlin_query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()")
 
+    def get_list_answers(self, selected_form: str) -> list:
+        answers = []
+        node = selected_form
+        node_label = self.get_question_label(node)
+        while node_label != "end":
+            answer = self.run_gremlin_query(f"g.V('{node}').outE().properties('answer').value()")
+            answers.append(answer)
+            node = self.run_gremlin_query(f"g.V('{node}').outE().inV().id()")[0]
+            node_label = self.get_question_label(node)
+        return answers
+
 
 def main():
     database = DbConnection()
@@ -490,7 +502,7 @@ def main():
         )
     )
     print(database.get_proposition_id("2", "Yes"))
-    print(database.get_all_forms("Canary"))
+    print(database.get_list_answers("Canary-answer1-Test2"))
     database.close()
 
 
