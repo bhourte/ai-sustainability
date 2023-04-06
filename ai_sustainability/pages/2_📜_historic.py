@@ -60,12 +60,12 @@ def main() -> None:
         new_form_name = st_historic.input_form_name(form_name)
         if not new_form_name:
             return
-        if database.check_form_exist(username, new_form_name):
+        if database.check_form_exist(username, new_form_name) and new_form_name != form_name:
             if st_historic.error_name_already_taken(username):
                 return
         list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
+        st_historic.show_best_ai(list_bests_ais)
         if st_historic.show_submission(list_answers):
-            st_historic.show_best_ai(list_bests_ais)
             database.change_answers(list_answers, username, form_name, new_form_name)
             print(list_answers)
 

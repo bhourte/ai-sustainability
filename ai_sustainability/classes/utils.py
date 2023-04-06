@@ -38,4 +38,5 @@ def validate_text_input(text: str) -> str:
     Return :
         - text : the validated answer (string)
     """
+    text = text.replace('"', '\\"')
     return text.replace("'", "\\'")
