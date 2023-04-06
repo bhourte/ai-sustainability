@@ -1,40 +1,8 @@
 """
-Make the connection to the database, run the querys and close the connection
-
-1)
-
-    get_first_question() : get the first question of the form
-    get_one_question() : 
-        - get_question_text() : get the text of the question (str) with actual_question
-        - get_answers_text() list of all the answers (str) with actual_question
-        - get_help_text() : get the help text (str) with actual_question
-
-        return : dict {
-            1: text question
-            2: list of answers
-            3: help text
-            4: Label question
-        }
-    save_answer() : save the answer in the database
-
-    give answer(answer_list) : following the len of the list, we can find the question by the answer
-
-    attributes :
-        - list_questions (list) : list of past questions and last is actual_question (ids db)
-    
-    Methods :
-    check_user_exist(username) : check if the user exist in the database
-    save_feedback(feedback, username) : save the feedback in the database (feedback is a text)
-    get_all_feedbacks() : get all the feedbacks in the database for all users
-        Dict {
-            username: [feedback1, feedback2, ...],
-        }
-    get_all_users() -> list(str)
-
+This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import heapq
 import time
-from hmac import new
 
 import numpy as np
 import streamlit as st
@@ -62,8 +30,6 @@ def connect(endpoint: str, database_name: str, container_name: str, primary_key:
 
     Return :
         - client : the client to connect to the database
-
-
     """
     return client.Client(
         "wss://" + endpoint + ":443/",
@@ -75,6 +41,15 @@ def connect(endpoint: str, database_name: str, container_name: str, primary_key:
 
 
 class DbConnection:
+    """
+    Class used to connect to the database and to run the queries on it
+
+    Attributes :
+        - gremlin_client : the client to connect to the database
+        - list_questions_id : list of the questions id already asked to the user (list of str)
+        - modif_crypted : boolean to know if the user has already modified the crypted question (bool)
+    """
+
     def __init__(self):
         """
         Initialize the class with the connection to the database
@@ -106,24 +81,27 @@ class DbConnection:
 
         Parameters :
             - query : the gremlin query to run (string) (Exemple : "g.V()")
+
+        Return :
+            - result : the result of the query (list)
         """
         run = self.gremlin_client.submit(query).all()
         result = run.result()
         return result
 
-    def get_one_question(self, answers) -> dict:
+    def get_one_question(self, answers: list) -> dict:
         """
         Get one question from the database
 
         Parameters :
-            - answers : list of the answers given by the user (list of str)
+            - answers : list of the answers given by the user (list of list of str)
 
         Return :
             - question : dict {
-                1: question_text
-                2: answers (list of str)
-                3: help_text
-                4: question_label
+                question_text : the text of the question (str)
+                answers : list of answers (list of list of str)
+                help_text : the help text of the question (str)
+                question_label : the label of the question (str)
             }
         """
         question = {}  # type: dict
@@ -147,11 +125,29 @@ class DbConnection:
         return question
 
     def get_question_text(self, question_id: str) -> str:
+        """
+        Get the text of a question
+
+        Parameters :
+            - question_id : the id of the question (str)
+
+        Return :
+            - result[0] : the text of the question (str)
+        """
         query = f"g.V('{question_id}').properties('text').value()"
         result = self.run_gremlin_query(query)
         return result[0]
 
     def get_answers_text(self, question_id: str) -> list:
+        """
+        Get the texts of answers of a question
+
+        Parameters :
+            - question_id : the id of the question (str)
+
+        Return :
+            - result : the texts of the answers (list of str)
+        """
         if not self.modif_crypted:
             query = f"g.V('{question_id}').outE().properties('text').value()"
         else:
@@ -160,6 +156,15 @@ class DbConnection:
         return result
 
     def get_help_text(self, question_id: str) -> str:
+        """
+        Get the help text of a question
+
+        Parameters :
+            - question_id : the id of the question (str)
+
+        Return :
+            - help_text : the help text of the question (str)
+        """
         query = f"g.V('{question_id}').properties('help text').value()"
         help_text = self.run_gremlin_query(query)[0]
         if self.modif_crypted:
@@ -173,11 +178,29 @@ class DbConnection:
         return help_text
 
     def get_question_label(self, question_id: str) -> str:
+        """
+        Get the label of a question
+
+        Parameters :
+            - question_id : the id of the question (str)
+
+        Return :
+            - result[0] : the label of the question (str)
+        """
         query = f"g.V('{question_id}').label()"
         result = self.run_gremlin_query(query)
         return result[0]
 
     def get_next_question(self, answers: list) -> str:
+        """
+        Get the id of the next question
+
+        Parameters :
+            - answers : list of the answers given by the user (list of list of str)
+
+        Return :
+            - result[0] : the id of the next question (str)
+        """
         if not answers:
             return FIRST_NODE_ID
 
@@ -194,32 +217,63 @@ class DbConnection:
         return result[0]
 
     def truncate_questions(self, answers: list) -> None:
+        """
+        Truncate the list of questions id if the user has answered less questions than the previous time
+
+        Parameters :
+            - answers : list of the answers given by the user (list of list of str)
+        """
         if len(answers) < len(self.list_questions_id):
             self.list_questions_id = self.list_questions_id[: len(answers)]
 
-    def check_user_exist(self, username: str):
+    def check_user_exist(self, username: str) -> bool:
+        """
+        Check if a user exists in the database
+
+        Parameters :
+            - username : the username of the user (str)
+        """
         return self.check_node_exist(username)
 
-    def check_node_exist(self, node_id: str):
+    def check_node_exist(self, node_id: str) -> bool:
+        """
+        Check if a node exists in the database
+
+        Parameters :
+            - node_id : the id of the node (str)
+        """
         query = f"g.V('{node_id}')"
         result = self.run_gremlin_query(query)
         return bool(result)
 
-    def create_user_node(self, username: str):
+    def create_user_node(self, username: str) -> None:
+        """
+        Create a user node in the database
+
+        Parameters :
+            - username : the username of the user (str)
+        """
         query = f"g.addV('user').property('partitionKey', 'Answer').property('id', '{username}')"
         self.run_gremlin_query(query)
 
-    def get_all_users(self):
+    def get_all_users(self) -> list:
+        """
+        Return all users in the database
+            Return :
+                - result : list of all users (list of str)
+        """
         query = "g.V().hasLabel('user').id()"
         result = self.run_gremlin_query(query)
         return result
 
-    def get_all_feedbacks(self):
+    def get_all_feedbacks(self) -> dict:
         """
         Return all feedbacks from all users in the database
-            return : Dict {
-                username: [feedback1, feedback2, ...]
-            }
+            Return :
+                - all_feedbacks : dict of all feedbacks
+                    Dict {
+                            username: [feedback1, feedback2, ...]
+                    }
         """
         all_users = self.get_all_users()
         all_feedbacks = {}
@@ -227,38 +281,59 @@ class DbConnection:
             all_feedbacks[user] = self.get_user_feedbacks(user)
         return all_feedbacks
 
-    def get_user_feedbacks(self, username: str):
+    def get_user_feedbacks(self, username: str) -> list:
         """
         Return all feedbacks from a user in the database
-            return : List of feedbacks
+            Return :
+                - result : list of all feedbacks from a user (list of str)
         """
         query = f"g.V('{username}').outE().hasLabel('Feedback').values('text')"
         result = self.run_gremlin_query(query)
         return result
 
-    def save_feedback(self, username: str, feedback: str):
+    def save_feedback(self, username: str, feedback: str) -> None:
         """
         Save a feedback from a user in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - feedback : the feedback given by the user (str)
         """
         if not self.check_feedback_exist(username):
             self.create_feedback_node(username)
         self.create_feedback_edge(username, feedback)
 
-    def check_feedback_exist(self, username: str):
+    def check_feedback_exist(self, username: str) -> bool:
         """
         Check if a feedback exist in the database
+
+        Parameters :
+            - username : the username of the user (str)
+
+        Return :
+            - bool : True if the feedback exist, False otherwise
         """
         return self.check_node_exist(f"feedback{username}")
 
-    def create_feedback_node(self, username: str):
+    def create_feedback_node(self, username: str) -> None:
         """
         Create a feedback node in the database
+
+        Parameters :
+            - username : the username of the user (str)
         """
         query = f"g.addV('Feedback').property('partitionKey', 'Feedback').property('id', 'feedback{username}')"
         self.run_gremlin_query(query)
         time.sleep(0.2)
 
-    def create_feedback_edge(self, username, feedback):
+    def create_feedback_edge(self, username: str, feedback: str) -> None:
+        """
+        Create a feedback edge in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - feedback : the feedback given by the user (str)
+        """
         nb_feedback = self.get_nb_feedback_from_user(username)
         feedback_edge_id = f"Feedback-{username}-{nb_feedback+1}"
         self.run_gremlin_query(
@@ -268,14 +343,24 @@ class DbConnection:
     def get_nb_feedback_from_user(self, username: str) -> int:
         """
         Return the number of feedbacks from a user
+
+        Parameters :
+            - username : the username of the user (str)
+
+        Return :
+            - result[0] : the number of feedbacks from a user (int)
         """
         query = f"g.V('{username}').outE().hasLabel('Feedback').count()"
         result = self.run_gremlin_query(query)
         return result[0]
 
-    def get_nb_selected_edge(self):
+    def get_nb_selected_edge(self) -> dict:
         """
-        return : Dict{ edge_id: [text, nb_selected]}
+        Return a dict with number of selected edge for each proposition
+
+        Return :
+            - nb_selected_edge : dict of number of selected edge for each proposition
+                Dict{ edge_id: [text, nb_selected]}
         """
         query = "g.E().hasLabel('Answer').valueMap()"
         result = self.run_gremlin_query(query)
@@ -288,15 +373,22 @@ class DbConnection:
                 nb_selected_edge[edge["proposition_id"]][1] += 1
         return nb_selected_edge
 
-    def check_form_exist(self, username: str, form_name: str):
+    def check_form_exist(self, username: str, form_name: str) -> bool:
         """
         Check if a form exist in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - form_name : the name of the form (str)
+
+        Return :
+            - bool : True if the form exist, False otherwise
         """
         return self.check_node_exist(f"{username}-answer1-{form_name}")
 
     def get_weight(self, edge_id: str) -> list:
         """
-            Get the list_coef from the edge with edge_id id
+        Get the list_coef from the edge with edge_id id
 
         Parameters:
             - edge_id (str): id of the edge in the db
@@ -309,7 +401,17 @@ class DbConnection:
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    def calcul_best_ais(self, nb_ai: int, answers: list):
+    def calcul_best_ais(self, nb_ai: int, answers: list) -> list:
+        """
+        Calculate the best AI to use for the user
+
+        Parameters:
+            - nb_ai (int): number of AI to return
+            - answers (list): list of the answers of the user
+
+        Return:
+            - list_bests_ais (list): list of the best AI to use
+        """
         list_ai = self.run_gremlin_query("g.V('1').properties('list_AI')")[0]["value"].split(", ")
         edges_id = self.get_edges_id(answers)
         coef_ai = np.array([1] * len(list_ai))
@@ -329,9 +431,15 @@ class DbConnection:
                 list_bests_ais.append(list_ai[index])
         return list_bests_ais
 
-    def get_edges_id(self, answers: list):
+    def get_edges_id(self, answers: list) -> list:
         """
-        answers: list of list of answers [ [answer1, answer2], [answer3]
+        Get the edges id of the answers
+
+        Parameters:
+            - answers (list): list of the answers of the user
+
+        Return:
+            - edges_id (list): list of the edges id of the answers of the user
         """
         edges_id = []
         for i_question, question_id in enumerate(self.list_questions_id):
@@ -346,10 +454,17 @@ class DbConnection:
 
         return edges_id
 
-    def save_answers(self, username: str, form_name: str, answers: list):
+    def save_answers(self, username: str, form_name: str, answers: list) -> bool:
         """
         Save the answers of a user in the database
-        answers: list of list of answers [ [answer1, answer2], [answer3]
+
+        Parameters:
+            - username (str): username of the user
+            - form_name (str): name of the form
+            - answers (list): list of the answers of the user
+
+        Return:
+            - bool: True if the answers are saved, False if the form already exist
         """
         if not self.check_user_exist(username):
             self.create_user_node(username)
@@ -367,22 +482,6 @@ class DbConnection:
                 self.create_answer_node(self.list_questions_id[i + 1], next_new_node_name)
             self.create_answer_edge(new_node_name, next_new_node_name, answers[i], self.list_questions_id[i])
             i += 1
-
-        # for i_question, question_id in enumerate(self.list_questions_id):
-        #     print(self.list_questions_id)
-        #     new_node_name = f"{username}-answer{question_id}-{form_name}"
-        #     next_new_node_name = f"{username}-answer{self.list_questions_id[i_question+1]}-{form_name}"
-
-        #     if not self.check_node_exist(new_node_name):
-        #         self.create_answer_node(question_id, new_node_name)
-        #         print("create node")
-
-        #     if not self.check_node_exist(next_new_node_name):
-        #         self.create_answer_node(self.list_questions_id[i_question + 1], next_new_node_name)
-        #         print("create next_node")
-
-        #     self.create_answer_edge(new_node_name, next_new_node_name, answers[i_question], question_id)
-        #     print("create edge")
         # link between the first node of answers and the user
         first_node_id = f"{username}-answer{self.list_questions_id[0]}-{form_name}"
         self.run_gremlin_query(
@@ -396,9 +495,13 @@ class DbConnection:
         )
         return True
 
-    def create_answer_node(self, question_id: str, new_node_id: str):
+    def create_answer_node(self, question_id: str, new_node_id: str) -> None:
         """
         Create a question node in the database
+
+        Parameters:
+            - question_id (str): id of the question
+            - new_node_id (str): id of the new node
         """
         if "end" in new_node_id:
             self.run_gremlin_query(
@@ -413,6 +516,12 @@ class DbConnection:
     def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: list, question_id: str):
         """
         Create an edge between two nodes
+
+        Parameters:
+            - source_node_id (str): id of the source node
+            - target_node_id (str): id of the target node
+            - answers (list): list of the answers of the user
+            - question_id (str): id of the question form
         """
         time.sleep(0.05)
         for answer in answers:
@@ -431,7 +540,7 @@ class DbConnection:
             - new_form_name (str): new name of the form
 
         Return:
-            - None
+            - bool: True if the answers are saved, False if the form already exist
         """
         # We first delete the existing graph
         node_id = username + "-answer1-" + str(form_name)
@@ -446,9 +555,16 @@ class DbConnection:
                 node_id = next_node_id[0]["value"]
         return self.save_answers(username, new_form_name, answers)
 
-    def get_proposition_id(self, source_node_id: str, answer: str):
+    def get_proposition_id(self, source_node_id: str, answer: str) -> str:
         """
         Get the id of a proposition
+
+        Parameters:
+            - source_node_id (str): id of the source node
+            - answer (str): answer of the user
+
+        Return:
+            - str: id of the proposition
         """
         nb_edges = self.run_gremlin_query(f"g.V('{source_node_id}').outE().count()")[0]
         if nb_edges == 1:
@@ -456,10 +572,28 @@ class DbConnection:
         else:
             return self.run_gremlin_query(f"g.V('{source_node_id}').outE().has('text', '{answer}').id()")[0]
 
-    def get_all_forms(self, username: str):
+    def get_all_forms(self, username: str) -> list:
+        """
+        Get all the forms of a user
+
+        Parameters:
+            - username (str): username of the user
+
+        Return:
+            - list: list of the forms_id
+        """
         return self.run_gremlin_query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()")
 
     def get_list_answers(self, selected_form: str) -> list:
+        """
+        Get the list of answers of a form
+
+        Parameters:
+            - selected_form (str): id of the form
+
+        Return:
+            - list: list of the answers
+        """
         answers = []
         node = selected_form
         node_label = self.get_question_label(node)
