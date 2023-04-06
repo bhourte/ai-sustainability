@@ -38,28 +38,22 @@ class StatisticStreamlit:
 
     def display_statistic_edges(self, edge_selected: dict) -> None:
         """
-        Display bar graph of edges selected (v2)
+        Display bar graph of edges selected
 
         Parameters:
             - edge_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
-
-        Return:
-            - None
         """
         with st.spinner("Loading..."):
             # sort the dict on keys
             edge_selected = {k: edge_selected[k] for k in sorted(edge_selected)}
-            hover_text = []
-            text = []
-            count_edges = []
+            hover_text = []  # text with the in and out node
+            text = []  # Text of the selected answer
+            count_edges = []  # Number of times each edge was selected
             for key in edge_selected:
                 node_in = key.split("-")[0]
                 node_out = key.split("-")[1]
                 hover_text.append(f"Q {node_in} to Q {node_out}")
-                if edge_selected[key][0]:
-                    text.append(edge_selected[key][0])
-                else:
-                    text.append("Q_Next")
+                text.append(edge_selected[key][0])
                 count_edges.append(edge_selected[key][1])
             fig = go.Figure(
                 data=[go.Bar(x=list(edge_selected.keys()), y=list(count_edges), hovertext=text, text=hover_text)]
