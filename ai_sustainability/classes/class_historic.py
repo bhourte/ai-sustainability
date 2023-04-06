@@ -40,9 +40,10 @@ class HistoricStreamlit(FormStreamlit):
         return answer
 
     def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
+        new_list_answered_form = [""] * len(list_answered_form)
         for i, elmt_i in enumerate(list_answered_form):
-            list_answered_form[i] = elmt_i.rsplit("-", maxsplit=1)[-1]
-        list_form_name = ["<Select a form>"] + list_answered_form
+            new_list_answered_form[i] = elmt_i.rsplit("-", maxsplit=1)[-1]
+        list_form_name = ["<Select a form>"] + new_list_answered_form
         question = "Select the previous form you want to see again or edit"
         if is_admin:
             question = "Select a form"
@@ -51,7 +52,8 @@ class HistoricStreamlit(FormStreamlit):
             # we put that here, so it's executed only one time and the form is not blocked
             st.session_state.clicked = False
             return ""
-        return answer
+        index_sol = list_form_name.index(answer) - 1
+        return list_answered_form[index_sol]
 
     def show_submission(self, answers: list[list[str]]) -> bool:
         if st.button("Change answer", disabled=st.session_state.clicked):
