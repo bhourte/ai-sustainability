@@ -2,7 +2,6 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import heapq
-import select
 import time
 
 import numpy as np
@@ -375,6 +374,13 @@ class DbConnection:
         return nb_selected_edge
 
     def get_nb_selected_edge_stats(self) -> dict:
+        """
+        Return a dict with number of selected edge for each proposition
+        Especially for stats showing
+        Return :
+            - nb_selected_edge : dict of number of selected edge for each proposition
+                Dict{ edge_id: [text, nb_selected]}
+        """
         nb_selected_edge = self.get_nb_selected_edge()
 
         query = "g.E().hasLabel('Q_Next').id()"
