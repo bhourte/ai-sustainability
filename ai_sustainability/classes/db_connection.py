@@ -17,6 +17,7 @@ FIRST_NODE_ID = "1"
 LAST_NODE_ID = "9"
 
 
+# the connect function is outside the class to be able to use the cache of streamlit
 @st.cache_resource
 def connect(endpoint: str, database_name: str, container_name: str, primary_key: str) -> client.Client:
     """
