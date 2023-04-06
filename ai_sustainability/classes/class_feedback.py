@@ -1,11 +1,6 @@
 """
 Class for feedback page,
 Streamlit class
-
-methods:
-    -display_feedbacks (Admin only)
-    - inputs_feedback (User only)
-    
 """
 import streamlit as st
 
@@ -21,7 +16,7 @@ class FeedbackStreamlit:
         - __init__ : initialise the UI and check if the user is connected
         - show_all_feedbacks
         - user_dont_exist
-        - feedback_box
+        - feedback_box : show a box where the user can give a feedback
     """
 
     def __init__(self, database_link) -> None:
@@ -49,6 +44,9 @@ class FeedbackStreamlit:
         st.write("Thank you")
 
     def feedback_box(self, username: str) -> str:
+        """
+        Method used to show a box where the user can give a feedback
+        """
         st.write("Welcome back " + username)
         st.write("You can now give us your feedback")
         text = st.text_area("Your feedback: ")  # text area for the feedback
