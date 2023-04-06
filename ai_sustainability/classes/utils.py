@@ -9,7 +9,7 @@ method:
 """
 
 
-def no_dash_in_my_text(text: str) -> bool:
+def no_dash_in_my_text(text: str) -> tuple:
     """
     Check if there is a dash in the text
 
@@ -19,7 +19,13 @@ def no_dash_in_my_text(text: str) -> bool:
     Return:
         - bool: True if there is a special caracter (" ' - or backslash), False otherwise
     """
-    return "-" in text or "'" in text or "\\" in text or '"' in text
+    if "-" in text:
+        return True, "-"
+    if "\\" in text:
+        return True, "\\\\"
+    if '"' in text:
+        return True, '"'
+    return False, ""
 
 
 def validate_text_input(text: str) -> str:

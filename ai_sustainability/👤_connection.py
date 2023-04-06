@@ -13,7 +13,6 @@ def main() -> None:
 
     st_connect = ConnectionStreamlit()
     st_connect.setup_username()
-    print(st_connect.username)
 
 
 if __name__ == "__main__":

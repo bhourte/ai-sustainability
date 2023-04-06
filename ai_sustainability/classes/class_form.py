@@ -16,6 +16,16 @@ class FormStreamlit:
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
+        - set_atribute : set the page attributes
+        - show_question : select with methode use in function of the question label
+        - show_open_question : show a Q_open question
+        - show_qcm_question : show a Q_QCM and Q_QCM_Bool question
+        - show_qrm_question : show a Q_QRM question
+        - check_name
+        - input_form_name
+        - error_name_already_taken
+        - show_submission
+        - show_best_ai
     """
 
     def __init__(self, database_link, set_page: bool = True) -> None:
@@ -106,8 +116,9 @@ class FormStreamlit:
         return answers
 
     def check_name(self, string: str) -> str:
-        if no_dash_in_my_text(string):
-            st.warning("Please don't use dash in your form name")
+        no_dash, char = no_dash_in_my_text(string)
+        if no_dash:
+            st.warning(f"""Please don't use the {char} character in your form name""")
             return ""
         return validate_text_input(string)
 
@@ -119,7 +130,7 @@ class FormStreamlit:
         form_name = st.text_input(text, previous_answer, disabled=st.session_state.clicked)
         return self.check_name((form_name))
 
-    def error_name_already_taken(self, form_name) -> bool:
+    def error_name_already_taken(self, form_name: str) -> bool:
         if st.session_state.last_form_name != form_name:
             st.warning(
                 "You already have a form with this name, please pick an other name or change your previous form in the historic page."
@@ -127,7 +138,7 @@ class FormStreamlit:
             return True
         return False
 
-    def show_submission(self, answers) -> bool:
+    def show_submission(self, answers: list[list[str]]) -> bool:
         if st.button("Submit", disabled=st.session_state.clicked):
             st.write("Answers saved")
             st.write(answers)

@@ -423,6 +423,32 @@ class DbConnection:
                 f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('text', '{answer}').property('proposition_id', '{self.get_proposition_id(question_id, answer)}')"
             )
 
+    def change_answers(self, answers: list, username: str, form_name: str, new_form_name: str) -> bool:
+        """
+        Change the answer in db
+
+        Parameters:
+            - answers (list): list of answers
+            - username (str): username of the user
+            - form_name (str): name of the form
+            - new_form_name (str): new name of the form
+
+        Return:
+            - None
+        """
+        # We first delete the existing graph
+        node_id = username + "-answer1-" + str(form_name)
+        end = True
+        while end:
+            next_node_id = self.run_gremlin_query("g.V('" + node_id + "').out().properties('id')")
+            # we delete the node
+            self.run_gremlin_query("g.V('" + node_id + "').drop()")
+            if not next_node_id:
+                end = False
+            else:
+                node_id = next_node_id[0]["value"]
+        return self.save_answers(username, new_form_name, answers)
+
     def get_proposition_id(self, source_node_id: str, answer: str):
         """
         Get the id of a proposition
