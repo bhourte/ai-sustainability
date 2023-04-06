@@ -97,6 +97,8 @@ def main() -> None:
             if dict_question["question_label"] == "end":
                 end = False
             i += 1
+        list_bests_ais = database.calcul_best_ais(N_BEST_AI, previous_answers[:-1])
+        st_historic.show_best_ai(list_bests_ais)
 
 
 if __name__ == "__main__":
