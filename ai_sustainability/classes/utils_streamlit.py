@@ -5,7 +5,7 @@ function usefull for the project's UI
 
 method:
     - check_user_connection
-    - ...
+    - dash_error : show the error message if no_dash_in_my_text retrun True
 """
 import streamlit as st
 
