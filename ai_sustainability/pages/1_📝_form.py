@@ -34,7 +34,7 @@ def main() -> None:
         else:
             list_answers.append(selected_answer)
 
-    form_name = st_form.input_form_name()
+    form_name = st_form.input_form_name(previous_answer="")
     if not form_name:
         return
     if database.check_form_exist(username, form_name):
