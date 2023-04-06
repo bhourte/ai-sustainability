@@ -415,9 +415,6 @@ class DbConnection:
         Return:
             - list_weight (list(float)): list of the weights of the edge
         """
-        print("#################################")
-        print(self.run_gremlin_query(f"g.E('{edge_id}').properties('list_coef').value()"))
-        print("#################################")
         list_weight = self.run_gremlin_query(f"g.E('{edge_id}').properties('list_coef').value()")[0].split(", ")
         for i_weight, weight in enumerate(list_weight):
             list_weight[i_weight] = float(weight)

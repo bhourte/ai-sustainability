@@ -141,7 +141,6 @@ class FormStreamlit:
     def show_submission(self, answers: list[list[str]]) -> bool:
         if st.button("Submit", disabled=st.session_state.clicked):
             st.write("Answers saved")
-            st.write(answers)
             st.session_state.last_form_name = None
             return True
         st.session_state.clicked = True
