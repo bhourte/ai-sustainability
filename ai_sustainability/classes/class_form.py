@@ -24,7 +24,8 @@ class FormStreamlit:
         - check_name
         - input_form_name
         - error_name_already_taken
-        - show_submission
+        - show_submission_button
+        - set_state
         - show_best_ai
     """
 
@@ -135,12 +136,14 @@ class FormStreamlit:
         return False
 
     def show_submission_button(self) -> bool:
-        if st.button("Submit", disabled=st.session_state.clicked):
+        if st.button("Submit", on_click=self.set_state, disabled=st.session_state.clicked):
             st.write("Answers saved")
             st.session_state.last_form_name = None
             return True
-        st.session_state.clicked = True
         return False
+
+    def set_state(self) -> None:
+        st.session_state.clicked = True
 
     def show_best_ai(self, list_bests_ais: list) -> None:
         """
