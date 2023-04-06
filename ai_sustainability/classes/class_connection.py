@@ -1,9 +1,6 @@
 """
 Class for connection page,
 Streamlit class
-
-methods:
-    
 """
 import streamlit as st
 

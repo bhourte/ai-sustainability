@@ -1,12 +1,6 @@
 """
 Class for statistic page
 Streamlit class
-
-methods:
-    - __init__
-    - check_if_admin
-    - display_statistic_edges
-    - display_statistic_ais
 """
 import plotly.graph_objects as go
 import streamlit as st
@@ -21,6 +15,8 @@ class StatisticStreamlit:
     Methods :
         - __init__ : initialise the UI and check if the user is connected
         - check_if_admin : chek if the user is an admin, show some messages in both cases
+        - display_statistic_edges : show stats based on the edges
+        - display_statistic_ais : show stats based on the AIs
     """
 
     def __init__(self, database_link) -> None:

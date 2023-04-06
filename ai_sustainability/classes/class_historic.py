@@ -2,12 +2,6 @@
 Class which contains the hisoric of the different questions/answers of the users
 Streamlit class
 inherit from class_form
-
-methods:
-    - display_historic_of_all_users (Admin only)
-    - display_historic_of_one_user 
-    - get_list_results
-    - ...
 """
 import streamlit as st
 
@@ -21,6 +15,11 @@ class HistoricStreamlit(FormStreamlit):
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
+        - set_atribute : set the page attributes
+        - show_choice_user : show a select box with all users
+        - show_choice_form : show a select box with all forms of a user
+        - show_submission : show a previous answered form
+        - show_question_as_admin : show a previous answered form with the admin view
     """
 
     def __init__(self, database_link) -> None:
@@ -40,10 +39,12 @@ class HistoricStreamlit(FormStreamlit):
             return ""
         return answer
 
-    def show_choice_form(self, list_answered_form, admin: bool = False) -> str:
+    def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
+        for i, elmt_i in enumerate(list_answered_form):
+            list_answered_form[i] = elmt_i.rsplit("-", maxsplit=1)[-1]
         list_form_name = ["<Select a form>"] + list_answered_form
         question = "Select the previous form you want to see again or edit"
-        if admin:
+        if is_admin:
             question = "Select a form"
         answer = str(st.selectbox(label=question, options=list_form_name, index=0))
         if answer == "<Select a form>":
