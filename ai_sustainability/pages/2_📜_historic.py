@@ -53,7 +53,7 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
 
     list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
     st_historic.show_best_ai(list_bests_ais)
-    if st_historic.show_submission(list_answers):
+    if st_historic.show_submission_button():
         database.change_answers(list_answers, username, form_name, new_form_name)
 
 

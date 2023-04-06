@@ -3,7 +3,6 @@ Class for connection page,
 Streamlit class
 """
 import streamlit as st
-from matplotlib import use
 
 from ai_sustainability.classes.utils import no_dash_in_my_text
 

@@ -55,10 +55,9 @@ class HistoricStreamlit(FormStreamlit):
         index_sol = list_form_name.index(answer) - 1
         return list_answered_form[index_sol]
 
-    def show_submission(self, answers: list[list[str]]) -> bool:
+    def show_submission_button(self) -> bool:
         if st.button("Change answer", disabled=st.session_state.clicked):
             st.write("Answers saved")
-            st.write(answers)
             st.session_state.last_form_name = None
             return True
         return False
