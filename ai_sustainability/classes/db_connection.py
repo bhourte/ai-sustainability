@@ -35,6 +35,7 @@ Make the connection to the database, run the querys and close the connection
 import heapq
 
 import numpy as np
+import streamlit as st
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -46,6 +47,7 @@ FIRST_NODE_ID = "1"
 LAST_NODE_ID = "9"
 
 
+@st.cache_resource
 def connect(endpoint: str, database_name: str, container_name: str, primary_key: str) -> client.Client:
     """
     Connect to the database and return the client (made only once thanks to the cache)
@@ -61,6 +63,7 @@ def connect(endpoint: str, database_name: str, container_name: str, primary_key:
 
 
     """
+    print("Connect to the database")
     return client.Client(
         "wss://" + endpoint + ":443/",
         "g",
@@ -75,13 +78,19 @@ class DbConnection:
         """
         Initialize the class with the connection to the database
         """
+        self.gremlin_client = None
+        self.list_questions_id = []
+
+    def make_connection(self):
+        """
+        Make the connection to the database
+        """
         self.gremlin_client = connect(
             endpoint="questions-db.gremlin.cosmos.azure.com",
             database_name="graphdb",
             container_name=config("DATABASENAME"),
             primary_key=config("PRIMARYKEY"),
         )
-        self.list_questions_id = []
 
     def close(self) -> None:
         """
@@ -337,6 +346,7 @@ class DbConnection:
             return False
 
         form_name = f"-{form_name}"
+
         return True
 
 
