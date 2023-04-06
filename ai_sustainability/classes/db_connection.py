@@ -2,6 +2,7 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import heapq
+import select
 import time
 
 import numpy as np
@@ -365,17 +366,24 @@ class DbConnection:
         query = "g.E().hasLabel('Answer').valueMap()"
         result = self.run_gremlin_query(query)
 
-        Q_Next_ids = "g.E().hasLabel('Q_Next').id()"
-        Q_Next_ids = self.run_gremlin_query(Q_Next_ids)
         nb_selected_edge = {}
         for edge in result:
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
-                    if edge["proposition_id"] in Q_Next_ids:
-                        nb_selected_edge[edge["proposition_id"]] = ["Q_Next", 0]
-                    else:
-                        nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+                    nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
                 nb_selected_edge[edge["proposition_id"]][1] += 1
+        return nb_selected_edge
+
+    def get_nb_selected_edge_stats(self) -> dict:
+        nb_selected_edge = self.get_nb_selected_edge()
+
+        query = "g.E().hasLabel('Q_Next').id()"
+        result = self.run_gremlin_query(query)
+
+        for edge_id in result:
+            if edge_id in nb_selected_edge:
+                nb_selected_edge[edge_id][0] = "Q_Next"
+
         return nb_selected_edge
 
     def check_form_exist(self, username: str, form_name: str) -> bool:

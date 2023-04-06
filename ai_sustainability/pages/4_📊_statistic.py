@@ -20,7 +20,7 @@ def main() -> None:
 
     if not st_statistic.check_if_admin(username):
         return
-    selected_edges = database.get_nb_selected_edge()
+    selected_edges = database.get_nb_selected_edge_stats()
     st_statistic.display_statistic_edges(selected_edges)
 
 
