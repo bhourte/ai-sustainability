@@ -19,6 +19,9 @@ class FeedbackStreamlit:
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
+        - show_all_feedbacks
+        - user_dont_exist
+        - feedback_box
     """
 
     def __init__(self, database_link) -> None:
