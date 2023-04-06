@@ -134,6 +134,10 @@ class DbConnection:
             question["help_text"] = ""
             question["question_label"] = "end"
             return question
+
+        if len(answers) > 1 and answers[1][0] == "Yes":
+            self.modif_crypted = True
+
         self.list_questions_id.append(question_id)
         question["question_text"] = self.get_question_text(question_id)
         question["answers"] = self.get_answers_text(question_id)
@@ -147,7 +151,7 @@ class DbConnection:
         return result[0]
 
     def get_answers_text(self, question_id: str) -> list:
-        if not self.modif_crypted :
+        if not self.modif_crypted:
             query = f"g.V('{question_id}').outE().properties('text').value()"
         else:
             query = f"g.V('{question_id}').outE().has('modif_crypted','false').properties('text').value()"
@@ -157,7 +161,10 @@ class DbConnection:
     def get_help_text(self, question_id: str) -> str:
         query = f"g.V('{question_id}').properties('help text').value()"
         help_text = self.run_gremlin_query(query)[0]
-        query = f"g.V('{question_id}').outE().properties('help text').value()"
+        if self.modif_crypted:
+            query = f"g.V('{question_id}').outE().has('modif_crypted', 'false').properties('help text').value()"
+        else:
+            query = f"g.V('{question_id}').outE().properties('help text').value()"
         answers_help_text = self.run_gremlin_query(query)
         answers_text = self.get_answers_text(question_id)
         for i, val in enumerate(answers_help_text):
