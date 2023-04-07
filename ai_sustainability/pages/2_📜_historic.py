@@ -11,6 +11,9 @@ N_BEST_AI = 5
 
 
 def historic_user(username: str, st_historic: HistoricStreamlit, database: DbConnection) -> None:
+    """
+    Function used to show a form with the User view
+    """
     list_answered_form = database.get_all_forms(username)
     selected_form = st_historic.show_choice_form(list_answered_form)
     if not selected_form:  # if none form selected, don't show the rest
@@ -22,7 +25,6 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
 
     end = True
     list_answers: list[list[str]] = []
-    previous_answers += [["end"]]
     i = 0
     while end:
         dict_question = database.get_one_question(list_answers)
@@ -33,20 +35,28 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
             end = False
         else:
             list_answers.append(selected_answer)
-            if previous_answers[0] is not None and list_answers[i] != previous_answers[i]:
+            # If not already changed and name answer different from previous one and question's label is not Q_Open :
+            # The form is modified and we do not fill it automatically with previous answers
+            if (
+                previous_answers[0] is not None
+                and list_answers[i] != previous_answers[i]
+                and dict_question["question_label"] != "Q_Open"
+            ):
                 previous_answers = [None] * len(previous_answers)
         i += 1
         if i >= len(previous_answers):
-            previous_answers.append(None)
+            previous_answers.append(None)  # To avoid list index out of range when calling show_question
 
-    # If the form is not finish, we continue to show it with a new question
+    # If the form is not finish, we wait the user to enter a new answer
     if dict_question["question_label"] != "end":
         return
 
+    # We ask the user to give us a name for the form (potentially a new one)
     new_form_name = st_historic.input_form_name(form_name)
     if not new_form_name:
         return
 
+    # If the name is already taken by an other form
     if database.check_form_exist(username, new_form_name) and new_form_name != form_name:
         if st_historic.error_name_already_taken(username):
             return
@@ -58,17 +68,20 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
 
 
 def historic_admin(st_historic: HistoricStreamlit, database: DbConnection) -> None:
+    """
+    Function used to show a form with the Admin view
+    """
     list_username = database.get_all_users()
 
     # The admin select an user
     choosen_user = st_historic.show_choice_user(list_username)
-    if not choosen_user:  # if none user selected, don't show the rest
+    if not choosen_user:  # if no user selected, don't show the rest
         return
 
     # The admin select a form of the choosen user
     list_answered_form = database.get_all_forms(choosen_user)
     selected_form = st_historic.show_choice_form(list_answered_form, is_admin=True)
-    if not selected_form:  # if none form selected, don't show the rest
+    if not selected_form:  # if no form selected, don't show the rest
         return
 
     # get the list with all previous answers contained in the form

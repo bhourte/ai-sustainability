@@ -19,8 +19,7 @@ def main() -> None:
 
     # Connected as an User
     if username != "Admin":
-        username_exists = database.check_user_exist(username)  # check if the user already exist in the database
-        if not username_exists:
+        if not database.check_user_exist(username):  # check if the user already exist in the database
             st_feedback.user_dont_exist()
             return
         feedback_text = st_feedback.feedback_box(username)

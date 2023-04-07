@@ -12,6 +12,7 @@ class ConnectionStreamlit:
     Class used to show all the streamlit UI for the connection page
 
     Methods :
+        - __init__
         - setup_username : setup the username for all pages
     """
 
