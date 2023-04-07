@@ -209,11 +209,11 @@ class DbConnection:
         previous_question_label = self.get_question_label(previous_question_id)
         if previous_question_label == "Q_Open" or previous_question_label == "Q_QRM":
             query = f"g.V('{previous_question_id}').outE().inV().id()"
-            result = self.run_gremlin_query(query)
 
         if previous_question_label == "Q_QCM" or previous_question_label == "Q_QCM_Bool":
             query = f"g.V('{previous_question_id}').outE().has('text', '{answers[-1][0]}').inV().id()"
-            result = self.run_gremlin_query(query)
+
+        result = self.run_gremlin_query(query)
 
         return result[0]
 
@@ -404,7 +404,7 @@ class DbConnection:
         Return :
             - bool : True if the form exist, False otherwise
         """
-        return self.check_node_exist(f"{username}-answer1-{form_name}")
+        return self.check_node_exist(f"{username}-answer{FIRST_NODE_ID}-{form_name}")
 
     def get_weight(self, edge_id: str) -> list:
         """
@@ -497,9 +497,11 @@ class DbConnection:
             new_node_name = f"{username}-answer{self.list_questions_id[i]}-{form_name}"
             if not self.check_node_exist(new_node_name):
                 self.create_answer_node(self.list_questions_id[i], new_node_name)
+
             next_new_node_name = f"{username}-answer{self.list_questions_id[i+1]}-{form_name}"
             if not self.check_node_exist(next_new_node_name):
                 self.create_answer_node(self.list_questions_id[i + 1], next_new_node_name)
+
             self.create_answer_edge(new_node_name, next_new_node_name, answers[i], self.list_questions_id[i])
             i += 1
         # link between the first node of answers and the user
@@ -507,6 +509,7 @@ class DbConnection:
         self.run_gremlin_query(
             "g.V('" + username + "').addE('Answer').to(g.V('" + first_node_id + "')).property('partitionKey', 'Answer')"
         )
+
         self.list_questions_id.remove("end")
         list_bests_ais = self.calcul_best_ais(5, answers)
         list_bests_ais_string = str(list_bests_ais)[1:-1]
@@ -563,12 +566,12 @@ class DbConnection:
             - bool: True if the answers are saved, False if the form already exist
         """
         # We first delete the existing graph
-        node_id = username + "-answer1-" + str(form_name)
+        node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
         end = True
         while end:
-            next_node_id = self.run_gremlin_query("g.V('" + node_id + "').out().properties('id')")
+            next_node_id = self.run_gremlin_query(f"g.V('{node_id}').out().properties('id')")
             # we delete the node
-            self.run_gremlin_query("g.V('" + node_id + "').drop()")
+            self.run_gremlin_query(f"g.V('{node_id}').drop()")
             if not next_node_id:
                 end = False
             else:
