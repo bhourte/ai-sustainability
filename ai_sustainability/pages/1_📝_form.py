@@ -22,16 +22,15 @@ def main() -> None:
     if not username:
         return
 
-    end = True
+    end = False
     list_answers: list[list[str]] = []
-    while end:  # While we are not in the last question node
+    while not end:  # While we are not in the last question node
         dict_question = database.get_one_question(list_answers)
         selected_answer = st_form.show_question(dict_question)
         if not selected_answer[0]:
             return
-        if dict_question["question_label"] == "end":
-            end = False
-        else:
+        end = dict_question["question_label"] == "end"
+        if not end:
             list_answers.append(selected_answer)
 
     form_name = st_form.input_form_name(previous_answer="")

@@ -65,7 +65,7 @@ class HistoricStreamlit(FormStreamlit):
             return
         question = dict_question["question_text"]
         answers = ""
-        for i in previous_answers:
-            answers += f"{i} <br>"
+        for previous_answer in previous_answers:
+            answers += f"{previous_answer} <br>"
         st.subheader(f"{question} :")
         st.caption(answers, unsafe_allow_html=True)

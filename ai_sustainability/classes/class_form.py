@@ -106,8 +106,8 @@ class FormStreamlit:
         return [""] if not answers else answers
 
     def check_name(self, string: str) -> str:
-        no_dash, char = no_dash_in_my_text(string)
-        if no_dash:
+        dash, char = no_dash_in_my_text(string)
+        if dash:
             st.warning(f"""Please don't use the {char} character in your form name""")
             return ""
         return validate_text_input(string)
@@ -156,8 +156,8 @@ class FormStreamlit:
                 f"There is {str(len(list_bests_ais))} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
                 anchor=None,
             )
-            for i, val_i in enumerate(list_bests_ais):
-                st.caption(str(i + 1) + ") " + val_i)
+            for i_best_ai, best_ai in enumerate(list_bests_ais):
+                st.caption(str(i_best_ai + 1) + ") " + best_ai)
         # If no AI corresponding the the choices
         else:
             st.subheader(

@@ -23,17 +23,16 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
     # get the list with all previous answers contained in the form
     previous_answers = database.get_list_answers(selected_form)
 
-    end = True
+    end = False
     list_answers: list[list[str]] = []
     i = 0
-    while end:
+    while not end:
         dict_question = database.get_one_question(list_answers)
         selected_answer = st_historic.show_question(dict_question, previous_answers[len(list_answers)])
         if not selected_answer[0]:
             return
-        if dict_question["question_label"] == "end":
-            end = False
-        else:
+        end = dict_question["question_label"] == "end"
+        if not end:
             list_answers.append(selected_answer)
             # If not already changed and name answer different from previous one and question's label is not Q_Open :
             # The form is modified and we do not fill it automatically with previous answers
@@ -86,15 +85,14 @@ def historic_admin(st_historic: HistoricStreamlit, database: DbConnection) -> No
 
     # get the list with all previous answers contained in the form
     previous_answers = database.get_list_answers(selected_form)
-    end = True
+    end = False
     previous_answers += [["end"]]
     i = 0
-    while end:
+    while not end:
         list_answers = previous_answers[:i]
         dict_question = database.get_one_question(list_answers)
         st_historic.show_question_as_admin(dict_question, previous_answers[i])
-        if dict_question["question_label"] == "end":
-            end = False
+        end = dict_question["question_label"] == "end"
         i += 1
     list_bests_ais = database.calcul_best_ais(N_BEST_AI, previous_answers[:-1])
     st_historic.show_best_ai(list_bests_ais)

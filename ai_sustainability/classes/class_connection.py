@@ -32,8 +32,8 @@ class ConnectionStreamlit:
             st.caption("❌Not connected")
             return ""
 
-        no_dash, elmt = no_dash_in_my_text(username)
-        if no_dash:
+        dash, elmt = no_dash_in_my_text(username)
+        if dash:
             st.warning(f"You can't use {elmt} in your username")
             return ""
         if "'" in username:
