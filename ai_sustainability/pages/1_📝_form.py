@@ -42,7 +42,7 @@ def main() -> None:
             return
 
     list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
-    if st_form.show_submission_button():
+    if st_form.show_submission_button():  # show the submission button and return True if it's clicked
         st_form.show_best_ai(list_bests_ais)
         database.save_answers(username, form_name, list_answers)
 

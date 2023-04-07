@@ -22,6 +22,7 @@ def main() -> None:
         return
     selected_edges = database.get_nb_selected_edge_stats()
     st_statistic.display_statistic_edges(selected_edges)
+    st_statistic.display_statistic_ais()  # Don't do anything for now
 
 
 if __name__ == "__main__":
