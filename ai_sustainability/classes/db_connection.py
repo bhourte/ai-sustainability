@@ -526,7 +526,7 @@ class DbConnection:
                 f"g.addV('Answer').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question', '{question_text}').property('question_id', '{question_id}')"
             )
 
-    def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: list, question_id: str):
+    def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: list, question_id: str) -> None:
         """
         Create an edge between two nodes
 

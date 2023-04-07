@@ -21,6 +21,7 @@ class DbGestion:
         - primary_key : the primary key of the database (string)
 
     Methods :
+        - __init__
         - run_gremlin_query : run a gremlin query
         - close : close the connection to the database
         - save_graph : save the graph in a json file
@@ -51,8 +52,7 @@ class DbGestion:
             - query : the gremlin query to run (string) (Exemple : "g.V()")
         """
         run = self.gremlin_client.submit(query).all()
-        result = run.result()
-        return result
+        return run.result()
 
     def close(self) -> None:
         """
@@ -67,10 +67,8 @@ class DbGestion:
         Parameters :
             - path : the path of the json file (string) (Exemple : "data/graph.json")
         """
-        query = "g.V()"
-        all_vertices = self.run_gremlin_query(query)
-        query = "g.E()"
-        all_edges = self.run_gremlin_query(query)
+        all_vertices = self.run_gremlin_query("g.V()")
+        all_edges = self.run_gremlin_query("g.E()")
         if os.path.exists(path):
             os.remove(path)
         all_graph = [all_vertices, all_edges]
@@ -97,23 +95,15 @@ class DbGestion:
             query = "g.addV('" + vertex["label"] + "').property('id', '" + vertex["id"] + "')"
             if "properties" in vertex:
                 for prop in vertex["properties"]:
-                    query += ".property('" + prop + "', '" + vertex["properties"][prop][0]["value"] + "')"
+                    query += f".property('{prop}', '{vertex['properties'][prop][0]['value']}')"
             querys.append(query)
         for edge in json_data[1]:
             query = (
-                "g.V('"
-                + edge["outV"]
-                + "').addE('"
-                + edge["label"]
-                + "').to(g.V('"
-                + edge["inV"]
-                + "')).property('id', '"
-                + edge["id"]
-                + "')"
+                f"g.V('{edge['outV']}').addE('{edge['label']}').to(g.V('{edge['inV']}')).property('id', '{edge['id']}')"
             )
             if "properties" in edge:
                 for prop in edge["properties"]:
-                    query += ".property('" + prop + "', '" + edge["properties"][prop] + "')"
+                    query += f".property('{prop}', '{edge['properties'][prop]}')"
             querys.append(query)
         with open(script_path, "w", encoding="utf-8") as file:
             json.dump(querys, file, ensure_ascii=False, indent=4)
@@ -154,31 +144,23 @@ class DbGestion:
 
         querys = []
         for vertex in json_data[0]:
-            query = "g.addV('" + vertex["label"] + "').property('id', '" + vertex["id"] + "')"
+            query = f"g.addV('{vertex['label']}').property('id', '{vertex['id']}')"
             if "properties" in vertex:
                 for prop in vertex["properties"]:
                     if prop != "list_AI":
-                        query += ".property('" + prop + "', '" + vertex["properties"][prop][0]["value"] + "')"
+                        query += f".property('{prop}', '{vertex['properties'][prop][0]['value']}')"
             if vertex["id"] == "1":
-                query += ".property( 'list_AI', '" + ais + "')"
+                query += f".property('list_AI', '{ais}')"
             querys.append(query)
         for edge in json_data[1]:
             query = (
-                "g.V('"
-                + edge["outV"]
-                + "').addE('"
-                + edge["label"]
-                + "').to(g.V('"
-                + edge["inV"]
-                + "')).property('id', '"
-                + edge["id"]
-                + "')"
+                f"g.V('{edge['outV']}').addE('{edge['label']}').to(g.V('{edge['inV']}')).property('id', '{edge['id']}')"
             )
             if "properties" in edge:
                 for prop in edge["properties"]:
                     if prop != "list_coef":
-                        query += ".property('" + prop + "', '" + edge["properties"][prop] + "')"
-            query += ".property('list_coef', '" + str(dico_matrix[edge["id"]])[1:-1] + "')"
+                        query += f".property('{prop}', '{edge['properties'][prop]}')"
+            query += f".property('list_coef', '{str(dico_matrix[edge['id']])[1:-1]}')"
             querys.append(query)
         with open(script_path, "w", encoding="utf-8") as file:
             json.dump(querys, file, ensure_ascii=False, indent=4)
