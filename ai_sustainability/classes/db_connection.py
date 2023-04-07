@@ -55,8 +55,8 @@ class DbConnection:
         """
         Initialize the class with the connection to the database
         """
-        self.gremlin_client = None  # type: client.Client
-        self.list_questions_id = []  # type: list
+        self.gremlin_client: client.Client = None
+        self.list_questions_id: list[str] = []
         self.modif_crypted = False
 
     def make_connection(self) -> None:
@@ -87,8 +87,7 @@ class DbConnection:
             - result : the result of the query (list)
         """
         run = self.gremlin_client.submit(query).all()
-        result = run.result()
-        return result
+        return run.result()
 
     def get_one_question(self, answers: list) -> dict:
         """
@@ -108,14 +107,14 @@ class DbConnection:
         question = {}  # type: dict
         self.truncate_questions(answers)
         question_id = self.get_next_question(answers)
-        if question_id == LAST_NODE_ID:
+        if self.get_question_label(question_id) == "end":
             question["question_text"] = ""
             question["answers"] = []
             question["help_text"] = ""
             question["question_label"] = "end"
             return question
 
-        if len(answers) > 1 and answers[1][0] == "Yes":
+        if len(answers) > 1 and answers[1][0] == "Yes":  # /!\ hard code here
             self.modif_crypted = True
 
         self.list_questions_id.append(question_id)
@@ -136,8 +135,7 @@ class DbConnection:
             - result[0] : the text of the question (str)
         """
         query = f"g.V('{question_id}').properties('text').value()"
-        result = self.run_gremlin_query(query)
-        return result[0]
+        return self.run_gremlin_query(query)[0]
 
     def get_answers_text(self, question_id: str) -> list:
         """
@@ -153,8 +151,7 @@ class DbConnection:
             query = f"g.V('{question_id}').outE().properties('text').value()"
         else:
             query = f"g.V('{question_id}').outE().has('modif_crypted','false').properties('text').value()"
-        result = self.run_gremlin_query(query)
-        return result
+        return self.run_gremlin_query(query)
 
     def get_help_text(self, question_id: str) -> str:
         """
@@ -189,8 +186,7 @@ class DbConnection:
             - result[0] : the label of the question (str)
         """
         query = f"g.V('{question_id}').label()"
-        result = self.run_gremlin_query(query)
-        return result[0]
+        return self.run_gremlin_query(query)[0]
 
     def get_next_question(self, answers: list) -> str:
         """
@@ -207,15 +203,13 @@ class DbConnection:
 
         previous_question_id = self.list_questions_id[-1]
         previous_question_label = self.get_question_label(previous_question_id)
-        if previous_question_label == "Q_Open" or previous_question_label == "Q_QRM":
+        if previous_question_label in ("Q_Open", "Q_QRM"):
             query = f"g.V('{previous_question_id}').outE().inV().id()"
 
-        if previous_question_label == "Q_QCM" or previous_question_label == "Q_QCM_Bool":
+        if previous_question_label in ("Q_QCM", "Q_QCM_Bool"):
             query = f"g.V('{previous_question_id}').outE().has('text', '{answers[-1][0]}').inV().id()"
 
-        result = self.run_gremlin_query(query)
-
-        return result[0]
+        return self.run_gremlin_query(query)[0]
 
     def truncate_questions(self, answers: list) -> None:
         """
@@ -244,8 +238,7 @@ class DbConnection:
             - node_id : the id of the node (str)
         """
         query = f"g.V('{node_id}')"
-        result = self.run_gremlin_query(query)
-        return bool(result)
+        return bool(self.run_gremlin_query(query))
 
     def create_user_node(self, username: str) -> None:
         """
@@ -264,8 +257,7 @@ class DbConnection:
                 - result : list of all users (list of str)
         """
         query = "g.V().hasLabel('user').id()"
-        result = self.run_gremlin_query(query)
-        return result
+        return self.run_gremlin_query(query)
 
     def get_all_feedbacks(self) -> dict:
         """
@@ -289,8 +281,7 @@ class DbConnection:
                 - result : list of all feedbacks from a user (list of str)
         """
         query = f"g.V('{username}').outE().hasLabel('Feedback').values('text')"
-        result = self.run_gremlin_query(query)
-        return result
+        return self.run_gremlin_query(query)
 
     def save_feedback(self, username: str, feedback: str) -> None:
         """
@@ -325,7 +316,7 @@ class DbConnection:
         """
         query = f"g.addV('Feedback').property('partitionKey', 'Feedback').property('id', 'feedback{username}')"
         self.run_gremlin_query(query)
-        time.sleep(0.2)
+        time.sleep(0.2)  # used to wait the node creation before calling the edge creation
 
     def create_feedback_edge(self, username: str, feedback: str) -> None:
         """
@@ -352,8 +343,7 @@ class DbConnection:
             - result[0] : the number of feedbacks from a user (int)
         """
         query = f"g.V('{username}').outE().hasLabel('Feedback').count()"
-        result = self.run_gremlin_query(query)
-        return result[0]
+        return self.run_gremlin_query(query)[0]
 
     def get_nb_selected_edge(self) -> dict:
         """
@@ -546,7 +536,7 @@ class DbConnection:
             - answers (list): list of the answers of the user
             - question_id (str): id of the question form
         """
-        time.sleep(0.05)
+        time.sleep(0.05)  # we wait to be sure that the 2 nodes are well created
         for answer in answers:
             self.run_gremlin_query(
                 f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('answer', '{answer}').property('proposition_id', '{self.get_proposition_id(question_id, answer)}')"
@@ -570,7 +560,7 @@ class DbConnection:
         end = True
         while end:
             next_node_id = self.run_gremlin_query(f"g.V('{node_id}').out().properties('id')")
-            # we delete the node
+            # we delete the node, the edges are deleted automaticaly by gremlin
             self.run_gremlin_query(f"g.V('{node_id}').drop()")
             if not next_node_id:
                 end = False
@@ -592,8 +582,7 @@ class DbConnection:
         nb_edges = self.run_gremlin_query(f"g.V('{source_node_id}').outE().count()")[0]
         if nb_edges == 1:
             return self.run_gremlin_query(f"g.V('{source_node_id}').outE().id()")[0]
-        else:
-            return self.run_gremlin_query(f"g.V('{source_node_id}').outE().has('text', '{answer}').id()")[0]
+        return self.run_gremlin_query(f"g.V('{source_node_id}').outE().has('text', '{answer}').id()")[0]
 
     def get_all_forms(self, username: str) -> list:
         """
