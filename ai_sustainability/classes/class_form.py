@@ -25,7 +25,7 @@ class FormStreamlit:
         - input_form_name
         - error_name_already_taken
         - show_submission_button
-        - set_state
+        - set_state : set the session_state.clicked to True
         - show_best_ai
     """
 
@@ -72,19 +72,13 @@ class FormStreamlit:
                 disabled=st.session_state.clicked,
             )
         )
-        # If no answer given, we return an empty string
-        if not answer:
-            st.session_state.clicked = False
-            return [""]
-
         validated_answer = validate_text_input(answer)
         return [validated_answer]
 
     def show_qcm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         options = ["<Select an option>"] + dict_question["answers"]
-        previous_index = 0
-        if previous_answer is not None:  # If it has to be auto-completed before
-            previous_index = options.index(previous_answer[0])
+        # If it has to be auto-completed before
+        previous_index = options.index(previous_answer[0]) if previous_answer is not None else 0
         # We show the question selectbox
         answer = str(
             st.selectbox(
@@ -99,9 +93,8 @@ class FormStreamlit:
         return [answer] if answer != "<Select an option>" else [""]
 
     def show_qrm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
-        default = []
-        if previous_answer is not None:  # If it has to be auto-completed before
-            default = previous_answer
+        # If it has to be auto-completed before
+        default = previous_answer if previous_answer is not None else []
         answers = st.multiselect(
             label=dict_question["question_text"],
             options=dict_question["answers"],
@@ -136,13 +129,13 @@ class FormStreamlit:
         return False
 
     def show_submission_button(self) -> bool:
-        if st.button("Submit", on_click=self.set_state, disabled=st.session_state.clicked):
+        if st.button("Submit", on_click=self.set_state_clicked, disabled=st.session_state.clicked):
             st.write("Answers saved")
             st.session_state.last_form_name = None
             return True
         return False
 
-    def set_state(self) -> None:
+    def set_state_clicked(self) -> None:
         st.session_state.clicked = True
 
     def show_best_ai(self, list_bests_ais: list) -> None:

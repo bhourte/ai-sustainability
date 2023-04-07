@@ -51,11 +51,11 @@ class FeedbackStreamlit:
         """
         Method used to show a box where the user can give a feedback
         """
-        st.write("Welcome back " + username)
+        st.write(f"Welcome back {username}")
         st.write("You can now give us your feedback")
         text = st.text_area("Your feedback: ")  # text area for the feedback
         if not text:
             return ""
         st.write("Your feedback has been saved")
-        st.write("Thank you for your this !")
+        st.write("Thank you!")
         return validate_text_input(text)

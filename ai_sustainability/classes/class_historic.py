@@ -54,8 +54,8 @@ class HistoricStreamlit(FormStreamlit):
         return list_answered_form[index_sol]
 
     def show_submission_button(self) -> bool:
-        if st.button("Change answer", disabled=st.session_state.clicked):
-            st.write("Answers saved")
+        if st.button("Save changes", disabled=st.session_state.clicked):
+            st.write("Changes saved")
             st.session_state.last_form_name = None
             return True
         return False
@@ -66,6 +66,6 @@ class HistoricStreamlit(FormStreamlit):
         question = dict_question["question_text"]
         answers = ""
         for i in previous_answers:
-            answers += i + "<br>"
-        st.subheader(question + " :")
+            answers += f"{i} <br>"
+        st.subheader(f"{question} :")
         st.caption(answers, unsafe_allow_html=True)
