@@ -34,8 +34,8 @@ class FormStreamlit:
     page_icon = "📝"
 
     def __init__(self) -> None:
-        st.title(f"{self.page_icon}{self.form_title}")
         st.set_page_config(page_title=self.page_title, page_icon=self.page_icon)
+        st.title(f"{self.page_icon}{self.form_title}")
         self.username = check_user_connection()
 
     @property

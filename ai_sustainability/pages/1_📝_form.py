@@ -13,9 +13,9 @@ def main() -> None:
     This is the code used to show the form and used by the user to fill it
     """
     # Connection to the online gremlin database via db_connection.py
-    database = DbConnection()
     st_form = FormStreamlit()
-    database.make_connection()
+    database = DbConnection()
+
     username = st_form.username
     if not username:
         return

@@ -19,9 +19,7 @@ class FeedbackStreamlit:
         - feedback_box : show a box where the user can give a feedback
     """
 
-    def __init__(self, database_link) -> None:
-        self.database_link = database_link
-
+    def __init__(self) -> None:
         st.set_page_config(page_title="Feedback Page", page_icon="💬")
         st.title("💬Feedback")
         self.username = check_user_connection()

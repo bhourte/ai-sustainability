@@ -55,14 +55,8 @@ class DbConnection:
         """
         Initialize the class with the connection to the database
         """
-        self.gremlin_client: client.Client = None
         self.list_questions_id: list[str] = []
         self.modif_crypted = False
-
-    def make_connection(self) -> None:
-        """
-        Make the connection to the database
-        """
         self.gremlin_client = connect(
             endpoint="questions-db.gremlin.cosmos.azure.com",
             database_name="graphdb",
@@ -396,7 +390,7 @@ class DbConnection:
         """
         return self.check_node_exist(f"{username}-answer{FIRST_NODE_ID}-{form_name}")
 
-    def get_weight(self, edge_id: str) -> list:
+    def get_weight(self, edge_id: str) -> list[float]:
         """
         Get the list_coef from the edge with edge_id id
 

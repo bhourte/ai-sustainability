@@ -10,9 +10,8 @@ def main() -> None:
     This is the code used by the user to give feedback and by the Admin to see all feedback
     """
 
+    st_feedback = FeedbackStreamlit()
     database = DbConnection()
-    st_feedback = FeedbackStreamlit(database)
-    database.make_connection()
     username = st_feedback.username
     if not username:
         return

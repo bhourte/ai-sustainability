@@ -100,10 +100,8 @@ def main() -> None:
     This is the code used to show the previous form completed by an User
     Different usage if User or Admin
     """
-
-    database = DbConnection()
     st_historic = HistoricStreamlit()
-    database.make_connection()
+    database = DbConnection()
     username = st_historic.username
     if not username:
         return

@@ -19,9 +19,7 @@ class StatisticStreamlit:
         - display_statistic_ais : show stats based on the AIs
     """
 
-    def __init__(self, database_link) -> None:
-        self.database_link = database_link
-
+    def __init__(self) -> None:
         st.set_page_config(page_title="Statistic Page", page_icon="📊")
         st.title("📊Statistic")
         self.username = check_user_connection()

@@ -11,9 +11,8 @@ def main() -> None:
     """
 
     # Connection to the online gremlin database via db_connection.py
+    st_statistic = StatisticStreamlit()
     database = DbConnection()
-    st_statistic = StatisticStreamlit(database)
-    database.make_connection()
     username = st_statistic.username
     if not username:
         return
