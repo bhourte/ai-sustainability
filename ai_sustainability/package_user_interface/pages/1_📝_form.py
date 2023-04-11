@@ -1,8 +1,8 @@
 """
 This file is used to show the From page
 """
-from ai_sustainability.classes.class_form import FormStreamlit
 from ai_sustainability.package_data_access.db_connection import DbConnection
+from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 
 # General variable, used to begin the main() function
 N_BEST_AI = 5  # TODO : put this in a config file or env variable

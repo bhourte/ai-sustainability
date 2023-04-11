@@ -1,8 +1,10 @@
 """
 This file is used to show the Feedback page
 """
-from ai_sustainability.classes.class_feedback import FeedbackStreamlit
 from ai_sustainability.package_data_access.db_connection import DbConnection
+from ai_sustainability.package_user_interface.classes.class_feedback import (
+    FeedbackStreamlit,
+)
 
 
 def main() -> None:

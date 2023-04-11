@@ -1,8 +1,10 @@
 """
 This file is used to show the Statistic page
 """
-from ai_sustainability.classes.class_statistic import StatisticStreamlit
 from ai_sustainability.package_data_access.db_connection import DbConnection
+from ai_sustainability.package_user_interface.classes.class_statistic import (
+    StatisticStreamlit,
+)
 
 
 def main() -> None:
