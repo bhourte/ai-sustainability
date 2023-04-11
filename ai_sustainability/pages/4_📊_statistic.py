@@ -2,7 +2,7 @@
 This file is used to show the Statistic page
 """
 from ai_sustainability.classes.class_statistic import StatisticStreamlit
-from ai_sustainability.classes.db_connection import DbConnection
+from ai_sustainability.database.db_connection import DbConnection
 
 
 def main() -> None:

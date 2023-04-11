@@ -6,7 +6,7 @@ inherit from class_form
 import streamlit as st
 
 from ai_sustainability.classes.class_form import FormStreamlit
-from ai_sustainability.classes.utils_streamlit import check_user_connection
+from ai_sustainability.utils.utils_streamlit import check_user_connection
 
 
 class HistoricStreamlit(FormStreamlit):
