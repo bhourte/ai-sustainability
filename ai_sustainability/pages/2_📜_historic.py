@@ -84,9 +84,8 @@ def historic_admin(st_historic: HistoricStreamlit, database: DbConnection) -> No
         return
 
     # get the list with all previous answers contained in the form
-    previous_answers = database.get_list_answers(selected_form)
+    previous_answers = database.get_list_answers(selected_form) + [["end"]]
     end = False
-    previous_answers += [["end"]]
     i = 0
     while not end:
         list_answers = previous_answers[:i]

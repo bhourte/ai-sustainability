@@ -50,7 +50,7 @@ class StatisticStreamlit:
             text = []  # Text of the selected answer
             count_edges = []  # Number of times each edge was selected
             for key in edge_selected:
-                node_in = key.split("-")[0]  # /!\ hard code here
+                node_in = key.split("-")[0]
                 node_out = key.split("-")[1]
                 hover_text.append(f"Q {node_in} to Q {node_out}")
                 text.append(edge_selected[key][0])

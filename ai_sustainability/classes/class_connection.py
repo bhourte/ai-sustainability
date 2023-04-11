@@ -20,7 +20,6 @@ class ConnectionStreamlit:
         st.set_page_config(page_title="Connection Page", page_icon="👤")
         st.title("👤Connection")
         self.username = ""
-        st.session_state.clicked = False
 
     def setup_username(self) -> str:
         username = st.text_input(
@@ -41,9 +40,8 @@ class ConnectionStreamlit:
             return ""
 
         st.caption(f"🔑Connected as an {username}" if username == "Admin" else f"✅Connected as {username}")
-        st.session_state.username = username
+        st.session_state.username = self.username = username
         # To detect if the user create a form with the same name as the previous one (used in Historic)
         st.session_state.last_form_name = None
         st.session_state.clicked = False
-        self.username = username
         return username

@@ -28,17 +28,15 @@ class FeedbackStreamlit:
         st.session_state.clicked = False
 
     def show_all_feedbacks(self, all_feedbacks: dict) -> None:
-        if len(all_feedbacks.keys()) == 0:  # If there is no user in the database
+        if not all_feedbacks.keys():  # If there is no user in the database
             st.write("There is no user in the database.")
             return
         is_feedback = False
         for user in all_feedbacks:
             with st.expander("Feedbacks from " + user):
-                i = 1
-                for feedback in all_feedbacks[user]:
+                for i in range(len(all_feedbacks[user])):
+                    st.write(f"feedback {i} : {all_feedbacks[user][i]}")
                     is_feedback = True
-                    st.write(f"feedback {i} : {feedback}")
-                    i += 1
         if not is_feedback:  # If there is no feedback in the database
             st.write("There is no feedback in the database.")
 

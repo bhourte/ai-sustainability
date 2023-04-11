@@ -89,8 +89,7 @@ class FormStreamlit:
                 disabled=st.session_state.clicked,
             )
         )
-        # If no answer given, we return an empty string
-        return [answer] if answer != "<Select an option>" else [""]
+        return [""] if answer == "<Select an option>" else [answer]
 
     def show_qrm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
         # If it has to be auto-completed before
@@ -102,7 +101,6 @@ class FormStreamlit:
             help=dict_question["help_text"],
             disabled=st.session_state.clicked,
         )
-        # If no answer given, we return None
         return [""] if not answers else answers
 
     def check_name(self, string: str) -> str:
@@ -136,6 +134,9 @@ class FormStreamlit:
         return False
 
     def set_state_clicked(self) -> None:
+        """
+        Method used to set the clicked session_state to true ONLY when the submission button is clicked
+        """
         st.session_state.clicked = True
 
     def show_best_ai(self, list_bests_ais: list) -> None:

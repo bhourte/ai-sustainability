@@ -25,6 +25,8 @@ def no_dash_in_my_text(text: str) -> tuple:
         return True, "\\\\"
     if '"' in text:
         return True, '"'
+    if "'" in text:
+        return True, "'"
     return False, ""
 
 
