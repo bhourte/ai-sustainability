@@ -7,10 +7,9 @@ from ai_sustainability.utils.models import (
     AnswersList,
     Feedback,
     Question,
-    QuestionAnswer,
     SelectedEdge,
     User,
-    UserAnswer,
+    UserAnswers,
     UserFeedback,
 )
 
@@ -45,7 +44,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_next_question(self, actual_question: Question, answer: UserAnswer) -> Question:
+    def get_next_question(self, actual_question: Question, answer: UserAnswers) -> Question:
         """
         Get the id of the next question
 
@@ -55,30 +54,6 @@ class DBInterface(ABC):
 
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
-        """
-
-    @abstractmethod
-    def get_answers_text(self, question_id: str) -> QuestionAnswer:
-        """
-        Get the texts of answers of a question
-
-        Parameters :
-            - question_id : the id of the question (str)
-
-        Return :
-            - the texts of the answers (list of str)
-        """
-
-    @abstractmethod
-    def get_help_text_edge(self, question_id: str) -> str:  # TODO : Change to get_edge_answer ??
-        """
-        Get the help text of a question
-
-        Parameters :
-            - question_id : the id of the question (str)
-
-        Return :
-            - the help text of the answer (of the edge) (str)
         """
 
     @abstractmethod
@@ -133,15 +108,6 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_feedback_node(self, username: User) -> None:
-        """
-        Create a feedback node in the database
-
-        Parameters :
-            - username : the username of the user (str)
-        """
-
-    @abstractmethod
     def create_feedback_edge(self, username: User, feedback: Feedback) -> None:
         """
         Create a feedback edge in the database
@@ -164,15 +130,6 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_nb_selected_edge(self) -> list[SelectedEdge]:
-        """
-        Return a dict with number of selected edge for each proposition
-
-        Return :
-            - number of selected edge for each proposition
-        """
-
-    @abstractmethod
     def get_weight(self, edge_id: str) -> list[float]:
         """
         Get the list_coef from the edge with edge_id id
@@ -182,18 +139,6 @@ class DBInterface(ABC):
 
         Return:
             - list of the weights of the edge
-        """
-
-    @abstractmethod
-    def get_edges_id(self, answers: AnswersList) -> list[str]:
-        """
-        Get the edges id of the answers
-
-        Parameters:
-            - answers (list): list of the answers of the user
-
-        Return:
-            - list of the edges id of the answers of the user
         """
 
     @abstractmethod
@@ -222,7 +167,7 @@ class DBInterface(ABC):
 
     @abstractmethod
     def create_answer_edge(
-        self, source_node_id: str, target_node_id: str, answers: UserAnswer, question_id: str
+        self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str
     ) -> None:
         """
         Create an edge between two nodes
@@ -250,22 +195,9 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_proposition_id(self, source_node_id: str, answer_string: str) -> str:
+    def get_all_forms_names(self, username: User) -> list[str]:
         """
-        Get the id of a proposition
-
-        Parameters:
-            - source_node_id (str): id of the source node
-            - answer_string (str): answer of the user
-
-        Return:
-            - id of the proposition
-        """
-
-    @abstractmethod
-    def get_all_forms(self, username: User) -> list[str]:
-        """
-        Get all the forms of a user
+        Get all names of the forms of a user (in fact, get all the id lol)
 
         Parameters:
             - username (str): username of the user
@@ -289,37 +221,10 @@ class DBInterface(ABC):
     ########## Less useful method ##########  TODO : see if we keep them
 
     @abstractmethod
-    def get_question_text(self, question_id: str) -> str:
+    def get_nb_selected_edge(self) -> list[SelectedEdge]:
         """
-        Get the text of a question
-
-        Parameters :
-            - question_id : the id of the question (str)
+        Return a dict with number of selected edge for each proposition
 
         Return :
-            - the text of the question (str)
-        """
-
-    @abstractmethod
-    def get_help_text_node(self, question_id: str) -> str:
-        """
-        Get the help text of a question
-
-        Parameters :
-            - question_id : the id of the question (str)
-
-        Return :
-            - the help text of the question (str)
-        """
-
-    @abstractmethod
-    def get_question_label(self, question_id: str) -> str:
-        """
-        Get the label of a question
-
-        Parameters :
-            - question_id : the id of the question (str)
-
-        Return :
-            - the label of the question (str)
+            - number of selected edge for each proposition
         """

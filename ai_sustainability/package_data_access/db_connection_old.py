@@ -344,7 +344,7 @@ class DbConnection:
 
         Return :
             - nb_selected_edge : dict of number of selected edge for each proposition
-                Dict{ edge_id: [text, nb_selected]}  # TODO mettre ça dans le fichier models.py
+                Dict{ edge_id: [text, nb_selected]}
         """
         query = "g.E().hasLabel('Answer').valueMap()"
         result = self.run_gremlin_query(query)
