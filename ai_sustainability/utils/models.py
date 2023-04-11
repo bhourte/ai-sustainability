@@ -5,7 +5,6 @@ File with all dataclass and Type we use in the form application
 from dataclasses import dataclass
 from typing import NewType
 
-# TODO : distinguish between answer given by an user an list of answers of a question
 QuestionAnswer = NewType("QuestionAnswer", list[str])  # List of answers possible for a question
 UserAnswer = NewType("UserAnswer", list[str])  # List of answers selected by the user in QuestionAnswer propositions
 User = NewType("User", str)

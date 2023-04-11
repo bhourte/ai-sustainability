@@ -4,11 +4,13 @@ This file contains the class DbConnection, used to connect to the database and t
 from abc import ABC, abstractmethod
 
 from ai_sustainability.utils.models import (
-    Answer,
+    AnswersList,
     Feedback,
     Question,
+    QuestionAnswer,
     SelectedEdge,
     User,
+    UserAnswer,
     UserFeedback,
 )
 
@@ -43,20 +45,20 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_next_question(self, actual_question: Question, answer: str = "") -> Question:
+    def get_next_question(self, actual_question: Question, answer: UserAnswer) -> Question:
         """
         Get the id of the next question
 
         Parameters :
             - actual_question : the actual Question
-            - answer : the answer given buy the user to the actual question (if "" : this means no specific answer (=Q_Next))
+            - answer : the answer given by the user for the question (if "" : this means no specific answer eg: Q_Next)
 
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
 
     @abstractmethod
-    def get_answers_text(self, question_id: str) -> Answer:
+    def get_answers_text(self, question_id: str) -> QuestionAnswer:
         """
         Get the texts of answers of a question
 
@@ -183,7 +185,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_edges_id(self, answers: Answer) -> list[str]:
+    def get_edges_id(self, answers: AnswersList) -> list[str]:
         """
         Get the edges id of the answers
 
@@ -193,10 +195,9 @@ class DBInterface(ABC):
         Return:
             - list of the edges id of the answers of the user
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     @abstractmethod
-    def save_answers(self, username: User, form_name: str, answers: Answer) -> bool:
+    def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
         """
         Save the answers of a user in the database
 
@@ -208,7 +209,6 @@ class DBInterface(ABC):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     @abstractmethod
     def create_answer_node(self, question_id: str, new_node_id: str) -> None:
@@ -221,7 +221,9 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_answer_edge(self, source_node_id: str, target_node_id: str, answers: Answer, question_id: str) -> None:
+    def create_answer_edge(
+        self, source_node_id: str, target_node_id: str, answers: UserAnswer, question_id: str
+    ) -> None:
         """
         Create an edge between two nodes
 
@@ -231,10 +233,9 @@ class DBInterface(ABC):
             - answers (list): list of the answers of the user
             - question_id (str): id of the question form
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     @abstractmethod
-    def change_answers(self, answers: Answer, username: User, form_name: str, new_form_name: str) -> bool:
+    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
         """
         Change the answer in db
 
@@ -247,21 +248,19 @@ class DBInterface(ABC):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     @abstractmethod
-    def get_proposition_id(self, source_node_id: str, answer: Answer) -> str:
+    def get_proposition_id(self, source_node_id: str, answer_string: str) -> str:
         """
         Get the id of a proposition
 
         Parameters:
             - source_node_id (str): id of the source node
-            - answer (str): answer of the user
+            - answer_string (str): answer of the user
 
         Return:
             - id of the proposition
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     @abstractmethod
     def get_all_forms(self, username: User) -> list[str]:
@@ -276,7 +275,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_list_answers(self, selected_form: str) -> Answer:
+    def get_list_answers(self, selected_form: str) -> AnswersList:
         """
         Get the list of answers of a form
 
@@ -286,7 +285,6 @@ class DBInterface(ABC):
         Return:
             - list of the answers
         """
-        # TODO : distinguish between answer given by an user an list of answers of a question
 
     ########## Less useful method ##########  TODO : see if we keep them
 

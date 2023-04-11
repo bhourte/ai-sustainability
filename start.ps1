@@ -1,1 +1,1 @@
-﻿python -m streamlit run .\ai_sustainability\👤_connection.py
+﻿python -m streamlit run .\ai_sustainability\package_user_interface\👤_connection.py
