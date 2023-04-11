@@ -5,10 +5,7 @@ inherit from class_form
 """
 import streamlit as st
 
-from ai_sustainability.classes.class_form import FormStreamlit
-from ai_sustainability.package_user_interface.utils_streamlit import (
-    check_user_connection,
-)
+from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 
 
 class HistoricStreamlit(FormStreamlit):
@@ -27,9 +24,6 @@ class HistoricStreamlit(FormStreamlit):
     page_title = "Historic Page"
     form_title = "Historic"
     page_icon = "📜"
-
-    def __init__(self) -> None:
-        super().__init__()
 
     def show_choice_user(self, list_username: list[str]) -> str:
         list_username = ["<Select a user>"] + list_username

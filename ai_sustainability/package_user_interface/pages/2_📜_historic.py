@@ -1,7 +1,7 @@
 """
 This file is used to show the Historic page
 """
-from ai_sustainability.package_data_access.db_connection import DbConnection
+from ai_sustainability.package_data_access.db_connection_old import DbConnection
 from ai_sustainability.package_user_interface.classes.class_historic import (
     HistoricStreamlit,
 )

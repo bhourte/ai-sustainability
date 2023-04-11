@@ -2,7 +2,9 @@
 This file is the main file
 launch it with: streamlit run 👤_connection.py
 """
-from ai_sustainability.classes.class_connection import ConnectionStreamlit
+from ai_sustainability.package_user_interface.classes.class_connection import (
+    ConnectionStreamlit,
+)
 
 
 def main() -> None:
