@@ -6,11 +6,12 @@ from dataclasses import dataclass
 from typing import NewType
 
 # TODO : distinguish between answer given by an user an list of answers of a question
-Answer = NewType("Answer", list[str])
+QuestionAnswer = NewType("QuestionAnswer", list[str])  # List of answers possible for a question
+UserAnswer = NewType("UserAnswer", list[str])  # List of answers selected by the user in QuestionAnswer propositions
 User = NewType("User", str)
 Query = NewType("Query", str)
 Feedback = NewType("Feedback", str)
-AnswersList = NewType("AnswersList", list[Answer])
+AnswersList = NewType("AnswersList", list[UserAnswer])
 
 
 @dataclass
@@ -19,7 +20,7 @@ class Question:
 
     question_id: str
     text: str
-    answers: list[Answer]
+    answers: list[QuestionAnswer]
     help_text: str
     type: str
 
