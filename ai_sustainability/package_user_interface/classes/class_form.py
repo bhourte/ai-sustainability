@@ -6,8 +6,10 @@ from typing import Optional
 
 import streamlit as st
 
+from ai_sustainability.package_user_interface.utils_streamlit import (
+    check_user_connection,
+)
 from ai_sustainability.utils.utils import no_dash_in_my_text, validate_text_input
-from ai_sustainability.utils.utils_streamlit import check_user_connection
 
 
 class FormStreamlit:

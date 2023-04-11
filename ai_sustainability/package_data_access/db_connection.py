@@ -14,7 +14,6 @@ _range = range
 statics.load_statics(globals())
 
 FIRST_NODE_ID = "1"
-LAST_NODE_ID = "9"
 
 
 # the connect function is outside the class to be able to use the cache of streamlit

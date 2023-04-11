@@ -2,7 +2,7 @@
 This file is used to show the Historic page
 """
 from ai_sustainability.classes.class_historic import HistoricStreamlit
-from ai_sustainability.database.db_connection import DbConnection
+from ai_sustainability.package_data_access.db_connection import DbConnection
 
 # General variable, used to begin the main() function
 N_BEST_AI = 5
@@ -102,7 +102,7 @@ def main() -> None:
     """
     st_historic = HistoricStreamlit()
     database = DbConnection()
-    username = st_historic.username
+s    username = st_historic.username
     if not username:
         return
 

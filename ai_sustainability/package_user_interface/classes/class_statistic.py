@@ -5,7 +5,9 @@ Streamlit class
 import plotly.graph_objects as go
 import streamlit as st
 
-from ai_sustainability.utils.utils_streamlit import check_user_connection
+from ai_sustainability.package_user_interface.utils_streamlit import (
+    check_user_connection,
+)
 
 
 class StatisticStreamlit:

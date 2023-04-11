@@ -2,7 +2,7 @@
 This file is used to show the Feedback page
 """
 from ai_sustainability.classes.class_feedback import FeedbackStreamlit
-from ai_sustainability.database.db_connection import DbConnection
+from ai_sustainability.package_data_access.db_connection import DbConnection
 
 
 def main() -> None:
