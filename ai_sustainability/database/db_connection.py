@@ -193,7 +193,7 @@ class DbConnection:
         Get the id of the next question
 
         Parameters :
-            - answers : list of the answers given by the user (list of list of str)
+            - answers : list of the answers given by the user (list of list of str)  # TODO mettre ça dans le fichier models.py
 
         Return :
             - result[0] : the id of the next question (str)
@@ -216,7 +216,7 @@ class DbConnection:
         Truncate the list of questions id if the user has answered less questions than the previous time
 
         Parameters :
-            - answers : list of the answers given by the user (list of list of str)
+            - answers : list of the answers given by the user (list of list of str)  # TODO mettre ça dans le fichier models.py
         """
         if len(answers) < len(self.list_questions_id):
             self.list_questions_id = self.list_questions_id[: len(answers)]
@@ -263,7 +263,7 @@ class DbConnection:
         """
         Return all feedbacks from all users in the database
             Return :
-                - all_feedbacks : dict of all feedbacks
+                - all_feedbacks : dict of all feedbacks  # TODO mettre ça dans le fichier models.py
                     Dict {
                             username: [feedback1, feedback2, ...]
                     }
@@ -351,7 +351,7 @@ class DbConnection:
 
         Return :
             - nb_selected_edge : dict of number of selected edge for each proposition
-                Dict{ edge_id: [text, nb_selected]}
+                Dict{ edge_id: [text, nb_selected]}  # TODO mettre ça dans le fichier models.py
         """
         query = "g.E().hasLabel('Answer').valueMap()"
         result = self.run_gremlin_query(query)
@@ -370,7 +370,7 @@ class DbConnection:
         Especially for stats showing
         Return :
             - nb_selected_edge : dict of number of selected edge for each proposition
-                Dict{ edge_id: [text, nb_selected]}
+                Dict{ edge_id: [text, nb_selected]}  # TODO mettre ça dans le fichier models.py
         """
         nb_selected_edge = self.get_nb_selected_edge()
 
@@ -404,7 +404,7 @@ class DbConnection:
             - edge_id (str): id of the edge in the db
 
         Return:
-            - list_weight (list(float)): list of the weights of the edge
+            - list_weight (list(float)): list of the weights of the edge  # TODO mettre ça dans le fichier models.py(à voir s'il faut le faire ou pas)
         """
         list_weight = self.run_gremlin_query(f"g.E('{edge_id}').properties('list_coef').value()")[0].split(", ")
         for i_weight, weight in enumerate(list_weight):
