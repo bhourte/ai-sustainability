@@ -114,7 +114,7 @@ class FormStreamlit:
 
     def input_form_name(self, previous_answer: str = "") -> str:
         if previous_answer:
-            text = "If you want to change the name of the form, change it here:"
+            text = "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"
         else:
             text = "Give a name to your form here"
         form_name = st.text_input(text, previous_answer, disabled=st.session_state.clicked)
@@ -147,9 +147,6 @@ class FormStreamlit:
 
         Parameters:
             - list_bests_ais (list): list of the n best AI
-
-        Return:
-            - None
         """
         if len(list_bests_ais) > 0:
             st.subheader(
