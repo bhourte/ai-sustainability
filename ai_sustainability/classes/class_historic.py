@@ -21,12 +21,13 @@ class HistoricStreamlit(FormStreamlit):
         - show_submission : show a previous answered form
         - show_question_as_admin : show a previous answered form with the admin view
     """
+
     page_title = "Historic Page"
     form_title = "Historic"
     page_icon = "📜"
+
     def __init__(self) -> None:
         super().__init__()
-
 
     def show_choice_user(self, list_username: list[str]) -> str:
         list_username = ["<Select a user>"] + list_username
