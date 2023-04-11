@@ -5,8 +5,6 @@ from ai_sustainability.classes.class_historic import HistoricStreamlit
 from ai_sustainability.classes.db_connection import DbConnection
 
 # General variable, used to begin the main() function
-FIRST_NODE_ID = "1"
-BASE_MODIF_CRYPTED = False
 N_BEST_AI = 5
 
 
@@ -51,13 +49,13 @@ def historic_user(username: str, st_historic: HistoricStreamlit, database: DbCon
         return
 
     # We ask the user to give us a name for the form (potentially a new one)
-    new_form_name = st_historic.input_form_name(form_name)
+    new_form_name = st_historic.show_form_name_input(form_name)
     if not new_form_name:
         return
 
     # If the name is already taken by an other form
     if database.check_form_exist(username, new_form_name) and new_form_name != form_name:
-        if st_historic.error_name_already_taken(username):
+        if st_historic.check_name_already_taken(username):
             return
 
     list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
@@ -104,7 +102,7 @@ def main() -> None:
     """
 
     database = DbConnection()
-    st_historic = HistoricStreamlit(database)
+    st_historic = HistoricStreamlit()
     database.make_connection()
     username = st_historic.username
     if not username:

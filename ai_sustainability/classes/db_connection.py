@@ -89,7 +89,7 @@ class DbConnection:
         run = self.gremlin_client.submit(query).all()
         return run.result()
 
-    def get_one_question(self, answers: list) -> dict:
+    def get_one_question(self, answers: list) -> dict:  # TODO: no dict but Question class
         """
         Get one question from the database
 
@@ -99,7 +99,7 @@ class DbConnection:
         Return :
             - question : dict {
                 question_text : the text of the question (str)
-                answers : list of answers (list of list of str)
+                answers : list of answers (list of str)
                 help_text : the help text of the question (str)
                 question_label : the label of the question (str)
             }
@@ -411,7 +411,9 @@ class DbConnection:
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    def calcul_best_ais(self, nb_ai: int, answers: list) -> list:
+    def calcul_best_ais(
+        self, nb_ai: int, answers: list
+    ) -> list:  # TODO: not in db_connection (split 3 functions to gets infos from db)
         """
         Calculate the best AI to use for the user
 

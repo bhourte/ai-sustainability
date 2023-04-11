@@ -29,77 +29,83 @@ class FormStreamlit:
         - show_best_ai
     """
 
-    def __init__(self, database_link, set_page: bool = True) -> None:
-        self.database_link = database_link
-        if set_page:
-            self.set_atribute()
-        if "clicked" not in st.session_state:
-            st.session_state.clicked = False
+    page_title = "Form Page"
+    form_title = "Form"
+    page_icon = "📝"
 
-    def set_atribute(self) -> None:
-        st.set_page_config(page_title="Form Page", page_icon="📝")
-        st.title("📝Form")
+    def __init__(self) -> None:
+        st.title(f"{self.page_icon}{self.form_title}")
+        st.set_page_config(page_title=self.page_title, page_icon=self.page_icon)
         self.username = check_user_connection()
 
-    def show_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
+    @property
+    def locked(self) -> bool:
+        return st.session_state.get("clicked", False)
+
+    @locked.setter
+    def locked(self, value: bool) -> None:
+        st.session_state.clicked = value
+
+    def show_question(self, question: dict[str, str], previous_answer: Optional[list] = None) -> list[str]:
         answer = [""]
-        if dict_question["question_label"] == "Q_Open":
-            answer = self.show_open_question(dict_question, previous_answer)
-        elif dict_question["question_label"] == "Q_QCM" or dict_question["question_label"] == "Q_QCM_Bool":
-            answer = self.show_qcm_question(dict_question, previous_answer)
-        elif dict_question["question_label"] == "Q_QRM":
-            answer = self.show_qrm_question(dict_question, previous_answer)
-        elif dict_question["question_label"] == "end":  # This is the end (of the form)
+        if question["question_label"] == "Q_Open":  # TODO : in type Question, change attribute label by type, ...
+            answer = self.show_open_question(question, previous_answer)  # TODO:
+        elif question["question_label"] == "Q_QCM" or question["question_label"] == "Q_QCM_Bool":
+            answer = self.show_qcm_question(question, previous_answer)
+        elif question["question_label"] == "Q_QRM":
+            answer = self.show_qrm_question(question, previous_answer)
+        elif question["question_label"] == "end":  # This is the end (of the form)
             return ["end"]
         else:
             print("Error, question label no recognised")
         if answer == [""]:
             st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
-            st.session_state.clicked = False
+            self.locked = False
         return answer
 
-    def show_open_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
+    # TODO : maybe create an other class UI question for each type of question or factory method -> really interesting
+
+    def show_open_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
         if previous_answer is None:  # If it has not to be auto-completed before
             previous_answer = [""]
         # We show the question text area
         answer = str(
             st.text_area(
-                label=dict_question["question_text"],
+                label=question["question_text"],
                 height=100,
                 label_visibility="visible",
                 value=previous_answer[0],
-                help=dict_question["help_text"],
-                disabled=st.session_state.clicked,
+                help=question["help_text"],
+                disabled=self.locked,
             )
         )
-        validated_answer = validate_text_input(answer)
-        return [validated_answer]
+        return [validate_text_input(answer)]
 
-    def show_qcm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
-        options = ["<Select an option>"] + dict_question["answers"]
+    def show_qcm_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
+        options = ["<Select an option>"] + question["answers"]
         # If it has to be auto-completed before
         previous_index = options.index(previous_answer[0]) if previous_answer is not None else 0
         # We show the question selectbox
         answer = str(
             st.selectbox(
-                label=dict_question["question_text"],
+                label=question["question_text"],
                 options=options,
                 index=previous_index,
-                help=dict_question["help_text"],
-                disabled=st.session_state.clicked,
+                help=question["help_text"],
+                disabled=self.locked,
             )
         )
-        return [""] if answer == "<Select an option>" else [answer]
+        return [""] if answer == "<Select an option>" else [answer]  # TODO: change [""] by None
 
-    def show_qrm_question(self, dict_question: dict, previous_answer: Optional[list] = None) -> list[str]:
+    def show_qrm_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
         # If it has to be auto-completed before
         default = previous_answer if previous_answer is not None else []
         answers = st.multiselect(
-            label=dict_question["question_text"],
-            options=dict_question["answers"],
+            label=question["question_text"],
+            options=question["answers"],
             default=default,
-            help=dict_question["help_text"],
-            disabled=st.session_state.clicked,
+            help=question["help_text"],
+            disabled=self.locked,
         )
         return [""] if not answers else answers
 
@@ -110,15 +116,15 @@ class FormStreamlit:
             return ""
         return validate_text_input(string)
 
-    def input_form_name(self, previous_answer: str = "") -> str:
+    def show_form_name_input(self, previous_answer: str = "") -> str:  # TODO: change_name with a VERB
         if previous_answer:
             text = "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"
         else:
             text = "Give a name to your form here"
-        form_name = st.text_input(text, previous_answer, disabled=st.session_state.clicked)
+        form_name = st.text_input(text, previous_answer, disabled=self.locked)
         return self.check_name(form_name)
 
-    def error_name_already_taken(self, form_name: str) -> bool:
+    def check_name_already_taken(self, form_name: str) -> bool:
         if st.session_state.last_form_name != form_name:
             st.warning(
                 "You already have a form with this name, please pick an other name or change your previous form in the historic page."
@@ -126,20 +132,17 @@ class FormStreamlit:
             return True
         return False
 
+    def set_locked(self) -> None:
+        self.locked = True
+
     def show_submission_button(self) -> bool:
-        if st.button("Submit", on_click=self.set_state_clicked, disabled=st.session_state.clicked):
+        if st.button("Submit", on_click=self.set_locked, disabled=self.locked):
             st.write("Answers saved")
             st.session_state.last_form_name = None
             return True
         return False
 
-    def set_state_clicked(self) -> None:
-        """
-        Method used to set the clicked session_state to true ONLY when the submission button is clicked
-        """
-        st.session_state.clicked = True
-
-    def show_best_ai(self, list_bests_ais: list) -> None:
+    def show_best_ai(self, list_bests_ais: list[str]) -> None:
         """
             Method used to show the n best AI obtained after the user has completed the Form
             The number of AI choosen is based on the nbai wanted by the user and
@@ -151,11 +154,11 @@ class FormStreamlit:
         """
         if len(list_bests_ais) > 0:
             st.subheader(
-                f"There is {str(len(list_bests_ais))} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
+                f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
                 anchor=None,
             )
-            for i_best_ai, best_ai in enumerate(list_bests_ais):
-                st.caption(str(i_best_ai + 1) + ") " + best_ai)
+            for index, best_ai in enumerate(list_bests_ais):
+                st.caption(f"{index + 1}) {best_ai}")
         # If no AI corresponding the the choices
         else:
             st.subheader(
