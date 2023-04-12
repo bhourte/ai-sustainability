@@ -1,8 +1,9 @@
 """
 This file is used to show the From page
 """
-# from ai_sustainability.package_application.application import Application
-from ai_sustainability.package_application.test_application import Application
+from ai_sustainability.package_application.application import Application
+
+# from ai_sustainability.package_application.test_application import Application
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 from ai_sustainability.utils.models import AnswersList, User
 

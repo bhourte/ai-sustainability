@@ -263,7 +263,6 @@ class DbConnection(DBInterface):
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    @abstractmethod
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
         """
         Save the answers of a user in the database
@@ -318,7 +317,6 @@ class DbConnection(DBInterface):
                 )
             )
 
-    @abstractmethod
     def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
         """
         Change the answer in db
