@@ -1,6 +1,7 @@
 """
 File with our Application class
 """
+from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_data_access.db_connection import DbConnection
 from ai_sustainability.utils.models import (
     AnswersList,
@@ -19,6 +20,7 @@ class Application:
 
     def __init__(self) -> None:
         self.database = DbConnection()
+        self.business = Business()
         self.list_questions: list[Question] = []
         self.modif_crypted = False
 
@@ -54,11 +56,8 @@ class Application:
         Return:
             - list_bests_ais (list): list of the best AI to use
         """
-        for i in answers:
-            print(i[0].text)
-        for j in self.list_questions:
-            print(j.question_id)
-        return [""]
+        list_ai = self.database.get_all_ais()
+        return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, list_answers=answers)
 
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
         """
@@ -89,6 +88,14 @@ class Application:
         """
         return True
 
+    def get_all_users(self) -> list[User]:
+        """
+        Return all users in the database
+            Return :
+                - result : list of all users (list of str)
+        """
+        return self.database.get_all_users()
+
     def get_all_forms_names(self, username: User) -> list[str]:
         """
         Get all names of the forms of a user (in fact, get all the id lol)
@@ -113,13 +120,11 @@ class Application:
         """
         return self.database.get_list_answers(selected_form)
 
-    def get_all_users(self) -> list[User]:
+    def get_all_feedbacks(self) -> list[UserFeedback]:
         """
-        Return all users in the database
-            Return :
-                - result : list of all users (list of str)
+        Return all feedbacks from all users in the database
         """
-        return self.database.get_all_users()
+        return self.database.get_all_feedbacks()
 
     def check_user_exist(self, username: User) -> bool:
         """
@@ -151,12 +156,6 @@ class Application:
             - username : the username of the user (str)
             - feedback : the feedback given by the user (str)
         """
-
-    def get_all_feedbacks(self) -> list[UserFeedback]:
-        """
-        Return all feedbacks from all users in the database
-        """
-        return self.database.get_all_feedbacks()
 
     def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
         """
