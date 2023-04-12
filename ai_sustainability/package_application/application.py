@@ -73,7 +73,7 @@ class Application:
         """
         return self.database.save_answers(username, form_name, answers, self.list_questions)
 
-    def change_answers(self, answers: list, username: str, form_name: str, new_form_name: str) -> bool:
+    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
         """
         Change the answer in db
 
@@ -86,7 +86,7 @@ class Application:
         Return:
             - bool: True if the answers are saved, False if the form already exist
         """
-        return True
+        return self.database.change_answers(answers, username, form_name, new_form_name, self.list_questions)
 
     def get_all_users(self) -> list[User]:
         """
