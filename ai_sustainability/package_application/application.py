@@ -56,6 +56,8 @@ class Application:
         """
         for i in answers:
             print(i[0].text)
+        for j in self.list_questions:
+            print(j.question_id)
         return [""]
 
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
