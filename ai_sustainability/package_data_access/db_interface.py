@@ -132,7 +132,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
+    def save_answers(self, username: User, form_name: str, answers: AnswersList, questions: list[Question]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -146,7 +146,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_answer_node(self, question_id: str, question_text: str, new_node_id: str) -> None:
+    def create_answer_node(self, question: Question, new_node_id: str) -> None:
         """
         Create a question node in the database
 
@@ -157,7 +157,10 @@ class DBInterface(ABC):
 
     @abstractmethod
     def create_answer_edges(
-        self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str, proposition_id: str
+        self,
+        source_node_id: str,
+        target_node_id: str,
+        answers: UserAnswers,
     ) -> None:
         """
         Create an edge between two nodes

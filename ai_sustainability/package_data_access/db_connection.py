@@ -262,7 +262,7 @@ class DbConnection(DBInterface):
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
+    def save_answers(self, username: User, form_name: str, answers: AnswersList, questions: list[Question]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -274,9 +274,41 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        return None
+        if not self.check_node_exist(username):
+            self.create_user_node(username)
+        if self.check_form_exist(username, form_name):
+            return False
+        i = 0
+        while questions[i].type != "end":
+            new_node_name = f"{username}-answer{questions[i].question_id}-{form_name}"
+            if not self.check_node_exist(new_node_name):
+                self.create_answer_node(questions[i], new_node_name)
+            next_new_node_name = f"{username}-answer{questions[i+1].question_id}-{form_name}"
+            if not self.check_node_exist(next_new_node_name):
+                self.create_answer_node(questions[i + 1], next_new_node_name)
+            self.create_answer_edges(new_node_name, next_new_node_name, answers[i])
+            i += 1
+        # link between the User node and the first answer node
+        first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        self.run_gremlin_query(
+            Query(f"g.V('{username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')")
+        )
+        return True
 
-    def create_answer_node(self, question_id: str, question_text: str, new_node_id: str) -> None:
+    def check_form_exist(self, username: str, form_name: str) -> bool:
+        """
+        Check if a form exist in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - form_name : the name of the form (str)
+
+        Return :
+            - bool : True if the form exist, False otherwise
+        """
+        return self.check_node_exist(f"{username}-answer{FIRST_NODE_ID}-{form_name}")
+
+    def create_answer_node(self, question: Question, new_node_id: str) -> None:
         """
         Create a question node in the database
 
@@ -284,16 +316,16 @@ class DbConnection(DBInterface):
             - question_id (str): id of the question
             - new_node_id (str): id of the new node
         """
-        if "end" in new_node_id:
+        if question.type == "end":
             self.run_gremlin_query(
                 Query(
-                    f"g.addV('end').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question_id', '{question_id}')"
+                    f"g.addV('end').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question_id', '{question.question_id}')"
                 )
             )
         else:
             self.run_gremlin_query(
                 Query(
-                    f"g.addV('Answer').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question', '{question_text}').property('question_id', '{question_id}')"
+                    f"g.addV('Answer').property('partitionKey', 'Answer').property('id', '{new_node_id}').property('question', '{question.text}').property('question_id', '{question.question_id}')"
                 )
             )
 

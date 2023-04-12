@@ -70,7 +70,7 @@ class Application:
         Return:
             - bool: True if the answers are saved, False if the form already exist
         """
-        return True
+        return self.database.save_answers(username, form_name, answers, self.list_questions)
 
     def change_answers(self, answers: list, username: str, form_name: str, new_form_name: str) -> bool:
         """
