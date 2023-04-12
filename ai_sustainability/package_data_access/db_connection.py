@@ -369,7 +369,6 @@ class DbConnection(DBInterface):
         return self.run_gremlin_query(Query(f"g.V('{node_id}').label()"))[0]
 
     ########## Less useful method ##########  TODO : see if we keep them
-    @abstractmethod
     def get_nb_selected_edge(self) -> list[SelectedEdge]:
         """
         Return a dict with number of selected edge for each proposition
@@ -377,3 +376,26 @@ class DbConnection(DBInterface):
         Return :
             - number of selected edge for each proposition
         """
+        query = Query("g.E().hasLabel('Answer').valueMap()")
+        result = self.run_gremlin_query(query)
+
+        nb_selected_edge = {}
+        for edge in result:
+            if "proposition_id" in edge:
+                if edge["proposition_id"] not in nb_selected_edge:
+                    nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+                nb_selected_edge[edge["proposition_id"]][1] += 1
+
+        selected_edges = []
+        for key, val in nb_selected_edge.items():
+            selected_edges.append(SelectedEdge(key, val[0], val[1]))
+        return selected_edges
+
+    def get_all_ais(self) -> list[str]:
+        """
+        Get all the ais in the db
+
+        Return:
+            - list of the ais
+        """
+        return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI')")[0].split(", "))
