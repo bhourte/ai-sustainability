@@ -17,8 +17,6 @@ class Application:
     Class used to make the link between the database and the UI
     """
 
-    database: DbConnection
-
     def __init__(self) -> None:
         self.database = DbConnection()
         self.list_questions: list[Question] = []
@@ -56,6 +54,8 @@ class Application:
         Return:
             - list_bests_ais (list): list of the best AI to use
         """
+        for i in answers:
+            print(i[0].text)
         return [""]
 
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
@@ -117,7 +117,7 @@ class Application:
             Return :
                 - result : list of all users (list of str)
         """
-        return []
+        return self.database.get_all_users()
 
     def check_user_exist(self, username: User) -> bool:
         """
@@ -154,7 +154,7 @@ class Application:
         """
         Return all feedbacks from all users in the database
         """
-        return []
+        return self.database.get_all_feedbacks()
 
     def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
         """

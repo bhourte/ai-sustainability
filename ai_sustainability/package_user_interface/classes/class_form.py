@@ -97,7 +97,7 @@ class FormStreamlit:
     def show_qcm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         options = ["<Select an option>"] + self.get_proposition_list(question)
         # If it has to be auto-completed before
-        previous_index = options.index(previous_answer[0]) if previous_answer is not None else 0
+        previous_index = options.index(previous_answer[0].text) if previous_answer is not None else 0
         # We show the question selectbox
         answer = str(
             st.selectbox(
@@ -117,7 +117,13 @@ class FormStreamlit:
 
     def show_qrm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         # If it has to be auto-completed before
-        default = previous_answer if previous_answer is not None else []
+        default = []
+        if previous_answer is not None:
+            for proposition in previous_answer:
+                default.append(proposition.text)
+        print(previous_answer)
+        print("################")
+        print(default)
         answers = UserAnswers(
             st.multiselect(
                 label=question.text,

@@ -59,18 +59,6 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_node(self, node_id: str) -> dict:
-        """
-        Check if a node exists in the database
-
-        Parameters :
-            - node_id : the id of the node (str)
-
-        Return :
-            - a dict containing all information of the node
-        """
-
-    @abstractmethod
     def create_user_node(self, username: User) -> None:
         """
         Create a user node in the database
@@ -168,7 +156,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_answer_edge(
+    def create_answer_edges(
         self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str, proposition_id: str
     ) -> None:
         """

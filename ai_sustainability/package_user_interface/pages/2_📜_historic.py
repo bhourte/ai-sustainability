@@ -22,7 +22,8 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     form_name = selected_form.rsplit("-", maxsplit=1)[-1]
 
     # get the list with all previous answers contained in the form
-    previous_answers = app.get_list_answers(selected_form)
+    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False)
+    previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
 
     keep_going = True
     list_answers: AnswersList = AnswersList([])
@@ -40,7 +41,13 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
             list_answers.append(selected_answer)
             # If not already changed and name answer different from previous one and question's label is not Q_Open :
             # The form is modified and we do not fill it automatically with previous answers
-            if not change_made and list_answers[i] != previous_answers[i] and next_question.type != "Q_Open":
+            if (
+                not change_made
+                and list_answers[i][0].text != previous_answers[i][0].text
+                and next_question.type != "Q_Open"
+            ):
+                print("ICIIIIIIIIIIIIIII PTNNNNNNNNNNNNNNNNNNNNNNn")
+                print(list_answers[i] != previous_answers[i])
                 change_made = True
         i += 1
 
