@@ -297,8 +297,11 @@ class DbConnection(DBInterface):
                 )
             )
 
-    def create_answer_edge(
-        self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str, proposition_id: str
+    def create_answer_edges(
+        self,
+        source_node_id: str,
+        target_node_id: str,
+        answers: UserAnswers,
     ) -> None:
         """
         Create an edge between two nodes
@@ -310,10 +313,10 @@ class DbConnection(DBInterface):
             - question_id (str): id of the question form
         """
         time.sleep(0.05)  # we wait to be sure that the 2 nodes are well created
-        for answer in answers:
+        for proposition in answers:
             self.run_gremlin_query(
                 Query(
-                    f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('answer', '{answer}').property('proposition_id', '{proposition_id}')"
+                    f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('answer', '{proposition.text}').property('proposition_id', '{proposition.proposition_id}')"
                 )
             )
 
