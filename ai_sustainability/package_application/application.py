@@ -5,11 +5,9 @@ from ai_sustainability.package_data_access.db_connection import DbConnection
 from ai_sustainability.utils.models import (
     AnswersList,
     Feedback,
-    Proposition,
     Question,
     SelectedEdge,
     User,
-    UserAnswers,
     UserFeedback,
 )
 
@@ -74,6 +72,21 @@ class Application:
         """
         return True
 
+    def change_answers(self, answers: list, username: str, form_name: str, new_form_name: str) -> bool:
+        """
+        Change the answer in db
+
+        Parameters:
+            - answers (list): list of answers
+            - username (str): username of the user
+            - form_name (str): name of the form
+            - new_form_name (str): new name of the form
+
+        Return:
+            - bool: True if the answers are saved, False if the form already exist
+        """
+        return True
+
     def get_all_forms_names(self, username: User) -> list[str]:
         """
         Get all names of the forms of a user (in fact, get all the id lol)
@@ -84,7 +97,7 @@ class Application:
         Return:
             - list of the forms_id
         """
-        return [""]
+        return self.database.get_all_forms_names(username)
 
     def get_list_answers(self, selected_form: str) -> AnswersList:
         """
@@ -96,7 +109,7 @@ class Application:
         Return:
             - list of the answers
         """
-        return AnswersList([])
+        return self.database.get_list_answers(selected_form)
 
     def get_all_users(self) -> list[User]:
         """

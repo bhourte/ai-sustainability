@@ -6,7 +6,7 @@ inherit from class_form
 import streamlit as st
 
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
-from ai_sustainability.utils.models import Question, User
+from ai_sustainability.utils.models import Question, User, UserAnswers
 
 
 class HistoricStreamlit(FormStreamlit):
@@ -52,7 +52,7 @@ class HistoricStreamlit(FormStreamlit):
             return True
         return False
 
-    def show_question_as_admin(self, question: Question, previous_answers: list[str]) -> None:
+    def show_question_as_admin(self, question: Question, previous_answers: UserAnswers) -> None:
         if question.type == "end":
             return
         answers = ""

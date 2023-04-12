@@ -5,7 +5,7 @@ from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.classes.class_historic import (
     HistoricStreamlit,
 )
-from ai_sustainability.utils.models import AnswersList, User
+from ai_sustainability.utils.models import AnswersList, Proposition, User
 
 # General variable, used to begin the main() function
 N_BEST_AI = 5
@@ -27,9 +27,12 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     keep_going = True
     list_answers: AnswersList = AnswersList([])
     i = 0
+    change_made = False
     while keep_going:
         next_question = app.get_next_question(list_answers)
-        selected_answer = st_historic.ask_question_user(next_question, previous_answers[len(list_answers)])
+        selected_answer = st_historic.ask_question_user(
+            next_question, None if change_made else previous_answers[len(list_answers)]
+        )
         if selected_answer is None:
             return
         keep_going = next_question.type != "end"
@@ -37,18 +40,12 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
             list_answers.append(selected_answer)
             # If not already changed and name answer different from previous one and question's label is not Q_Open :
             # The form is modified and we do not fill it automatically with previous answers
-            if (
-                previous_answers[0] is not None
-                and list_answers[i] != previous_answers[i]
-                and next_question.type != "Q_Open"
-            ):
-                previous_answers = [None] * len(previous_answers)
+            if not change_made and list_answers[i] != previous_answers[i] and next_question.type != "Q_Open":
+                change_made = True
         i += 1
-        if i >= len(previous_answers):
-            previous_answers.append(None)  # To avoid list index out of range when calling show_question
 
     # If the form is not finish, we wait the user to enter a new answer
-    if next_question["question_label"] != "end":
+    if next_question.type != "end":
         return
 
     # We ask the user to give us a name for the form (potentially a new one)
@@ -85,14 +82,15 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
         return
 
     # get the list with all previous answers contained in the form
-    previous_answers = app.get_list_answers(selected_form) + [["end"]]
-    end = False
+    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False)
+    previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
+    keep_going = True
     i = 0
-    while not end:
+    while keep_going:
         list_answers = previous_answers[:i]
         next_question = app.get_next_question(list_answers)
         st_historic.show_question_as_admin(next_question, previous_answers[i])
-        end = next_question["question_label"] == "end"
+        keep_going = next_question.type != "end"
         i += 1
     list_bests_ais = app.calcul_best_ais(N_BEST_AI, previous_answers[:-1])
     st_historic.show_best_ai(list_bests_ais)
