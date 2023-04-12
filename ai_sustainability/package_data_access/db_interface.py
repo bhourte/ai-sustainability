@@ -173,7 +173,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
+    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str, questions: list[Question]) -> bool:
         """
         Change the answer in db
 

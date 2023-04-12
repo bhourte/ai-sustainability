@@ -353,7 +353,9 @@ class DbConnection(DBInterface):
                 )
             )
 
-    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
+    def change_answers(
+        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, questions: list[Question]
+    ) -> bool:
         """
         Change the answer in db
 
@@ -370,6 +372,12 @@ class DbConnection(DBInterface):
         keep_going = True
         while keep_going:
             next_node_id = self.run_gremlin_query(Query(f"g.V('{node_id}').out().properties('id')"))
+            self.run_gremlin_query(Query(f"g.V('{node_id}').drop()"))
+            if not next_node_id:
+                keep_going = False
+            else:
+                node_id = next_node_id[0]["value"]
+        return self.save_answers(username, new_form_name, answers, questions)
 
     def get_all_forms_names(self, username: User) -> list[str]:
         """
