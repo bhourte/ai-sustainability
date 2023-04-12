@@ -156,6 +156,7 @@ class Application:
             - username : the username of the user (str)
             - feedback : the feedback given by the user (str)
         """
+        self.database.save_feedback(username, feedback)
 
     def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
         """

@@ -24,8 +24,6 @@ class Business:
         for proposition_list in list_answers:
             for proposition in proposition_list:
                 if proposition.list_coef:
-                    print(coef_ai)
-                    print(f"{type(proposition.list_coef)} {proposition.list_coef}")
                     coef_ai = np.multiply(coef_ai, np.array(proposition.list_coef))
         # we put all NaN value to -1
         for i_coef, coef in enumerate(coef_ai):
