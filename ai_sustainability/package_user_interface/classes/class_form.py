@@ -9,7 +9,7 @@ import streamlit as st
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.models import Question, UserAnswers
+from ai_sustainability.utils.models import Proposition, Question, UserAnswers
 from ai_sustainability.utils.utils import check_if_name_ok, validate_text_input
 
 
@@ -53,7 +53,7 @@ class FormStreamlit:
     def ask_question_user(
         self, question: Question, previous_answer: Optional[UserAnswers] = None
     ) -> Optional[UserAnswers]:
-        answer: Optional[UserAnswers] = UserAnswers([""])
+        answer: Optional[UserAnswers] = UserAnswers([])
         if question.type == "Q_Open":  # TODO : in type Question, change attribute label by type, ...
             answer = self.show_open_question(question, previous_answer)
         elif question.type in ("Q_QCM", "Q_QCM_Bool"):
@@ -61,10 +61,11 @@ class FormStreamlit:
         elif question.type == "Q_QRM":
             answer = self.show_qrm_question(question, previous_answer)
         elif question.type == "end":  # This is the end (of the form)
-            return UserAnswers(["end"])
+            proposition_end = Proposition(proposition_id="end", text="end", help_text="", modif_crypted=False)
+            return UserAnswers([proposition_end])
         else:
             print("Error, question label no recognised")
-        if answer == UserAnswers([""]):
+        if answer == UserAnswers([]):
             st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
             self.locked = False
         return answer
@@ -73,19 +74,25 @@ class FormStreamlit:
 
     def show_open_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         if previous_answer is None:  # If it has not to be auto-completed before
-            previous_answer = [""]
+            previous_answer = [Proposition(proposition_id="", text="", help_text="", modif_crypted=False)]
         # We show the question text area
         answer = str(
             st.text_area(
                 label=question.text,
                 height=100,
                 label_visibility="visible",
-                value=previous_answer[0],
+                value=previous_answer[0].text,
                 help=question.help_text,
                 disabled=self.locked,
             )
         )
-        return UserAnswers([validate_text_input(answer)]) if answer else None
+        open_proposition = Proposition(
+            proposition_id=previous_answer[0].proposition_id,
+            text=validate_text_input(answer),
+            help_text=previous_answer[0].help_text,
+            modif_crypted=previous_answer[0].modif_crypted,
+        )
+        return UserAnswers([open_proposition]) if answer else None
 
     def show_qcm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         options = ["<Select an option>"] + self.get_proposition_list(question)
@@ -101,7 +108,12 @@ class FormStreamlit:
                 disabled=self.locked,
             )
         )
-        return None if answer == "<Select an option>" else UserAnswers([answer])
+        if answer == "<Select an option>":
+            return None
+        for i in question.answers:
+            if i.text == answer:
+                return UserAnswers([i])
+        return None  # Never reached
 
     def show_qrm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         # If it has to be auto-completed before
@@ -109,13 +121,19 @@ class FormStreamlit:
         answers = UserAnswers(
             st.multiselect(
                 label=question.text,
-                options=self.get_proposition_list(question),
+                options=self.get_proposition_list(question),  # TODO ask Benoit
                 default=default,
                 help=question.help_text,
                 disabled=self.locked,
             )
         )
-        return None if not answers else answers
+        if not answers:
+            return None
+        list_prop = []
+        for i in question.answers:
+            if i.text in answers:
+                list_prop.append(i)
+        return list_prop
 
     def get_proposition_list(self, question: Question) -> list[str]:
         proposition_list: list[str] = []
@@ -123,12 +141,12 @@ class FormStreamlit:
             proposition_list.append(i.text)
         return proposition_list
 
-    def check_name(self, string: str) -> str:
-        dash, char = check_if_name_ok(string)
+    def check_name(self, form_name: str) -> str:
+        dash, char = check_if_name_ok(form_name)
         if dash:
             st.warning(f"""Please don't use the {char} character in your form name""")
             return ""
-        return validate_text_input(string)
+        return validate_text_input(form_name)
 
     def show_input_form_name(self, previous_answer: str = "") -> str:
         if previous_answer:

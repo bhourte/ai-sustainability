@@ -5,6 +5,7 @@ from ai_sustainability.package_data_access.db_connection import DbConnection
 from ai_sustainability.utils.models import (
     AnswersList,
     Feedback,
+    Proposition,
     Question,
     SelectedEdge,
     User,
@@ -39,7 +40,7 @@ class Application:
             self.list_questions = self.list_questions[: len(answer_list)]
         if not answer_list:  # The form is empty, so we create a question 0 to initialise it
             start = Question(question_id="0", text="", type="start", help_text="", answers=[])
-            self.list_questions.append(self.database.get_next_question(start, UserAnswers("")))
+            self.list_questions.append(self.database.get_next_question(start, []))
             return self.list_questions[-1]
 
         actual_question = self.list_questions[-1]
@@ -57,10 +58,6 @@ class Application:
         Return:
             - list_bests_ais (list): list of the best AI to use
         """
-        list_ai = self.database.get_all_ais()
-        list_all_coef = []
-        for i in answers:
-            list_all_coef.append(self.database.get_weight())
         return [""]
 
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
