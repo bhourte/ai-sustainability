@@ -42,8 +42,17 @@ class Application:
             return self.list_questions[-1]
 
         actual_question = self.list_questions[-1]
-        self.list_questions.append(self.database.get_next_question(actual_question, answer_list[-1]))
-        return self.list_questions[-1]
+        if len(answer_list) > 1 and answer_list[1][0].text == "Yes":
+            self.modif_crypted = True
+        next_question = self.database.get_next_question(actual_question, answer_list[-1])
+        if self.modif_crypted:
+            list_proposition = []
+            for i in next_question.answers:
+                if not i.modif_crypted:
+                    list_proposition.append(i)
+            next_question.answers = list_proposition
+        self.list_questions.append(next_question)
+        return next_question
 
     def calcul_best_ais(self, nb_ai: int, answers: AnswersList) -> list[str]:
         """

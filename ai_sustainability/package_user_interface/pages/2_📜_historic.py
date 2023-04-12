@@ -46,8 +46,6 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
                 and list_answers[i][0].text != previous_answers[i][0].text
                 and next_question.type != "Q_Open"
             ):
-                print("ICIIIIIIIIIIIIIII PTNNNNNNNNNNNNNNNNNNNNNNn")
-                print(list_answers[i] != previous_answers[i])
                 change_made = True
         i += 1
 
@@ -65,6 +63,7 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
         if st_historic.check_name_already_taken(username):
             return
 
+    print(list_answers)
     list_bests_ais = app.calcul_best_ais(N_BEST_AI, list_answers)
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission_button():
@@ -99,6 +98,7 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
         st_historic.show_question_as_admin(next_question, previous_answers[i])
         keep_going = next_question.type != "end"
         i += 1
+    # TODO probleme des best IA, tous a 1, car list_coef = []
     list_bests_ais = app.calcul_best_ais(N_BEST_AI, previous_answers[:-1])
     st_historic.show_best_ai(list_bests_ais)
 

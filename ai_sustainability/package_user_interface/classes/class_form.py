@@ -54,7 +54,7 @@ class FormStreamlit:
         self, question: Question, previous_answer: Optional[UserAnswers] = None
     ) -> Optional[UserAnswers]:
         answer: Optional[UserAnswers] = UserAnswers([])
-        if question.type == "Q_Open":  # TODO : in type Question, change attribute label by type, ...
+        if question.type == "Q_Open":
             answer = self.show_open_question(question, previous_answer)
         elif question.type in ("Q_QCM", "Q_QCM_Bool"):
             answer = self.show_qcm_question(question, previous_answer)
@@ -71,8 +71,6 @@ class FormStreamlit:
             st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
             self.locked = False
         return answer
-
-    # TODO : maybe create an other class UI question for each type of question or factory method -> really interesting
 
     def show_open_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         if previous_answer is None:  # If it has not to be auto-completed before

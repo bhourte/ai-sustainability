@@ -3,7 +3,6 @@ This file contained all function used by the business part of our application
 """
 
 import heapq
-from typing import Optional
 
 import numpy as np
 
@@ -15,7 +14,6 @@ class Business:
     Class used by the application layer to make all the business thing of the app
     """
 
-    # TODO : changer cette description eclatté au sol
     def __init__(self) -> None:
         pass
 
@@ -29,6 +27,7 @@ class Business:
         for i_coef, coef in enumerate(coef_ai):
             if coef != coef:
                 coef_ai[i_coef] = -1
+        print(coef_ai)
         best = list(heapq.nlargest(nb_ai, np.array(coef_ai)))
         # we put the best nb_ai in list_bests_ais
         list_bests_ais = []
