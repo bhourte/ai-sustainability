@@ -6,6 +6,7 @@ inherit from class_form
 import streamlit as st
 
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
+from ai_sustainability.utils.models import Question, User
 
 
 class HistoricStreamlit(FormStreamlit):
@@ -25,11 +26,11 @@ class HistoricStreamlit(FormStreamlit):
     form_title = "Historic"
     page_icon = "📜"
 
-    def show_choice_user(self, list_username: list[str]) -> str:
-        list_username = ["<Select a user>"] + list_username
+    def show_choice_user(self, list_username: list[User]) -> User:
+        list_username = [User("<Select a user>")] + list_username
         question = "Select an user"
-        answer = str(st.selectbox(label=question, options=list_username, index=0))
-        return answer if answer != "<Select a user>" else ""
+        answer = User(str(st.selectbox(label=question, options=list_username, index=0)))
+        return answer if answer != "<Select a user>" else User("")
 
     def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
         list_form_name = ["<Select a form>"]
@@ -51,12 +52,11 @@ class HistoricStreamlit(FormStreamlit):
             return True
         return False
 
-    def show_question_as_admin(self, dict_question: dict, previous_answers: list[str]) -> None:
-        if dict_question["question_label"] == "end":
+    def show_question_as_admin(self, question: Question, previous_answers: list[str]) -> None:
+        if question.type == "end":
             return
-        question = dict_question["question_text"]
         answers = ""
         for previous_answer in previous_answers:
             answers += f"{previous_answer} <br>"
-        st.subheader(f"{question} :")
+        st.subheader(f"{question.text} :")
         st.caption(answers, unsafe_allow_html=True)

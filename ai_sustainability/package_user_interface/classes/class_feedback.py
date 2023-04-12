@@ -7,6 +7,7 @@ import streamlit as st
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
+from ai_sustainability.utils.models import Feedback, User, UserFeedback
 from ai_sustainability.utils.utils import validate_text_input
 
 
@@ -27,15 +28,15 @@ class FeedbackStreamlit:
         self.username = check_user_connection()
         st.session_state.clicked = False
 
-    def show_all_feedbacks(self, all_feedbacks: dict) -> None:
-        if not all_feedbacks.keys():  # If there is no user in the database
+    def show_all_feedbacks(self, all_feedbacks: list[UserFeedback]) -> None:
+        if not all_feedbacks:  # If there is no user in the database
             st.write("There is no user in the database.")
             return
         is_feedback = False
-        for user in all_feedbacks:
-            with st.expander("Feedbacks from " + user):
-                for i in range(len(all_feedbacks[user])):
-                    st.write(f"feedback {i} : {all_feedbacks[user][i]}")
+        for user_feedback in all_feedbacks:
+            with st.expander("Feedbacks from " + user_feedback.user):
+                for index, value in enumerate(user_feedback.feedbacks):
+                    st.write(f"feedback {index} : {value}")
                     is_feedback = True
         if not is_feedback:  # If there is no feedback in the database
             st.write("There is no feedback in the database.")
@@ -45,7 +46,7 @@ class FeedbackStreamlit:
         st.write("Please fill the form first and come back to give us your feedback.")
         st.write("Thank you")
 
-    def feedback_box(self, username: str) -> str:
+    def feedback_box(self, username: User) -> Feedback:
         """
         Method used to show a box where the user can give a feedback
         """
@@ -53,7 +54,7 @@ class FeedbackStreamlit:
         st.write("You can now give us your feedback")
         text = st.text_area("Your feedback: ")  # text area for the feedback
         if not text:
-            return ""
+            return Feedback("")
         st.write("Your feedback has been saved")
         st.write("Thank you!")
-        return validate_text_input(text)
+        return Feedback(validate_text_input(text))

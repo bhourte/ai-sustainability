@@ -9,15 +9,15 @@ method:
 """
 
 
-def no_dash_in_my_text(text: str) -> tuple:
+def check_if_name_ok(text: str) -> tuple:
     """
-    Check if there is a dash in the text
+    Check if there is a special character in the name
 
     Parameters:
         - text (str): text to check
 
     Return:
-        - bool: True if there is a special caracter (" ' - or backslash), False otherwise
+        - bool: True if there is a special character (" ' - or backslash), False otherwise
     """
     if "-" in text:
         return True, "-"
