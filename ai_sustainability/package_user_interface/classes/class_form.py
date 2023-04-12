@@ -124,9 +124,6 @@ class FormStreamlit:
         if previous_answer is not None:
             for proposition in previous_answer:
                 default.append(proposition.text)
-        print(previous_answer)
-        print("################")
-        print(default)
         answers = UserAnswers(
             st.multiselect(
                 label=question.text,
