@@ -20,11 +20,13 @@ class Business:
         pass
 
     def calcul_best_ais(self, nb_ai: int, list_ai: list[str], list_answers: AnswersList) -> list[str]:
-        coef_ai = np.array([1] * len(list_ai))
+        coef_ai = np.array([1.0] * len(list_ai))
         for proposition_list in list_answers:
             for proposition in proposition_list:
                 if proposition.list_coef:
-                    coef_ai = np.multiply(coef_ai, proposition.list_coef)
+                    print(coef_ai)
+                    print(f"{type(proposition.list_coef)} {proposition.list_coef}")
+                    coef_ai = np.multiply(coef_ai, np.array(proposition.list_coef))
         # we put all NaN value to -1
         for i_coef, coef in enumerate(coef_ai):
             if coef != coef:
