@@ -77,9 +77,7 @@ class DbConnection(DBInterface):
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
         if actual_question.type in ("Q_Open", "Q_QRM"):
-            query = Query(
-                f"g.V('{actual_question.question_id}').outE().inV()"
-            )  # TODO : replace since outE().inV() by out()
+            query = Query(f"g.V('{actual_question.question_id}').out()")
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
             query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0].text}').inV()")
         elif actual_question.type == "start":
@@ -453,4 +451,4 @@ class DbConnection(DBInterface):
         Return:
             - list of the ais
         """
-        return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI')"))[0].split(", ")
+        return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI').value()"))[0].split(", ")
