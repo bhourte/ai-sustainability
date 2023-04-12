@@ -35,27 +35,16 @@ class Application:
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
+        if len(answer_list) < len(self.list_questions):
+            self.list_questions = self.list_questions[: len(answer_list)]
         if not answer_list:  # The form is empty, so we create a question 0 to initialise it
             start = Question(question_id="0", text="", type="start", help_text="", answers=[])
             self.list_questions.append(self.database.get_next_question(start, UserAnswers("")))
             return self.list_questions[-1]
 
-        previou_question = self.list_questions[-1]
-        self.list_questions.append(self.database.get_next_question(previou_question, answer_list[-1]))
+        actual_question = self.list_questions[-1]
+        self.list_questions.append(self.database.get_next_question(actual_question, answer_list[-1]))
         return self.list_questions[-1]
-
-    def check_form_exist(self, username: User, form_name: str) -> bool:
-        """
-        Check if a form exist in the database
-
-        Parameters :
-            - username : the username of the user (str)
-            - form_name : the name of the form (str)
-
-        Return :
-            - bool : True if the form exist, False otherwise
-        """
-        return True
 
     def calcul_best_ais(self, nb_ai: int, answers: AnswersList) -> list[str]:
         """
@@ -68,6 +57,10 @@ class Application:
         Return:
             - list_bests_ais (list): list of the best AI to use
         """
+        list_ai = self.database.get_all_ais()
+        list_all_coef = []
+        for i in answers:
+            list_all_coef.append(self.database.get_weight())
         return [""]
 
     def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
@@ -123,7 +116,20 @@ class Application:
         Parameters :
             - username : the username of the user (str)
         """
-        return True
+        return self.database.check_node_exist(username)
+
+    def check_form_exist(self, username: User, form_name: str) -> bool:
+        """
+        Check if a form exist in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - form_name : the name of the form (str)
+
+        Return :
+            - bool : True if the form exist, False otherwise
+        """
+        return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
     def save_feedback(self, username: User, feedback: Feedback) -> None:
         """

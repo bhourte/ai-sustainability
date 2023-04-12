@@ -85,7 +85,7 @@ class FormStreamlit:
                 disabled=self.locked,
             )
         )
-        return UserAnswers([validate_text_input(answer)])
+        return UserAnswers([validate_text_input(answer)]) if answer else None
 
     def show_qcm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         options = ["<Select an option>"] + self.get_proposition_list(question)
