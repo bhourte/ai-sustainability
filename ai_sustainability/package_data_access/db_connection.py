@@ -1,9 +1,7 @@
 """
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
-import re
 import time
-from abc import abstractmethod
 
 from decouple import config
 from gremlin_python import statics
@@ -125,19 +123,19 @@ class DbConnection(DBInterface):
             )
         return propositions
 
-    # TODO : check if this method is still used
-    def get_node(self, node_id: str) -> dict:
-        """
-        Check if a node exists in the database
+    # # TODO : check if this method is still used
+    # def get_node(self, node_id: str) -> dict:
+    #     """
+    #     Check if a node exists in the database
 
-        Parameters :
-            - node_id : the id of the node (str)
+    #     Parameters :
+    #         - node_id : the id of the node (str)
 
-        Return :
-            - a dict containing all information of the node
-        """
-        query = Query(f"g.V('{node_id}')")
-        return self.run_gremlin_query(query)[0]
+    #     Return :
+    #         - a dict containing all information of the node
+    #     """
+    #     query = Query(f"g.V('{node_id}')")
+    #     return self.run_gremlin_query(query)[0]
 
     def create_user_node(self, username: User) -> None:
         """
@@ -356,15 +354,29 @@ class DbConnection(DBInterface):
         Return:
             - list of the answers
         """
-        answers = AnswersList()
+        list_answers = AnswersList()
         node = selected_form
-        node_label = self.get_node_label(node)
+        node_label = self.get_node_label(selected_form)
         while node_label != "end":
-            answer = self.run_gremlin_query(Query(f"g.V('{node}').outE().properties('answer').value()"))
-            answers.append(answer)
+            list_answers.append(self.get_answers(node))
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
             node_label = self.get_node_label(node)
-        return answers
+        return list_answers
+
+    def get_answers(self, node_id: str) -> list[Proposition]:
+        query = Query(f"g.V('{node_id}').outE()")
+        props = self.run_gremlin_query(query)
+        propositions = []
+        for prop in props:
+            propositions.append(
+                Proposition(
+                    proposition_id=prop["properties"]["proposition_id"],
+                    text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
+                    help_text="",
+                    modif_crypted=False,
+                )
+            )
+        return propositions
 
     def get_node_label(self, node_id: str) -> str:
         return self.run_gremlin_query(Query(f"g.V('{node_id}').label()"))[0]
