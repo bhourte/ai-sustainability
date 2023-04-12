@@ -77,7 +77,9 @@ class DbConnection(DBInterface):
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
         if actual_question.type in ("Q_Open", "Q_QRM"):
-            query = Query(f"g.V('{actual_question.question_id}').outE().inV()")
+            query = Query(
+                f"g.V('{actual_question.question_id}').outE().inV()"
+            )  # TODO : replace since outE().inV() by out()
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
             query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0].text}').inV()")
         elif actual_question.type == "start":
@@ -119,6 +121,7 @@ class DbConnection(DBInterface):
                     modif_crypted=prop["properties"]["modif_crypted"] == "True"
                     if "modif_crypted" in prop["properties"]
                     else False,
+                    list_coef=prop["properties"]["list_coef"] if "list_coef" in prop["properties"] else [],
                 )
             )
         return propositions
@@ -365,7 +368,10 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        return
+        node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        keep_going = True
+        while keep_going:
+            next_node_id = self.run_gremlin_query(Query(f"g.V('{node_id}').out().properties('id')"))
 
     def get_all_forms_names(self, username: User) -> list[str]:
         """
@@ -409,6 +415,7 @@ class DbConnection(DBInterface):
                     text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
                     help_text="",
                     modif_crypted=False,
+                    list_coef=prop["properties"]["list_coef"] if "list_coef" in prop["properties"] else [],
                 )
             )
         return propositions
