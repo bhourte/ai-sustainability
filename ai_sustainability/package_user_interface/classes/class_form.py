@@ -119,7 +119,9 @@ class FormStreamlit:
 
     def get_proposition_list(self, question: Question) -> list[str]:
         proposition_list: list[str] = []
+        print(question.answers)
         for i in question.answers:
+            print(i)
             proposition_list.append(i.text)
         return proposition_list
 

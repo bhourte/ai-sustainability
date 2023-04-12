@@ -1,7 +1,8 @@
 """
 This file is used to show the From page
 """
-from ai_sustainability.package_application.application import Application
+# from ai_sustainability.package_application.application import Application
+from ai_sustainability.package_application.test_application import Application
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 from ai_sustainability.utils.models import AnswersList, User
 
@@ -22,7 +23,7 @@ def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> t
             return list_answers, False
         keep_going = actuel_question.type != "end"
         if keep_going:
-            list_answers.append(selected_answer)  # TODO demander a Benoit
+            list_answers.append(selected_answer)
     return list_answers, True
 
 
