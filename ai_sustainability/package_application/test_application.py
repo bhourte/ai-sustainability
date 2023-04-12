@@ -26,8 +26,12 @@ class Application:
         self.create_list_questions()
 
     def create_list_questions(self) -> None:
-        answer1 = Proposition(proposition_id="1", text="Answer1", help_text="Answer1", modif_crypted=False)
-        answer2 = Proposition(proposition_id="2", text="Answer2", help_text="Answer2", modif_crypted=False)
+        answer1 = Proposition(
+            proposition_id="1", text="Answer1", help_text="Answer1", modif_crypted=False, list_coef=[]
+        )
+        answer2 = Proposition(
+            proposition_id="2", text="Answer2", help_text="Answer2", modif_crypted=False, list_coef=[]
+        )
         Q1 = Question(question_id="1", text="Q1", type="Q_QCM", help_text="1", answers=[answer1, answer2])
         Q2 = Question(question_id="2", text="Q2", type="Q_QCM", help_text="2", answers=[answer1, answer2])
         Q3 = Question(question_id="3", text="Q3", type="Q_QCM", help_text="3", answers=[answer1, answer2])

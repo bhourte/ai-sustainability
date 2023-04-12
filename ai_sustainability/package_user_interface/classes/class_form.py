@@ -61,7 +61,9 @@ class FormStreamlit:
         elif question.type == "Q_QRM":
             answer = self.show_qrm_question(question, previous_answer)
         elif question.type == "end":  # This is the end (of the form)
-            proposition_end = Proposition(proposition_id="end", text="end", help_text="", modif_crypted=False)
+            proposition_end = Proposition(
+                proposition_id="end", text="end", help_text="", modif_crypted=False, list_coef=[]
+            )
             return UserAnswers([proposition_end])
         else:
             print("Error, question label no recognised")
@@ -74,7 +76,7 @@ class FormStreamlit:
 
     def show_open_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         if previous_answer is None:  # If it has not to be auto-completed before
-            previous_answer = [Proposition(proposition_id="", text="", help_text="", modif_crypted=False)]
+            previous_answer = [Proposition(proposition_id="", text="", help_text="", modif_crypted=False, list_coef=[])]
         # We show the question text area
         answer = str(
             st.text_area(
@@ -91,6 +93,7 @@ class FormStreamlit:
             text=validate_text_input(answer),
             help_text=previous_answer[0].help_text,
             modif_crypted=previous_answer[0].modif_crypted,
+            list_coef=previous_answer[0].list_coef,
         )
         return UserAnswers([open_proposition]) if answer else None
 

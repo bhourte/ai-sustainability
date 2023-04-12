@@ -22,7 +22,7 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     form_name = selected_form.rsplit("-", maxsplit=1)[-1]
 
     # get the list with all previous answers contained in the form
-    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False)
+    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
     previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
 
     keep_going = True
@@ -89,7 +89,7 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
         return
 
     # get the list with all previous answers contained in the form
-    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False)
+    proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
     previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
     keep_going = True
     i = 0

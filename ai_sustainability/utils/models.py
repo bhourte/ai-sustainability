@@ -3,7 +3,7 @@ File with all dataclass and Type we use in the form application
 """
 
 from dataclasses import dataclass
-from typing import NewType, Optional
+from typing import NewType
 
 User = NewType("User", str)
 Query = NewType("Query", str)
@@ -18,6 +18,7 @@ class Proposition:
     text: str
     help_text: str
     modif_crypted: bool
+    list_coef: list[float]
 
 
 UserAnswers = list[Proposition]  # List of answers selected by the user in QuestionAnswer propositions
