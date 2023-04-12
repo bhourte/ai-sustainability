@@ -4,6 +4,7 @@ This file contains the class DbConnection, used to connect to the database and t
 import time
 from abc import abstractmethod
 
+from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
@@ -24,19 +25,8 @@ FIRST_NODE_ID = "1"
 _range = range
 statics.load_statics(globals())
 
+
 def connect(endpoint: str, database_name: str, container_name: str, primary_key: str) -> client.Client:
-    """
-    Connect to the database and return the client (made only once thanks to the cache)
-
-    Parameters :
-        - endpoint : the endpoint of the database (string)
-        - database_name : the name of the database (string)
-        - container_name : the name of the container (string)
-        - primary_key : the primary key of the database (string)
-
-    Return :
-        - client : the client to connect to the database
-    """
     return client.Client(
         "wss://" + endpoint + ":443/",
         "g",
@@ -45,9 +35,15 @@ def connect(endpoint: str, database_name: str, container_name: str, primary_key:
         message_serializer=serializer.GraphSONSerializersV2d0(),
     )
 
+
 class DbConnection(DBInterface):
     def __init__(self) -> None:
-        self.gremlin_client: client.Client
+        self.gremlin_client: client.Client = connect(
+            endpoint="questions-db.gremlin.cosmos.azure.com",
+            database_name="graphdb",
+            container_name=config("DATABASENAME"),
+            primary_key=config("PRIMARYKEY"),
+        )
 
     def close(self) -> None:
         """
@@ -81,12 +77,12 @@ class DbConnection(DBInterface):
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
-        if actual_question.type in ("Q_Next", "Q_QRM"):
+        if actual_question.type in ("Q_Open", "Q_QRM"):
             query = Query(f"g.V('{actual_question.question_id}').outE().inV()")
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
             query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0]}').inV()")
         elif actual_question.type == "start":
-            query = Query(f"g.V('{FIRST_NODE_ID}').outE().inV()")
+            query = f"g.V('{FIRST_NODE_ID}')"
         elif actual_question.type == "end":
             return Question("end", "end", [], "end", "end")
         else:
@@ -94,9 +90,11 @@ class DbConnection(DBInterface):
         next_question = self.run_gremlin_query(query)[0]
         return Question(
             question_id=next_question["id"],
-            text=next_question["text"],
+            text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
             answers=self.get_propositions(next_question["id"]),
-            help_text=next_question["help_text"],
+            help_text=next_question["properties"]["help text"][0]["value"]
+            if "help text" in next_question["properties"]
+            else "",
             type=next_question["label"],
         )
 
@@ -114,7 +112,16 @@ class DbConnection(DBInterface):
         props = self.run_gremlin_query(query)
         propositions = []
         for prop in props:
-            propositions.append(Proposition(prop["id"], prop["text"], prop["help_text"], prop["modif_crypted"]))
+            propositions.append(
+                Proposition(
+                    proposition_id=prop["id"],
+                    text=prop["properties"]["text"] if "text" in prop["properties"] else "",
+                    help_text=prop["properties"]["help text"] if "help text" in prop["properties"] else "",
+                    modif_crypted=prop["properties"]["modif_crypted"] == "True"
+                    if "modif_crypted" in prop["properties"]
+                    else False,
+                )
+            )
         return propositions
 
     # TODO : check if this method is still used
@@ -370,11 +377,3 @@ class DbConnection(DBInterface):
         Return :
             - number of selected edge for each proposition
         """
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
