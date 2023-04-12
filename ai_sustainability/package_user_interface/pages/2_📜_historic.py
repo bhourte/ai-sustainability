@@ -24,23 +24,23 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     # get the list with all previous answers contained in the form
     previous_answers = app.get_list_answers(selected_form)
 
-    end = False
+    keep_going = True
     list_answers: AnswersList = AnswersList([])
     i = 0
-    while not end:
+    while keep_going:
         next_question = app.get_next_question(list_answers)
         selected_answer = st_historic.ask_question_user(next_question, previous_answers[len(list_answers)])
         if selected_answer is None:
             return
-        end = next_question.type == "end"
-        if not end:
+        keep_going = next_question.type != "end"
+        if keep_going:
             list_answers.append(selected_answer)
             # If not already changed and name answer different from previous one and question's label is not Q_Open :
             # The form is modified and we do not fill it automatically with previous answers
             if (
                 previous_answers[0] is not None
                 and list_answers[i] != previous_answers[i]
-                and next_question["question_label"] != "Q_Open"
+                and next_question.type != "Q_Open"
             ):
                 previous_answers = [None] * len(previous_answers)
         i += 1
