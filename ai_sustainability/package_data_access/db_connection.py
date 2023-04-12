@@ -1,6 +1,7 @@
 """
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
+import re
 import time
 from abc import abstractmethod
 
@@ -275,6 +276,7 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
+        return None
 
     def create_answer_node(self, question_id: str, question_text: str, new_node_id: str) -> None:
         """
@@ -330,6 +332,7 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
+        return
 
     def get_all_forms_names(self, username: User) -> list[str]:
         """
@@ -396,4 +399,4 @@ class DbConnection(DBInterface):
         Return:
             - list of the ais
         """
-        return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI')")[0].split(", "))
+        return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI')"))[0].split(", ")
