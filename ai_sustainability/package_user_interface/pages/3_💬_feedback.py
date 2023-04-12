@@ -1,7 +1,7 @@
 """
 This file is used to show the Feedback page
 """
-from ai_sustainability.package_data_access.db_connection_old import DbConnection
+from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.classes.class_feedback import (
     FeedbackStreamlit,
 )
@@ -13,22 +13,22 @@ def main() -> None:
     """
 
     st_feedback = FeedbackStreamlit()
-    database = DbConnection()
+    app = Application()
     username = st_feedback.username
     if not username:
         return
 
     # Connected as an User
     if username != "Admin":
-        if not database.check_user_exist(username):  # check if the user already exist in the database
+        if not app.check_user_exist(username):  # check if the user already exist in the database
             st_feedback.user_dont_exist()
             return
         feedback_text = st_feedback.feedback_box(username)
         if feedback_text:
-            database.save_feedback(username, feedback_text)  # we save the feedback
+            app.save_feedback(username, feedback_text)  # we save the feedback
     # Connected as an Admin
     else:
-        all_feedbacks = database.get_all_feedbacks()
+        all_feedbacks = app.get_all_feedbacks()
         st_feedback.show_all_feedbacks(all_feedbacks)
 
 

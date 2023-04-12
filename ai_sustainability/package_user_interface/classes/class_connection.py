@@ -4,7 +4,8 @@ Streamlit class
 """
 import streamlit as st
 
-from ai_sustainability.utils.utils import no_dash_in_my_text
+from ai_sustainability.utils.models import User
+from ai_sustainability.utils.utils import check_if_name_ok
 
 
 class ConnectionStreamlit:
@@ -16,25 +17,25 @@ class ConnectionStreamlit:
         - setup_username : setup the username for all pages
     """
 
-    _username: str = ""
+    _username: User = User("")
 
     def __init__(self) -> None:
         st.set_page_config(page_title="Connection Page", page_icon="👤")
         st.title("👤Connection")
 
     def setup_username(self) -> None:  # TODO remove return
-        username = st.text_input(
-            "Put your username here to connect :",
-            st.session_state.username if "username" in st.session_state else "",
+        username = User(
+            st.text_input(
+                "Put your username here to connect :",
+                st.session_state.username if "username" in st.session_state else "",
+            )
         )
 
         if not username:  # User connected
             st.caption("❌Not connected")
             return
 
-        dash, elmt = no_dash_in_my_text(
-            username
-        )  # TODO name of function changed by verbs and split in 2 functions (username, text_input)
+        dash, elmt = check_if_name_ok(username)
         if dash:
             st.warning(f"You can't use {elmt} in your username")
             return

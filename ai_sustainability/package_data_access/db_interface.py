@@ -1,5 +1,6 @@
 """
-This file contains the class DbConnection, used to connect to the database and to run the queries
+This file contains the interface for all database connection classes,
+used to connect to the database and to run the queries
 """
 from abc import ABC, abstractmethod
 

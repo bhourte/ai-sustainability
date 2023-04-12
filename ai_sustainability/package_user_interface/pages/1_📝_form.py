@@ -1,11 +1,42 @@
 """
 This file is used to show the From page
 """
-from ai_sustainability.package_data_access.db_connection_old import DbConnection
+from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
+from ai_sustainability.utils.models import AnswersList, User
 
 # General variable, used to begin the main() function
 N_BEST_AI = 5  # TODO : put this in a config file or env variable
+
+
+def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> tuple[AnswersList, bool]:
+    """
+    Function used to show the form to be completed by the user
+    """
+    keep_going = True
+    list_answers: AnswersList = []
+    while keep_going:  # While we are not in the last question node
+        actuel_question = app.get_next_question(list_answers)
+        selected_answer = st_form.ask_question_user(actuel_question)
+        if selected_answer is None:
+            return list_answers, False
+        keep_going = actuel_question.type != "end"
+        if keep_going:
+            list_answers.append(selected_answer)  # TODO demander a Benoit
+    return list_answers, True
+
+
+def input_fotm_name_and_check(username: User, st_form: FormStreamlit, app: Application) -> tuple[str, bool]:
+    """
+    Function used to show a box where the user can give a name to the form and check if the name is incorrect
+    """
+    form_name = st_form.show_input_form_name(previous_answer="")
+    if not form_name:
+        return "", True
+    if app.check_form_exist(username, form_name):
+        if st_form.check_name_already_taken(username):
+            return "", True
+    return form_name, False
 
 
 def main() -> None:
@@ -14,36 +45,24 @@ def main() -> None:
     """
     # Connection to the online gremlin database via db_connection.py
     st_form = FormStreamlit()
-    database = DbConnection()
+    app = Application()
 
     username = st_form.username
     if not username:
         return
 
-    end = False  # TODO : change this variable name in continue = True
-    list_answers: list[list[str]] = []
-    while not end:  # While we are not in the last question node
-        dict_question = database.get_one_question(list_answers)
-        selected_answer = st_form.show_question(dict_question)  # TODO : change function name ask_question_user
-        if not selected_answer[0]:
-            return
-        end = dict_question["question_label"] == "end"
-        if not end:
-            list_answers.append(
-                selected_answer
-            )  # TODO : all this block (25 to 34) can be a function get_all_questions_and_answers return 2: answers and end (bool)
-
-    form_name = st_form.show_form_name_input(previous_answer="")
-    if not form_name:
+    list_answers, is_ended = get_all_questions_and_answers(st_form, app)
+    if not is_ended:
         return
-    if database.check_form_exist(username, form_name):
-        if st_form.check_name_already_taken(username):
-            return  # TODO : function (36, 41) can be a function check_form_name_exist return bool
 
-    list_bests_ais = database.calcul_best_ais(N_BEST_AI, list_answers)
+    form_name, form_name_incorrect = input_fotm_name_and_check(username, st_form, app)
+    if form_name_incorrect:
+        return
+
+    list_bests_ais = app.calcul_best_ais(N_BEST_AI, list_answers)
     if st_form.show_submission_button():  # show the submission button and return True if it's clicked
         st_form.show_best_ai(list_bests_ais)
-        database.save_answers(username, form_name, list_answers)  # TODO : this can be a function
+        app.save_answers(username, form_name, list_answers)
 
 
 if __name__ == "__main__":

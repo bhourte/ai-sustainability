@@ -9,7 +9,8 @@ import streamlit as st
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.utils import no_dash_in_my_text, validate_text_input
+from ai_sustainability.utils.models import Question, UserAnswers
+from ai_sustainability.utils.utils import check_if_name_ok, validate_text_input
 
 
 class FormStreamlit:
@@ -23,6 +24,7 @@ class FormStreamlit:
         - show_open_question : show a Q_open question
         - show_qcm_question : show a Q_QCM and Q_QCM_Bool question
         - show_qrm_question : show a Q_QRM question
+        - get_proposition_list : return a list[str] with all proposition of a question
         - check_name
         - input_form_name
         - error_name_already_taken
@@ -48,77 +50,87 @@ class FormStreamlit:
     def locked(self, value: bool) -> None:
         st.session_state.clicked = value
 
-    def show_question(self, question: dict[str, str], previous_answer: Optional[list] = None) -> list[str]:
-        answer = [""]
-        if question["question_label"] == "Q_Open":  # TODO : in type Question, change attribute label by type, ...
-            answer = self.show_open_question(question, previous_answer)  # TODO:
-        elif question["question_label"] == "Q_QCM" or question["question_label"] == "Q_QCM_Bool":
+    def ask_question_user(
+        self, question: Question, previous_answer: Optional[UserAnswers] = None
+    ) -> Optional[UserAnswers]:
+        answer: Optional[UserAnswers] = UserAnswers([""])
+        if question.type == "Q_Open":  # TODO : in type Question, change attribute label by type, ...
+            answer = self.show_open_question(question, previous_answer)
+        elif question.type in ("Q_QCM", "Q_QCM_Bool"):
             answer = self.show_qcm_question(question, previous_answer)
-        elif question["question_label"] == "Q_QRM":
+        elif question.type == "Q_QRM":
             answer = self.show_qrm_question(question, previous_answer)
-        elif question["question_label"] == "end":  # This is the end (of the form)
-            return ["end"]
+        elif question.type == "end":  # This is the end (of the form)
+            return UserAnswers(["end"])
         else:
             print("Error, question label no recognised")
-        if answer == [""]:
+        if answer == UserAnswers([""]):
             st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
             self.locked = False
         return answer
 
     # TODO : maybe create an other class UI question for each type of question or factory method -> really interesting
 
-    def show_open_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
+    def show_open_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         if previous_answer is None:  # If it has not to be auto-completed before
             previous_answer = [""]
         # We show the question text area
         answer = str(
             st.text_area(
-                label=question["question_text"],
+                label=question.text,
                 height=100,
                 label_visibility="visible",
                 value=previous_answer[0],
-                help=question["help_text"],
+                help=question.help_text,
                 disabled=self.locked,
             )
         )
-        return [validate_text_input(answer)]
+        return UserAnswers([validate_text_input(answer)])
 
-    def show_qcm_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
-        options = ["<Select an option>"] + question["answers"]
+    def show_qcm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
+        options = ["<Select an option>"] + self.get_proposition_list(question)
         # If it has to be auto-completed before
         previous_index = options.index(previous_answer[0]) if previous_answer is not None else 0
         # We show the question selectbox
         answer = str(
             st.selectbox(
-                label=question["question_text"],
+                label=question.text,
                 options=options,
                 index=previous_index,
-                help=question["help_text"],
+                help=question.help_text,
                 disabled=self.locked,
             )
         )
-        return [""] if answer == "<Select an option>" else [answer]  # TODO: change [""] by None
+        return None if answer == "<Select an option>" else UserAnswers([answer])
 
-    def show_qrm_question(self, question: dict, previous_answer: Optional[list] = None) -> list[str]:
+    def show_qrm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
         # If it has to be auto-completed before
         default = previous_answer if previous_answer is not None else []
-        answers = st.multiselect(
-            label=question["question_text"],
-            options=question["answers"],
-            default=default,
-            help=question["help_text"],
-            disabled=self.locked,
+        answers = UserAnswers(
+            st.multiselect(
+                label=question.text,
+                options=self.get_proposition_list(question),
+                default=default,
+                help=question.help_text,
+                disabled=self.locked,
+            )
         )
-        return [""] if not answers else answers
+        return None if not answers else answers
+
+    def get_proposition_list(self, question: Question) -> list[str]:
+        proposition_list: list[str] = []
+        for i in question.answers:
+            proposition_list.append(i.text)
+        return proposition_list
 
     def check_name(self, string: str) -> str:
-        dash, char = no_dash_in_my_text(string)
+        dash, char = check_if_name_ok(string)
         if dash:
             st.warning(f"""Please don't use the {char} character in your form name""")
             return ""
         return validate_text_input(string)
 
-    def show_form_name_input(self, previous_answer: str = "") -> str:  # TODO: change_name with a VERB
+    def show_input_form_name(self, previous_answer: str = "") -> str:
         if previous_answer:
             text = "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"
         else:

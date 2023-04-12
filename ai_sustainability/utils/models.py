@@ -5,16 +5,16 @@ File with all dataclass and Type we use in the form application
 from dataclasses import dataclass
 from typing import NewType
 
-UserAnswers = list[str]  # List of answers selected by the user in QuestionAnswer propositions for one question
+UserAnswers = list[str]  # List of answers selected by the user in QuestionAnswer propositions
+AnswersList = list[UserAnswers]
 User = NewType("User", str)
 Query = NewType("Query", str)
 Feedback = NewType("Feedback", str)
-AnswersList = list[UserAnswers]  # List of answers selected by the user for all questions
 
 
 @dataclass
 class Proposition:
-    """Dataclass corresponding to one proposition for a question"""
+    """Dataclass corresponding to one proposition for a question (an edge in the database)"""
 
     proposition_id: str
     text: str
@@ -24,7 +24,7 @@ class Proposition:
 
 @dataclass
 class Question:
-    """Dataclass corresponding to one question stored in the database"""
+    """Dataclass corresponding to one question stored in the database (a vertice/node in the database)"""
 
     question_id: str
     text: str
@@ -38,7 +38,7 @@ class UserFeedback:
     """Dataclass correponding to all feedbacks of one user stored in the database"""
 
     user: User
-    feedback: list[Feedback]
+    feedbacks: list[Feedback]
 
 
 @dataclass
