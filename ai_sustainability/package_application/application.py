@@ -8,6 +8,7 @@ from ai_sustainability.utils.models import (
     Question,
     SelectedEdge,
     User,
+    UserAnswers,
     UserFeedback,
 )
 
@@ -34,7 +35,14 @@ class Application:
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
-        return Question(question_id="1", text="", type="start", help_text="", answers=[])
+        if not answer_list:  # The form is empty, so we create a question 0 to initialise it
+            start = Question(question_id="0", text="", type="start", help_text="", answers=[])
+            self.list_questions.append(self.database.get_next_question(start, UserAnswers("")))
+            return self.list_questions[-1]
+
+        previou_question = self.list_questions[-1]
+        self.list_questions.append(self.database.get_next_question(previou_question, answer_list[-1]))
+        return self.list_questions[-1]
 
     def check_form_exist(self, username: User, form_name: str) -> bool:
         """
