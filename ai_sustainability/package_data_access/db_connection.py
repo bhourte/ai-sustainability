@@ -119,7 +119,9 @@ class DbConnection(DBInterface):
                     modif_crypted=prop["properties"]["modif_crypted"] == "True"
                     if "modif_crypted" in prop["properties"]
                     else False,
-                    list_coef=prop["properties"]["list_coef"] if "list_coef" in prop["properties"] else [],
+                    list_coef=[float(coef) for coef in (prop["properties"]["list_coef"].split(", "))]
+                    if "list_coef" in prop["properties"]
+                    else [],
                 )
             )
         return propositions
