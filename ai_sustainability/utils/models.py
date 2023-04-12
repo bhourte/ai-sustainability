@@ -3,7 +3,7 @@ File with all dataclass and Type we use in the form application
 """
 
 from dataclasses import dataclass
-from typing import NewType
+from typing import NewType, Optional
 
 User = NewType("User", str)
 Query = NewType("Query", str)
@@ -21,7 +21,7 @@ class Proposition:
 
 
 UserAnswers = list[Proposition]  # List of answers selected by the user in QuestionAnswer propositions
-AnswersList = list[UserAnswers]
+AnswersList = list[Optional[UserAnswers]]
 
 
 @dataclass
