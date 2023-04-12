@@ -81,7 +81,7 @@ class DbConnection(DBInterface):
         if actual_question.type in ("Q_Open", "Q_QRM"):
             query = Query(f"g.V('{actual_question.question_id}').outE().inV()")
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
-            query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0]}').inV()")
+            query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0].text}').inV()")
         elif actual_question.type == "start":
             query = Query(f"g.V('{FIRST_NODE_ID}')")
         elif actual_question.type == "end":
