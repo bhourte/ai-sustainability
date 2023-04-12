@@ -21,7 +21,7 @@ class Proposition:
 
 
 UserAnswers = list[Proposition]  # List of answers selected by the user in QuestionAnswer propositions
-AnswersList = list[Optional[UserAnswers]]
+AnswersList = list[UserAnswers]
 
 
 @dataclass
