@@ -24,6 +24,26 @@ FIRST_NODE_ID = "1"
 _range = range
 statics.load_statics(globals())
 
+def connect(endpoint: str, database_name: str, container_name: str, primary_key: str) -> client.Client:
+    """
+    Connect to the database and return the client (made only once thanks to the cache)
+
+    Parameters :
+        - endpoint : the endpoint of the database (string)
+        - database_name : the name of the database (string)
+        - container_name : the name of the container (string)
+        - primary_key : the primary key of the database (string)
+
+    Return :
+        - client : the client to connect to the database
+    """
+    return client.Client(
+        "wss://" + endpoint + ":443/",
+        "g",
+        username="/dbs/" + database_name + "/colls/" + container_name,
+        password=primary_key,
+        message_serializer=serializer.GraphSONSerializersV2d0(),
+    )
 
 class DbConnection(DBInterface):
     def __init__(self) -> None:
