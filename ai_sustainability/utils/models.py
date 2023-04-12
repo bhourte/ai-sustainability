@@ -5,11 +5,11 @@ File with all dataclass and Type we use in the form application
 from dataclasses import dataclass
 from typing import NewType
 
-UserAnswers = NewType("UserAnswers", list[str])  # List of answers selected by the user in QuestionAnswer propositions
+UserAnswers = list[str]  # List of answers selected by the user in QuestionAnswer propositions for one question
 User = NewType("User", str)
 Query = NewType("Query", str)
 Feedback = NewType("Feedback", str)
-AnswersList = NewType("AnswersList", list[UserAnswers])
+AnswersList = list[UserAnswers]  # List of answers selected by the user for all questions
 
 
 @dataclass

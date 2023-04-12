@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from ai_sustainability.utils.models import (
     AnswersList,
     Feedback,
+    Query,
     Question,
     SelectedEdge,
     User,
@@ -32,7 +33,7 @@ class DBInterface(ABC):
     ########## Useful method ##########
 
     @abstractmethod
-    def run_gremlin_query(self, query: str) -> list:
+    def run_gremlin_query(self, query: Query) -> list:
         """
         Run a gremlin query
 
@@ -156,7 +157,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_answer_node(self, question_id: str, new_node_id: str) -> None:
+    def create_answer_node(self, question_id: str, question_text: str, new_node_id: str) -> None:
         """
         Create a question node in the database
 
@@ -167,7 +168,7 @@ class DBInterface(ABC):
 
     @abstractmethod
     def create_answer_edge(
-        self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str
+        self, source_node_id: str, target_node_id: str, answers: UserAnswers, question_id: str, proposition_id: str
     ) -> None:
         """
         Create an edge between two nodes
