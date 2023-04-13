@@ -19,7 +19,7 @@ class StatisticStreamlit:
         - __init__ : initialise the UI and check if the user is connected
         - check_if_admin : chek if the user is an admin, show some messages in both cases
         - display_statistic_edges : show stats based on the edges
-        - display_statistic_ais : show stats based on the AIs
+        - display_statistic_ais : show stats based on the AIs (not implemented yet)
     """
 
     def __init__(self) -> None:
@@ -48,7 +48,7 @@ class StatisticStreamlit:
             st.write("There is no form answered")
             return
         with st.spinner("Loading..."):
-            # sort the dict on keys
+            # sort the list on edges name
             edge_selected.sort(key=lambda x: x.edge)
             hover_text = []  # text with the in and out node
             text = []  # Text of the selected answer
@@ -59,15 +59,19 @@ class StatisticStreamlit:
                 hover_text.append(f"Q {node_in} to Q {node_out}")
                 text.append(i.text)
                 count_edges.append(i.nb_selected)
-            list_edge_name = sorted(list({k.edge for k in edge_selected}))
+            list_edge_name = sorted(list({k.edge for k in edge_selected}))  # To get the edges name in ascending order
             fig = go.Figure(data=[go.Bar(x=list_edge_name, y=list(count_edges), hovertext=text, text=hover_text)])
             fig.update_layout(
                 title="Number of times each edge was selected",
                 xaxis_title="Edges/Propositions id",
                 yaxis_title="Number of times selected",
-                yaxis=dict(dtick=1),
+                yaxis={
+                    "dtick": 1,
+                },
             )
             st.plotly_chart(fig)
 
     def display_statistic_ais(self) -> None:
-        pass
+        """
+        Show stats based on the AIs (not implemented yet)
+        """

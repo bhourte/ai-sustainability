@@ -23,7 +23,7 @@ class ConnectionStreamlit:
         st.set_page_config(page_title="Connection Page", page_icon="👤")
         st.title("👤Connection")
 
-    def setup_username(self) -> None:  # TODO remove return
+    def setup_username(self) -> None:
         username = User(
             st.text_input(
                 "Put your username here to connect :",

@@ -1,14 +1,13 @@
 """
 This file is used to show the Historic page
 """
+from decouple import config
+
 from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.classes.class_historic import (
     HistoricStreamlit,
 )
 from ai_sustainability.utils.models import AnswersList, Proposition, User
-
-# General variable, used to begin the main() function
-N_BEST_AI = 5
 
 
 def historic_user(username: User, st_historic: HistoricStreamlit, app: Application) -> None:
@@ -62,7 +61,8 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
         if st_historic.check_name_already_taken(username):
             return
 
-    list_bests_ais = app.calcul_best_ais(N_BEST_AI, list_answers)
+    n_best_ai = config("NBEST_AI")
+    list_bests_ais = app.calcul_best_ais(n_best_ai, list_answers)
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission_button():
         app.change_answers(list_answers, username, selected_form, new_form_name, list_bests_ais)
