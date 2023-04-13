@@ -44,26 +44,23 @@ class StatisticStreamlit:
         Parameters:
             - edge_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
         """
-        print(edge_selected)
+        if not edge_selected:
+            st.write("There is no form answered")
+            return
         with st.spinner("Loading..."):
-            print(
-                "##########################################\n##########################################\n##########################################\n##########################################\n"
-            )
             # sort the dict on keys
             edge_selected.sort(key=lambda x: x.edge)
             hover_text = []  # text with the in and out node
             text = []  # Text of the selected answer
             count_edges = []  # Number of times each edge was selected
-            for edge in edge_selected:
-                print(edge)
-                node_in = edge.edge.split("-")[0]
-                node_out = edge.edge.split("-")[1]
+            for i in edge_selected:
+                node_in = i.edge.split("-")[0]
+                node_out = i.edge.split("-")[1]
                 hover_text.append(f"Q {node_in} to Q {node_out}")
-                text.append(edge.text)
-                count_edges.append(edge.nb_selected)
-            list_edge_name = list({k.edge for k in edge_selected}).sort()
-            print(list_edge_name)
-            fig = go.Figure(data=[go.Bar(x=list(list_edge_name), y=list(count_edges), hovertext=text, text=hover_text)])
+                text.append(i.text)
+                count_edges.append(i.nb_selected)
+            list_edge_name = sorted(list({k.edge for k in edge_selected}))
+            fig = go.Figure(data=[go.Bar(x=list_edge_name, y=list(count_edges), hovertext=text, text=hover_text)])
             fig.update_layout(
                 title="Number of times each edge was selected",
                 xaxis_title="Edges/Propositions id",

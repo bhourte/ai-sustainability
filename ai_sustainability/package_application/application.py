@@ -191,5 +191,4 @@ class Application:
         Return :
             - list of SelectedEdge
         """
-        print(self.database.get_nb_selected_edge())
         return self.database.get_nb_selected_edge()

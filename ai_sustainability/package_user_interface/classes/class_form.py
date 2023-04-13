@@ -87,7 +87,7 @@ class FormStreamlit:
             )
         )
         open_proposition = Proposition(
-            proposition_id=previous_answer[0].proposition_id,
+            proposition_id=question.answers[0].proposition_id,
             text=validate_text_input(answer),
             help_text=previous_answer[0].help_text,
             modif_crypted=previous_answer[0].modif_crypted,
