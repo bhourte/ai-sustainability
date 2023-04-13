@@ -23,6 +23,22 @@ def connec_to_db() -> DbConnection:
 class Application:
     """
     Class used to make the link between the database and the UI
+
+    Methods :
+        - __init__
+        - get_next_question
+        - calcul_best_ais
+        - get_best_ais
+        - get_all_users
+        - get_all_forms_names
+        - get_list_answers
+        - get_all_feedbacks
+        - get_nb_selected_edge_stats
+        - check_user_exist
+        - check_form_exist
+        - save_answers
+        - change_answers
+        - save_feedback
     """
 
     def __init__(self) -> None:
@@ -81,39 +97,6 @@ class Application:
         """
         return self.database.get_best_ais(username, form_name)
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_best_ai: list[str]) -> bool:
-        """
-        Save the answers of a user in the database
-
-        Parameters:
-            - username (str): username of the user
-            - form_name (str): name of the form
-            - answers (list): list of the answers of the user
-
-        Return:
-            - bool: True if the answers are saved, False if the form already exist
-        """
-        return self.database.save_answers(username, form_name, answers, self.list_questions, list_best_ai)
-
-    def change_answers(
-        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, list_best_ai: list[str]
-    ) -> bool:
-        """
-        Change the answer in db
-
-        Parameters:
-            - answers (list): list of answers
-            - username (str): username of the user
-            - form_name (str): name of the form
-            - new_form_name (str): new name of the form
-
-        Return:
-            - bool: True if the answers are saved, False if the form already exist
-        """
-        return self.database.change_answers(
-            answers, username, form_name, new_form_name, self.list_questions, list_best_ai
-        )
-
     def get_all_users(self) -> list[User]:
         """
         Return all users in the database
@@ -152,6 +135,15 @@ class Application:
         """
         return self.database.get_all_feedbacks()
 
+    def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
+        """
+        Return a dict with number of selected edge for each proposition
+        Especially for stats showing
+        Return :
+            - list of SelectedEdge
+        """
+        return self.database.get_nb_selected_edge()
+
     def check_user_exist(self, username: User) -> bool:
         """
         Check if a user exists in the database
@@ -174,6 +166,39 @@ class Application:
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
+    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_best_ai: list[str]) -> bool:
+        """
+        Save the answers of a user in the database
+
+        Parameters:
+            - username (str): username of the user
+            - form_name (str): name of the form
+            - answers (list): list of the answers of the user
+
+        Return:
+            - bool: True if the answers are saved, False if the form already exist
+        """
+        return self.database.save_answers(username, form_name, answers, self.list_questions, list_best_ai)
+
+    def change_answers(
+        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, list_best_ai: list[str]
+    ) -> bool:
+        """
+        Change the answer in db
+
+        Parameters:
+            - answers (list): list of answers
+            - username (str): username of the user
+            - form_name (str): name of the form
+            - new_form_name (str): new name of the form
+
+        Return:
+            - bool: True if the answers are saved, False if the form already exist
+        """
+        return self.database.change_answers(
+            answers, username, form_name, new_form_name, self.list_questions, list_best_ai
+        )
+
     def save_feedback(self, username: User, feedback: Feedback) -> None:
         """
         Save a feedback from a user in the database
@@ -183,12 +208,3 @@ class Application:
             - feedback : the feedback given by the user (str)
         """
         self.database.save_feedback(username, feedback)
-
-    def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
-        """
-        Return a dict with number of selected edge for each proposition
-        Especially for stats showing
-        Return :
-            - list of SelectedEdge
-        """
-        return self.database.get_nb_selected_edge()
