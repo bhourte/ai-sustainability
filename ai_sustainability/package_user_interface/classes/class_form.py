@@ -4,6 +4,7 @@ Streamlit class
 """
 from typing import Optional
 
+import numpy as np
 import streamlit as st
 
 from ai_sustainability.package_user_interface.utils_streamlit import (
@@ -121,14 +122,12 @@ class FormStreamlit:
         if previous_answer is not None:
             for proposition in previous_answer:
                 default.append(proposition.text)
-        answers = UserAnswers(
-            st.multiselect(
-                label=question.text,
-                options=self.get_proposition_list(question),  # TODO ask Benoit
-                default=default,
-                help=question.help_text,
-                disabled=self.locked,
-            )
+        answers = st.multiselect(
+            label=question.text,
+            options=self.get_proposition_list(question),
+            default=default,
+            help=question.help_text,
+            disabled=self.locked,
         )
         if not answers:
             return None
