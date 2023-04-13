@@ -476,10 +476,11 @@ class DbConnection(DBInterface):
         """
         return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI').value()"))[0].split(", ")
 
-    def get_best_ais(self, username: User, form_name: str):
+    def get_best_ais(self, username: User, form_name: str) -> list[str]:
         """
         Return the best ais for a form
         """
         form_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
-        query = Query(f"g.V('{form_id}').properties('list_AI').value()")
-        return self.run_gremlin_query(query)[0].split(", ")
+        query = Query(f"g.V('{form_id}').properties('best_ais').value()")
+        result = self.run_gremlin_query(query)
+        return result[0].split(", ") if result[0] else []
