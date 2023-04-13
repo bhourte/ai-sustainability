@@ -452,7 +452,7 @@ class DbConnection(DBInterface):
         query = Query("g.E().hasLabel('Answer').valueMap()")
         result = self.run_gremlin_query(query)
 
-        nb_selected_edge = {}
+        nb_selected_edge = {}  # key : proposition_id, value : [answer, nb_selected]
         for edge in result:
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
