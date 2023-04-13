@@ -61,7 +61,7 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
         if st_historic.check_name_already_taken(username):
             return
 
-    n_best_ai = config("NBEST_AI")
+    n_best_ai = int(config("NBEST_AI"))
     list_bests_ais = app.calcul_best_ais(n_best_ai, list_answers)
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission_button():

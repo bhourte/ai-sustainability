@@ -45,7 +45,7 @@ def main() -> None:
     # Connection to the online gremlin database via db_connection.py
     st_form = FormStreamlit()
     app = Application()
-    n_best_ai = config("NBEST_AI")
+    n_best_ai = int(config("NBEST_AI"))
 
     username = st_form.username
     if not username:
