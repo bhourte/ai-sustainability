@@ -68,7 +68,7 @@ class Application:
         list_ai = self.database.get_all_ais()
         return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, list_answers=answers)
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList) -> bool:
+    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_ai: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -80,7 +80,7 @@ class Application:
         Return:
             - bool: True if the answers are saved, False if the form already exist
         """
-        return self.database.save_answers(username, form_name, answers, self.list_questions)
+        return self.database.save_answers(username, form_name, answers, self.list_questions, list_ai)
 
     def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
         """
@@ -174,4 +174,5 @@ class Application:
         Return :
             - list of SelectedEdge
         """
+        print(self.database.get_nb_selected_edge())
         return []
