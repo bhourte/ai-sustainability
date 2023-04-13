@@ -57,18 +57,17 @@ class Application:
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
-        if len(answer_list) < len(self.list_questions):
+        if len(answer_list) < len(self.list_questions):  # A previous answer is changed
             self.list_questions = self.list_questions[: len(answer_list)]
         if not answer_list:  # The form is empty, so we create a question 0 to initialise it
             start = Question(question_id="0", text="", type="start", help_text="", answers=[])
             self.list_questions.append(self.database.get_next_question(start, []))
             return self.list_questions[-1]
 
-        actual_question = self.list_questions[-1]
-        if len(answer_list) > 1 and answer_list[1][0].text == "Yes":
+        if len(answer_list) > 1 and answer_list[1][0].text == "Yes":  # /!> hard code pour modif_crypted
             self.modif_crypted = True
-        next_question = self.database.get_next_question(actual_question, answer_list[-1])
-        if self.modif_crypted:
+        next_question = self.database.get_next_question(self.list_questions[-1], answer_list[-1])
+        if self.modif_crypted:  # We only take the proposition that can be shown (modif_crytpted = False)
             list_proposition = []
             for i in next_question.answers:
                 if not i.modif_crypted:
