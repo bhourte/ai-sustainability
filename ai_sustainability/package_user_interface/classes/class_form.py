@@ -19,7 +19,6 @@ class FormStreamlit:
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
-        - set_atribute : set the page attributes
         - show_question : select with methode use in function of the question label
         - show_open_question : show a Q_open question
         - show_qcm_question : show a Q_QCM and Q_QCM_Bool question
@@ -29,7 +28,7 @@ class FormStreamlit:
         - input_form_name
         - error_name_already_taken
         - show_submission_button
-        - set_state : set the session_state.clicked to True
+        - set_locked : lock all the question of the form
         - show_best_ai
     """
 

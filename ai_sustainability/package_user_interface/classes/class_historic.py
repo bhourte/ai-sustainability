@@ -15,11 +15,10 @@ class HistoricStreamlit(FormStreamlit):
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
-        - set_atribute : set the page attributes
         - show_choice_user : show a select box with all users
         - show_choice_form : show a select box with all forms of a user
-        - show_submission : show a previous answered form
-        - show_question_as_admin : show a previous answered form with the admin view
+        - show_submission_button : display a button where the user can save the changes made in the form
+        - show_question_as_admin : show a previous answered question with the admin view
     """
 
     page_title = "Historic Page"
@@ -27,12 +26,18 @@ class HistoricStreamlit(FormStreamlit):
     page_icon = "📜"
 
     def show_choice_user(self, list_username: list[User]) -> User:
+        """
+        Show a select box with all users
+        """
         list_username = [User("<Select a user>")] + list_username
         question = "Select an user"
         answer = User(str(st.selectbox(label=question, options=list_username, index=0)))
         return answer if answer != "<Select a user>" else User("")
 
     def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
+        """
+        Show a select box with all forms of a user
+        """
         list_form_name = ["<Select a form>"] + list_answered_form
         question = "Select a form" if is_admin else "Select the previous form you want to see again or edit"
         answer = str(st.selectbox(label=question, options=list_form_name, index=0))
@@ -43,6 +48,9 @@ class HistoricStreamlit(FormStreamlit):
         return answer
 
     def show_submission_button(self) -> bool:
+        """
+        Display a button where the user can save the changes made in the form
+        """
         if st.button("Save changes", disabled=st.session_state.clicked):
             st.write("Changes saved")
             st.session_state.last_form_name = None
@@ -50,6 +58,9 @@ class HistoricStreamlit(FormStreamlit):
         return False
 
     def show_question_as_admin(self, question: Question, previous_answers: UserAnswers) -> None:
+        """
+        Show a previous answered question with the admin view
+        """
         if question.type == "end":
             return
         answers = ""

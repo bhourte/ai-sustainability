@@ -1,5 +1,18 @@
 """
 File with all dataclass and Type we use in the form application
+
+New models :
+  NewType :
+    - User
+    - Query
+    - Feedback
+    - UserAnswers
+    - AnswersList
+  Dataclass :
+    - Proposition
+    - Question
+    - UserFeedback
+    - SelectedEdge
 """
 
 from dataclasses import dataclass

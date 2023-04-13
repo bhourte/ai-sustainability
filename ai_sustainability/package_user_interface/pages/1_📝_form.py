@@ -1,14 +1,11 @@
 """
 This file is used to show the From page
 """
-from ai_sustainability.package_application.application import Application
+from decouple import config
 
-# from ai_sustainability.package_application.test_application import Application
+from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 from ai_sustainability.utils.models import AnswersList, User
-
-# General variable, used to begin the main() function
-N_BEST_AI = 5  # TODO : put this in a config file or env variable
 
 
 def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> tuple[AnswersList, bool]:
@@ -48,6 +45,7 @@ def main() -> None:
     # Connection to the online gremlin database via db_connection.py
     st_form = FormStreamlit()
     app = Application()
+    n_best_ai = config("NBEST_AI")
 
     username = st_form.username
     if not username:
@@ -61,8 +59,7 @@ def main() -> None:
     if form_name_incorrect:
         return
 
-    print(list_answers)
-    list_bests_ais = app.calcul_best_ais(N_BEST_AI, list_answers)
+    list_bests_ais = app.calcul_best_ais(n_best_ai, list_answers)
     if st_form.show_submission_button():  # show the submission button and return True if it's clicked
         st_form.show_best_ai(list_bests_ais)
         app.save_answers(username, form_name, list_answers, list_bests_ais)

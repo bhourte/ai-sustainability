@@ -12,6 +12,9 @@ from ai_sustainability.utils.models import AnswersList
 class Business:
     """
     Class used by the application layer to make all the business thing of the app
+
+    Methods :
+        - calcul_best_ais: find the nb_ai best ai form all answers and the list of all AIs
     """
 
     def __init__(self) -> None:
@@ -25,10 +28,9 @@ class Business:
                     coef_ai = np.multiply(coef_ai, np.array(proposition.list_coef))
         # we put all NaN value to -1
         for i_coef, coef in enumerate(coef_ai):
-            if coef != coef:
+            if coef != coef:  # Abracadabra! ^^
                 coef_ai[i_coef] = -1
-        print(coef_ai)
-        best = list(heapq.nlargest(nb_ai, np.array(coef_ai)))
+        best = list(heapq.nlargest(nb_ai, np.array(coef_ai)))  # We sort and find the nb_ai best AIs
         # we put the best nb_ai in list_bests_ais
         list_bests_ais = []
         for i_ai in range(nb_ai):
