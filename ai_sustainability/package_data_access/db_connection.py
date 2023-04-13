@@ -76,7 +76,7 @@ class DbConnection(DBInterface):
             - answer : the answer given by the user for the question (UserAnswers)
 
         Return :
-            - a Question corresponding to the next question according to 
+            - a Question corresponding to the next question according to
                 the actual_question and answer provided (Question)
         """
         if actual_question.type in ("Q_Open", "Q_QRM"):
