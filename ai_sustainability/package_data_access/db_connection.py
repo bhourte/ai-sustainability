@@ -295,7 +295,7 @@ class DbConnection(DBInterface):
             i += 1
         # link between the User node and the first answer node
         first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
-        self.run_gremlin_query(Query(f"g.V('{first_node_id}).property('best_ais', '{best_ais[1:-1]}'"))
+        self.run_gremlin_query(Query(f"g.V('{first_node_id}).property('best_ais', '{best_ais[1:-1]}')"))
         self.run_gremlin_query(
             Query(f"g.V('{username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')")
         )
