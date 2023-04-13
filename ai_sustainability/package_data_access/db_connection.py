@@ -265,7 +265,9 @@ class DbConnection(DBInterface):
             list_weight[i_weight] = float(weight)
         return list_weight
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList, questions: list[Question]) -> bool:
+    def save_answers(
+        self, username: User, form_name: str, answers: AnswersList, questions: list[Question], best_ais: list[str]
+    ) -> bool:
         """
         Save the answers of a user in the database
 
@@ -293,6 +295,7 @@ class DbConnection(DBInterface):
             i += 1
         # link between the User node and the first answer node
         first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        self.run_gremlin_query(Query(f"g.V('{first_node_id}).property('best_ais', '{best_ais[1:-1]}'"))
         self.run_gremlin_query(
             Query(f"g.V('{username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')")
         )
@@ -356,7 +359,13 @@ class DbConnection(DBInterface):
             )
 
     def change_answers(
-        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, questions: list[Question]
+        self,
+        answers: AnswersList,
+        username: User,
+        form_name: str,
+        new_form_name: str,
+        questions: list[Question],
+        best_ais: list[str],
     ) -> bool:
         """
         Change the answer in db
@@ -379,7 +388,7 @@ class DbConnection(DBInterface):
                 keep_going = False
             else:
                 node_id = next_node_id[0]["value"]
-        return self.save_answers(username, new_form_name, answers, questions)
+        return self.save_answers(username, new_form_name, answers, questions, best_ais)
 
     def get_all_forms_names(self, username: User) -> list[str]:
         """
@@ -462,3 +471,11 @@ class DbConnection(DBInterface):
             - list of the ais
         """
         return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI').value()"))[0].split(", ")
+
+    def get_best_ais(self, username: User, form_name: str):
+        """
+        Return the best ais for a form
+        """
+        form_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        query = Query(f"g.V('{form_id}').properties('list_AI').value()")
+        return self.run_gremlin_query(query)[0].split(", ")

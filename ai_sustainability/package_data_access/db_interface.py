@@ -132,7 +132,9 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_answers(self, username: User, form_name: str, answers: AnswersList, questions: list[Question]) -> bool:
+    def save_answers(
+        self, username: User, form_name: str, answers: AnswersList, questions: list[Question], best_ais: list[str]
+    ) -> bool:
         """
         Save the answers of a user in the database
 
@@ -173,7 +175,15 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str, questions: list[Question]) -> bool:
+    def change_answers(
+        self,
+        answers: AnswersList,
+        username: User,
+        form_name: str,
+        new_form_name: str,
+        questions: list[Question],
+        best_ais: list[str],
+    ) -> bool:
         """
         Change the answer in db
 
@@ -220,4 +230,10 @@ class DBInterface(ABC):
 
         Return :
             - number of selected edge for each proposition
+        """
+
+    @abstractmethod
+    def get_best_ais(self, username: User, form_name: str):
+        """
+        Return the best ais for a form
         """
