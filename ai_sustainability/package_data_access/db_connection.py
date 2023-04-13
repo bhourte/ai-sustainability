@@ -21,7 +21,7 @@ from ai_sustainability.utils.models import (
 )
 
 FIRST_NODE_ID = "1"
-_range = range
+_map = map
 statics.load_statics(globals())
 
 
@@ -400,9 +400,10 @@ class DbConnection(DBInterface):
         Return:
             - list of the forms_id
         """
-        return self.run_gremlin_query(Query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()"))
+        forms_id = self.run_gremlin_query(Query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()"))
+        return list(_map(lambda x: x.split("-")[-1], forms_id))
 
-    def get_list_answers(self, selected_form: str) -> AnswersList:
+    def get_list_answers(self, username: User, form_name: str) -> AnswersList:
         """
         Get the list of answers of a form
 
@@ -413,8 +414,8 @@ class DbConnection(DBInterface):
             - list of the answers
         """
         list_answers = AnswersList()
-        node = selected_form
-        node_label = self.get_node_label(selected_form)
+        node = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        node_label = self.get_node_label(node)
         while node_label != "end":
             list_answers.append(self.get_answers(node))
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
