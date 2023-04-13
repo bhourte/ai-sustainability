@@ -210,7 +210,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_list_answers(self, selected_form: str) -> AnswersList:
+    def get_list_answers(self, username: User, form_name: str) -> AnswersList:
         """
         Get the list of answers of a form
 
