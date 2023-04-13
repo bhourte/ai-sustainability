@@ -68,7 +68,13 @@ class Application:
         list_ai = self.database.get_all_ais()
         return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, list_answers=answers)
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_ai: list[str]) -> bool:
+    def get_best_ais(self, username: User, form_name: str) -> list[str]:
+        """
+        Method used to retreive all the N_best Ais stored in a answer
+        """
+        return self.database.get_best_ais(username, form_name)
+
+    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_best_ai: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -80,9 +86,11 @@ class Application:
         Return:
             - bool: True if the answers are saved, False if the form already exist
         """
-        return self.database.save_answers(username, form_name, answers, self.list_questions, list_ai)
+        return self.database.save_answers(username, form_name, answers, self.list_questions, list_best_ai)
 
-    def change_answers(self, answers: AnswersList, username: User, form_name: str, new_form_name: str) -> bool:
+    def change_answers(
+        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, list_best_ai: list[str]
+    ) -> bool:
         """
         Change the answer in db
 
@@ -95,7 +103,9 @@ class Application:
         Return:
             - bool: True if the answers are saved, False if the form already exist
         """
-        return self.database.change_answers(answers, username, form_name, new_form_name, self.list_questions)
+        return self.database.change_answers(
+            answers, username, form_name, new_form_name, self.list_questions, list_best_ai
+        )
 
     def get_all_users(self) -> list[User]:
         """
@@ -117,7 +127,7 @@ class Application:
         """
         return self.database.get_all_forms_names(username)
 
-    def get_list_answers(self, selected_form: str) -> AnswersList:
+    def get_list_answers(self, username: User, selected_form: str) -> AnswersList:
         """
         Get the list of answers of a form
 

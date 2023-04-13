@@ -19,11 +19,10 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     selected_form = st_historic.show_choice_form(list_answered_form)
     if not selected_form:  # if none form selected, don't show the rest
         return
-    form_name = selected_form.rsplit("-", maxsplit=1)[-1]
 
     # get the list with all previous answers contained in the form
     proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
-    previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
+    previous_answers = app.get_list_answers(username, selected_form) + AnswersList([[proposition_end]])
 
     keep_going = True
     list_answers: AnswersList = AnswersList([])
@@ -54,12 +53,12 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
         return
 
     # We ask the user to give us a name for the form (potentially a new one)
-    new_form_name = st_historic.show_input_form_name(form_name)
+    new_form_name = st_historic.show_input_form_name(selected_form)
     if not new_form_name:
         return
 
     # If the name is already taken by an other form
-    if app.check_form_exist(username, new_form_name) and new_form_name != form_name:
+    if app.check_form_exist(username, new_form_name) and new_form_name != selected_form:
         if st_historic.check_name_already_taken(username):
             return
 
@@ -67,7 +66,7 @@ def historic_user(username: User, st_historic: HistoricStreamlit, app: Applicati
     list_bests_ais = app.calcul_best_ais(N_BEST_AI, list_answers)
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission_button():
-        app.change_answers(list_answers, username, form_name, new_form_name)
+        app.change_answers(list_answers, username, selected_form, new_form_name, list_bests_ais)
 
 
 def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
@@ -89,7 +88,7 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
 
     # get the list with all previous answers contained in the form
     proposition_end = Proposition(proposition_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
-    previous_answers = app.get_list_answers(selected_form) + AnswersList([[proposition_end]])
+    previous_answers = app.get_list_answers(choosen_user, selected_form) + AnswersList([[proposition_end]])
     keep_going = True
     i = 0
     while keep_going:
@@ -98,8 +97,7 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
         st_historic.show_question_as_admin(next_question, previous_answers[i])
         keep_going = next_question.type != "end"
         i += 1
-    # TODO probleme des best IA, tous a 1, car list_coef = []
-    list_bests_ais = app.calcul_best_ais(N_BEST_AI, previous_answers[:-1])
+    list_bests_ais = app.get_best_ais(choosen_user, selected_form)
     st_historic.show_best_ai(list_bests_ais)
 
 
