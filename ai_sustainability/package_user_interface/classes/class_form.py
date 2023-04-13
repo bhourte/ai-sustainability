@@ -4,7 +4,6 @@ Streamlit class
 """
 from typing import Optional
 
-import numpy as np
 import streamlit as st
 
 from ai_sustainability.package_user_interface.utils_streamlit import (
