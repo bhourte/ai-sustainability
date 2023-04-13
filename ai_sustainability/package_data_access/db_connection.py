@@ -295,7 +295,7 @@ class DbConnection(DBInterface):
             i += 1
         # link between the User node and the first answer node
         first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
-        self.run_gremlin_query(Query(f"g.V('{first_node_id}).property('best_ais', '{best_ais[1:-1]}')"))
+        self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(best_ais)[1:-1]}')"))
         self.run_gremlin_query(
             Query(f"g.V('{username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')")
         )
@@ -456,7 +456,10 @@ class DbConnection(DBInterface):
         for edge in result:
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
-                    nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+                    if self.get_node_label(edge["proposition_id"].split("-")[0]) == "Q_Open":
+                        nb_selected_edge[edge["proposition_id"]] = ["Q_Next", 0]
+                    else:
+                        nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
                 nb_selected_edge[edge["proposition_id"]][1] += 1
 
         selected_edges = []
