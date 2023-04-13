@@ -1,6 +1,8 @@
 """
 File with our Application class
 """
+import streamlit as st
+
 from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_data_access.db_connection import DbConnection
 from ai_sustainability.utils.models import (
@@ -13,13 +15,18 @@ from ai_sustainability.utils.models import (
 )
 
 
+@st.cache_resource
+def connec_to_db() -> DbConnection:
+    return DbConnection()
+
+
 class Application:
     """
     Class used to make the link between the database and the UI
     """
 
     def __init__(self) -> None:
-        self.database = DbConnection()
+        self.database = connec_to_db()
         self.business = Business()
         self.list_questions: list[Question] = []
         self.modif_crypted = False

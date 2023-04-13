@@ -221,8 +221,6 @@ class DBInterface(ABC):
             - list of the answers
         """
 
-    ########## Less useful method ##########  TODO : see if we keep them
-
     @abstractmethod
     def get_nb_selected_edge(self) -> list[SelectedEdge]:
         """
@@ -233,7 +231,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_best_ais(self, username: User, form_name: str):
+    def get_best_ais(self, username: User, form_name: str) -> list[str]:
         """
         Return the best ais for a form
         """
