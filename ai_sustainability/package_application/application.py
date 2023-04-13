@@ -137,7 +137,7 @@ class Application:
         Return:
             - list of the answers
         """
-        return self.database.get_list_answers(selected_form)
+        return self.database.get_list_answers(username, selected_form)
 
     def get_all_feedbacks(self) -> list[UserFeedback]:
         """
