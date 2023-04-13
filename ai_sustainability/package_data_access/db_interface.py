@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from ai_sustainability.utils.models import (
     AnswersList,
     Feedback,
+    Proposition,
     Query,
     Question,
     SelectedEdge,
@@ -31,15 +32,13 @@ class DBInterface(ABC):
         Close the connection to the database
         """
 
-    ########## Useful method ##########
-
     @abstractmethod
     def run_gremlin_query(self, query: Query) -> list:
         """
         Run a gremlin query
 
         Parameters :
-            - query : the gremlin query to run (string) (Exemple : "g.V()")
+            - query : the gremlin query to run (Query) (Exemple : Query("g.V()"))
 
         Return :
             - list of all result that correspond to the query (list)
@@ -48,14 +47,27 @@ class DBInterface(ABC):
     @abstractmethod
     def get_next_question(self, actual_question: Question, answer: UserAnswers) -> Question:
         """
-        Get the id of the next question
+        get the next question
 
         Parameters :
-            - actual_question : the actual Question
-            - answer : the answer given by the user for the question (if "" : this means no specific answer eg: Q_Next)
+            - actual_question : the actual Question (Question)
+            - answer : the answer given by the user for the question (UserAnswers)
 
         Return :
-            - a Question corresponding to the next question according to the actual_question and answer provided
+            - a Question corresponding to the next question according to
+                the actual_question and answer provided (Question)
+        """
+
+    @abstractmethod
+    def get_propositions(self, question_id: str) -> list[Proposition]:
+        """
+        Get the propositions for a question in the database
+
+        Parameters :
+            - question_id : the id of the question (str)
+
+        Return :
+            - propositions : list of all propositions for the question (list of Proposition)
         """
 
     @abstractmethod
@@ -64,7 +76,7 @@ class DBInterface(ABC):
         Create a user node in the database
 
         Parameters :
-            - username : the username of the user (str)
+            - username : the username of the user (User)
         """
 
     @abstractmethod
@@ -72,19 +84,28 @@ class DBInterface(ABC):
         """
         Return all users in the database
             Return :
-                - result : list of all users (list of str)
+                - result : list of all users (list of User)
         """
 
     @abstractmethod
     def get_all_feedbacks(self) -> list[UserFeedback]:
         """
-        Return all feedbacks from all users in the database
+        Return all feedbacks in the database
+
+        Return :
+            - result : list of all feedbacks (list of UserFeedback)
         """
 
     @abstractmethod
     def get_user_feedbacks(self, username: User) -> UserFeedback:
         """
         Return all feedbacks from a user in the database
+
+        Parameters :
+            - username : the username of the user (User)
+
+        Return :
+            - result : list of all feedbacks from the user (UserFeedback)
         """
 
     @abstractmethod
@@ -93,18 +114,50 @@ class DBInterface(ABC):
         Save a feedback from a user in the database
 
         Parameters :
-            - username : the username of the user (str)
-            - feedback : the feedback given by the user (str)
+            - username : the username of the user (User)
+            - feedback : the feedback given by the user (Feedback)
         """
 
     @abstractmethod
+    def check_feedback_exist(self, username: User) -> bool:
+        """
+        Check if a feedback exist in the database
+
+        Parameters :
+            - username : the username of the user (User)
+
+        Return :
+            - bool : True if the feedback exist, False otherwise
+        """
+
+    @abstractmethod
+    def check_node_exist(self, node_id: str) -> bool:
+        """
+        Check if a node exists in the database
+
+        Parameters :
+            - node_id : the id of the node (str)
+
+        Return :
+            - bool : True if the node exists, False otherwise
+        """
+
+    @abstractmethod
+    def create_feedback_node(self, username: User) -> None:
+        """
+        Create a feedback node in the database
+
+        Parameters :
+            - username : the username of the user (User)
+        """
+
     def create_feedback_edge(self, username: User, feedback: Feedback) -> None:
         """
         Create a feedback edge in the database
 
         Parameters :
-            - username : the username of the user (str)
-            - feedback : the feedback given by the user (str)
+            - username : the username of the user (User)
+            - feedback : the feedback given by the user (Feedback)
         """
 
     @abstractmethod
@@ -113,22 +166,10 @@ class DBInterface(ABC):
         Return the number of feedbacks from a user
 
         Parameters :
-            - username : the username of the user (str)
+            - username : the username of the user (User)
 
         Return :
             - the number of feedbacks from a user (int)
-        """
-
-    @abstractmethod
-    def get_weight(self, edge_id: str) -> list[float]:
-        """
-        Get the list_coef from the edge with edge_id id
-
-        Parameters:
-            - edge_id (str): id of the edge in the db
-
-        Return:
-            - list of the weights of the edge
         """
 
     @abstractmethod
@@ -139,12 +180,27 @@ class DBInterface(ABC):
         Save the answers of a user in the database
 
         Parameters:
-            - username (str): username of the user
+            - username (User): username of the user
             - form_name (str): name of the form
-            - answers (list): list of the answers of the user
+            - answers (AnswerList): list of the answers of the user
+            - questions (list[Question]): list of the questions of the form
+            - best_ais (list[str]): list of the best ais
 
         Return:
             - True if the answers are saved, False if the form already exist
+        """
+
+    @abstractmethod
+    def check_form_exist(self, username: str, form_name: str) -> bool:
+        """
+        Check if a form exist in the database
+
+        Parameters :
+            - username : the username of the user (str)
+            - form_name : the name of the form (str)
+
+        Return :
+            - bool : True if the form exist, False otherwise
         """
 
     @abstractmethod
@@ -153,7 +209,7 @@ class DBInterface(ABC):
         Create a question node in the database
 
         Parameters:
-            - question_id (str): id of the question
+            - question (Question): id of the question
             - new_node_id (str): id of the new node
         """
 
@@ -170,8 +226,7 @@ class DBInterface(ABC):
         Parameters:
             - source_node_id (str): id of the source node
             - target_node_id (str): id of the target node
-            - answers (list): list of the answers of the user
-            - question_id (str): id of the question form
+            - answers (UserAnswers): list of the answers of the user
         """
 
     @abstractmethod
@@ -203,7 +258,7 @@ class DBInterface(ABC):
         Get all names of the forms of a user (in fact, get all the id lol)
 
         Parameters:
-            - username (str): username of the user
+            - username (User): username of the user
 
         Return:
             - list of the forms_id
@@ -215,23 +270,64 @@ class DBInterface(ABC):
         Get the list of answers of a form
 
         Parameters:
-            - selected_form (str): id of the form
+            - username (User): username of the user
+            - form_name (str): name of the form
 
         Return:
-            - list of the answers
+            - list_answers (AnswersList): list of the answers
+        """
+
+    @abstractmethod
+    def get_answers(self, node_id: str) -> list[Proposition]:
+        """
+        Get the answers of a node (completed form)
+
+        Parameters:
+            - node_id (str): id of the node
+
+        Return:
+            - list of the answers (list[Proposition])
+        """
+
+    @abstractmethod
+    def get_node_label(self, node_id: str) -> str:
+        """
+        Get the label of a node
+
+        Parameters:
+            - node_id (str): id of the node
+
+        Return:
+            - label of the node (str)
         """
 
     @abstractmethod
     def get_nb_selected_edge(self) -> list[SelectedEdge]:
         """
-        Return a dict with number of selected edge for each proposition
+        Return a list of SelectedEdge with theb number of times edge was selected for each proposition
 
         Return :
-            - number of selected edge for each proposition
+            - selected_edges (list[SelectedEdge]) : list of SelectedEdge
+        """
+
+    @abstractmethod
+    def get_all_ais(self) -> list[str]:
+        """
+        Get all the ais in the db
+
+        Return:
+            - list of the ais (list[str])
         """
 
     @abstractmethod
     def get_best_ais(self, username: User, form_name: str) -> list[str]:
         """
-        Return the best ais for a form
+        Return the best ais for a form which was saved in the db
+
+        Parameters:
+            - username (User): username of the user
+            - form_name (str): name of the form
+
+        Return:
+            - list of the best ais (list[str])
         """
