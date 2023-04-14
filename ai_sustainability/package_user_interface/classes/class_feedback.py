@@ -12,7 +12,7 @@ from ai_sustainability.package_user_interface.utils_streamlit import (
 from ai_sustainability.utils import sanitize_text_input
 
 
-class FeedbackStreamlit:
+class FeedbackPage:
     """
     Class used to show all the streamlit UI for the Form page
 
@@ -33,10 +33,12 @@ class FeedbackStreamlit:
 
     def render(self) -> None:
         if self.username == "Admin":
-            return self.show_all_feedbacks()
+            self.show_all_feedbacks()
+            return
 
         if not self.app.user_exist(self.username):
-            return self.warn_unexisting_user()
+            self.warn_unexisting_user()
+            return
 
         self.retrieve_user_feedback()
 

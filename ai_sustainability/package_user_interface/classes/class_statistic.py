@@ -12,7 +12,7 @@ from ai_sustainability.package_user_interface.utils_streamlit import (
 )
 
 
-class StatisticStreamlit:  # TODO rename stat_page
+class StatisticPage:
     """
     Class used to show all the streamlit UI for the Form page
 
