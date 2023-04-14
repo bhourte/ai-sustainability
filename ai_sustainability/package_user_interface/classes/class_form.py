@@ -6,11 +6,17 @@ from typing import Optional
 
 import streamlit as st
 
+from ai_sustainability.package_business.models import Answer, AnswersList, Question
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.models import Proposition, Question, UserAnswers
-from ai_sustainability.utils.utils import check_if_name_ok, validate_text_input
+from ai_sustainability.utils.utils import check_if_name_ok, sanitize_text_input
+
+EDIT_FORM_TEXT = (
+    "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"
+)
+INPUT_FORM_TEXT = "Give a name to your form here"
+WARNING_FORM_ALREADY_EXIST = "You already have a form with this name, please pick an other name or change your previous form in the historic page."
 
 
 class FormStreamlit:
@@ -50,56 +56,59 @@ class FormStreamlit:
         st.session_state.clicked = value
 
     def ask_question_user(
-        self, question: Question, previous_answer: Optional[UserAnswers] = None
-    ) -> Optional[UserAnswers]:
-        answer: Optional[UserAnswers] = UserAnswers([])
+        self, question: Question, previous_answers: Optional[AnswersList] = None
+    ) -> Optional[AnswersList]:
+        answers: Optional[AnswersList] = AnswersList([])
         if question.type == "Q_Open":
-            answer = self.show_open_question(question, previous_answer)
+            answers = self.show_open_question(question, previous_answers)
         elif question.type in ("Q_QCM", "Q_QCM_Bool"):
-            answer = self.show_qcm_question(question, previous_answer)
+            answers = self.show_qcm_question(question, previous_answers)
         elif question.type == "Q_QRM":
-            answer = self.show_qrm_question(question, previous_answer)
+            answers = self.show_qrm_question(question, previous_answers)
         elif question.type == "end":  # This is the end (of the form)
-            proposition_end = Proposition(
-                proposition_id="end", text="end", help_text="", modif_crypted=False, list_coef=[]
-            )
-            return UserAnswers([proposition_end])
+            proposition_end = Answer(
+                answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[]
+            )  # TODO put this in a function
+            return AnswersList([proposition_end])
         else:
             print("Error, question label no recognised")
-        if answer == UserAnswers([]):
+        if not answers:
             st.session_state.last_form_name = None  # We put the variable to None because we detect that is a new form
             self.locked = False
-        return answer
+        return answers
 
-    def show_open_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
-        if previous_answer is None:  # If it has not to be auto-completed before
-            previous_answer = [Proposition(proposition_id="", text="", help_text="", modif_crypted=False, list_coef=[])]
+    def show_open_question(
+        self, question: Question, previous_answers: Optional[AnswersList] = None
+    ) -> Optional[AnswersList]:
+        if previous_answers is None:  # If it has not to be auto-completed before
+            previous_answers = [Answer(answer_id=question.answers[0].answer_id, text="")]
         # We show the question text area
-        answer = str(
-            st.text_area(
-                label=question.text,
-                height=100,
-                label_visibility="visible",
-                value=previous_answer[0].text,
-                help=question.help_text,
-                disabled=self.locked,
+        answer_text = sanitize_text_input(
+            str(
+                st.text_area(
+                    label=question.text,
+                    height=100,
+                    label_visibility="visible",
+                    value=previous_answers[0].text,
+                    help=question.help_text,
+                    disabled=self.locked,
+                )
             )
         )
-        open_proposition = Proposition(
-            proposition_id=question.answers[0].proposition_id,
-            text=validate_text_input(answer),
-            help_text=previous_answer[0].help_text,
-            modif_crypted=previous_answer[0].modif_crypted,
-            list_coef=previous_answer[0].list_coef,
-        )
-        return UserAnswers([open_proposition]) if answer else None
+        previous_answers[0].text = answer_text
+        return previous_answers if answer_text else None
 
-    def show_qcm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
-        options = ["<Select an option>"] + self.get_proposition_list(question)
+    def show_qcm_question(
+        self, question: Question, previous_answers: Optional[AnswersList] = None
+    ) -> Optional[AnswersList]:
+        previous_answer = (
+            previous_answers[0] if previous_answers else None
+        )  # TODO do the same for open_question + check if more than one elmt -> raise ValueError
+        options = ["<Select an option>"] + self.get_answers_text_list(question)
         # If it has to be auto-completed before
-        previous_index = options.index(previous_answer[0].text) if previous_answer is not None else 0
+        previous_index = options.index(previous_answer.text) if previous_answer is not None else 0
         # We show the question selectbox
-        answer = str(
+        selected_answer_text = str(
             st.selectbox(
                 label=question.text,
                 options=options,
@@ -108,60 +117,51 @@ class FormStreamlit:
                 disabled=self.locked,
             )
         )
-        if answer == "<Select an option>":
+        if selected_answer_text == "<Select an option>":
             return None
-        for i in question.answers:
-            if i.text == answer:
-                return UserAnswers([i])
-        return None  # Never reached
+        for answer in question.answers:
+            if answer.text == selected_answer_text:
+                return AnswersList([answer])
+        raise RuntimeError("A non-existing answer can not be selected.")
 
-    def show_qrm_question(self, question: Question, previous_answer: Optional[list] = None) -> Optional[UserAnswers]:
+    def show_qrm_question(
+        self, question: Question, previous_answers: Optional[AnswersList] = None
+    ) -> Optional[AnswersList]:
         # If it has to be auto-completed before
-        default = []
-        if previous_answer is not None:
-            for proposition in previous_answer:
-                default.append(proposition.text)
-        answers = st.multiselect(
+        previous_answers_text_list = [previous_answer.text for previous_answer in previous_answers or []]
+        answers_text_list = st.multiselect(
             label=question.text,
-            options=self.get_proposition_list(question),
-            default=default,
+            options=self.get_answers_text_list(question),
+            default=previous_answers_text_list,
             help=question.help_text,
             disabled=self.locked,
         )
-        if not answers:
+        if not answers_text_list:
             return None
-        list_prop = []
-        for i in question.answers:
-            if i.text in answers:
-                list_prop.append(i)
-        return list_prop
+        list_answers = []
+        for answer in question.answers:
+            if answer.text in answers_text_list:
+                list_answers.append(answer)
+        return list_answers
 
-    def get_proposition_list(self, question: Question) -> list[str]:
-        proposition_list: list[str] = []
-        for i in question.answers:
-            proposition_list.append(i.text)
-        return proposition_list
+    def get_answers_text_list(self, question: Question) -> list[str]:
+        return [answer.text for answer in question.answers]
 
     def check_name(self, form_name: str) -> str:
         dash, char = check_if_name_ok(form_name)
         if dash:
-            st.warning(f"""Please don't use the {char} character in your form name""")
+            st.warning(f"Please don't use the {char} character in your form name")
             return ""
-        return validate_text_input(form_name)
+        return sanitize_text_input(form_name)
 
-    def show_input_form_name(self, previous_answer: str = "") -> str:
-        if previous_answer:
-            text = "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"
-        else:
-            text = "Give a name to your form here"
+    def show_input_form_name(self, previous_answer="") -> str:
+        text = EDIT_FORM_TEXT if previous_answer else INPUT_FORM_TEXT
         form_name = st.text_input(text, previous_answer, disabled=self.locked)
         return self.check_name(form_name)
 
     def check_name_already_taken(self, form_name: str) -> bool:
         if st.session_state.last_form_name != form_name:
-            st.warning(
-                "You already have a form with this name, please pick an other name or change your previous form in the historic page."
-            )
+            st.warning(WARNING_FORM_ALREADY_EXIST)
             return True
         return False
 
@@ -185,15 +185,15 @@ class FormStreamlit:
         Parameters:
             - list_bests_ais (list): list of the n best AI
         """
-        if len(list_bests_ais) > 0:
-            st.subheader(
-                f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
-                anchor=None,
-            )
-            for index, best_ai in enumerate(list_bests_ais):
-                st.caption(f"{index + 1}) {best_ai}")
-        # If no AI corresponding the the choices
-        else:
+        if not list_bests_ais:  # If no AI corresponding the the choices
             st.subheader(
                 "There is no AI corresponding to your request, please make other choices in the form", anchor=None
             )
+            return
+
+        st.subheader(
+            f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
+            anchor=None,
+        )
+        for index, best_ai in enumerate(list_bests_ais):
+            st.caption(f"{index + 1}) {best_ai}")

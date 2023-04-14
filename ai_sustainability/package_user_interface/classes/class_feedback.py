@@ -4,11 +4,11 @@ Streamlit class
 """
 import streamlit as st
 
+from ai_sustainability.package_business.models import Feedback, UserFeedback, Username
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.models import Feedback, User, UserFeedback
-from ai_sustainability.utils.utils import validate_text_input
+from ai_sustainability.utils.utils import sanitize_text_input
 
 
 class FeedbackStreamlit:
@@ -23,38 +23,37 @@ class FeedbackStreamlit:
     """
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Feedback Page", page_icon="💬")
-        st.title("💬Feedback")
         self.username = check_user_connection()
         st.session_state.clicked = False
 
     def show_all_feedbacks(self, all_feedbacks: list[UserFeedback]) -> None:
-        if not all_feedbacks:  # If there is no user in the database
+        if not all_feedbacks:
             st.write("There is no user in the database.")
             return
-        is_feedback = False
-        for user_feedback in all_feedbacks:
-            with st.expander("Feedbacks from " + user_feedback.user):
-                for index, value in enumerate(user_feedback.feedbacks):
-                    st.write(f"feedback {index} : {value}")
-                    is_feedback = True
-        if not is_feedback:  # If there is no feedback in the database
+        has_feedback = any(self.show_user_feedback(user_feedback) for user_feedback in all_feedbacks)
+        if not has_feedback:
             st.write("There is no feedback in the database.")
 
-    def user_dont_exist(self) -> None:
+    def show_user_feedback(self, user_feedback: UserFeedback) -> bool:
+        with st.expander("Feedbacks from " + user_feedback.user):
+            for index, value in enumerate(user_feedback.feedbacks):
+                st.write(f"feedback {index} : {value}")
+        return bool(user_feedback.feedbacks)
+
+    def warn_unexisting_user(self) -> None:
         st.write("You have never filled out a form.")
         st.write("Please fill the form first and come back to give us your feedback.")
         st.write("Thank you")
 
-    def feedback_box(self, username: User) -> Feedback:
+    def retrieve_feedback(self, username: Username) -> Feedback:
         """
         Method used to show a box where the user can give a feedback
         """
         st.write(f"Welcome back {username}")
         st.write("You can now give us your feedback")
-        text = st.text_area("Your feedback: ")  # text area for the feedback
+        text = st.text_area("Your feedback: ")
         if not text:
             return Feedback("")
         st.write("Your feedback has been saved")
         st.write("Thank you!")
-        return Feedback(validate_text_input(text))
+        return Feedback(sanitize_text_input(text))

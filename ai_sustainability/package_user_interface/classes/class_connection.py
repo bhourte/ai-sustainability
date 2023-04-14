@@ -1,11 +1,13 @@
+# TODO rename the classes folder name and all class_...py names
+
 """
 Class for connection page,
 Streamlit class
 """
 import streamlit as st
 
-from ai_sustainability.utils.models import User
-from ai_sustainability.utils.utils import check_if_name_ok
+from ai_sustainability.package_business.models import Username
+from ai_sustainability.utils import check_if_name_ok
 
 
 class ConnectionStreamlit:
@@ -17,14 +19,14 @@ class ConnectionStreamlit:
         - setup_username : setup the username for all pages
     """
 
-    _username: User = User("")
+    _username: Username = Username("")
 
     def __init__(self) -> None:
         st.set_page_config(page_title="Connection Page", page_icon="👤")
         st.title("👤Connection")
 
     def setup_username(self) -> None:
-        username = User(
+        username = Username(
             st.text_input(
                 "Put your username here to connect :",
                 st.session_state.username if "username" in st.session_state else "",

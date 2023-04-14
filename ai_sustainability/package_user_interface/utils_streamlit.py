@@ -9,14 +9,14 @@ method:
 """
 import streamlit as st
 
-from ai_sustainability.utils.models import User
+from ai_sustainability.package_business.models import Username
 
 
-def check_user_connection() -> User:
+def check_user_connection() -> Username:
     if "username" not in st.session_state or st.session_state.username == "":
         # User not connected, don't show the form, ask for connection
         st.caption("❌ You are not connected, please connect with your username in the Connection page.")
-        return User("")
+        return Username("")
     username = st.session_state.username
     # Connected as an Admin
     if username == "Admin":

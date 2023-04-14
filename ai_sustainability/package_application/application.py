@@ -4,19 +4,19 @@ File with our Application class
 import streamlit as st
 
 from ai_sustainability.package_business.business import Business
-from ai_sustainability.package_data_access.db_connection import DbConnection
-from ai_sustainability.utils.models import (
-    AnswersList,
+from ai_sustainability.package_business.models import (
+    Edge,
     Feedback,
+    FormAnswers,
     Question,
-    SelectedEdge,
-    User,
     UserFeedback,
+    Username,
 )
+from ai_sustainability.package_data_access.db_connection import DbConnection
 
 
 @st.cache_resource
-def connec_to_db() -> DbConnection:
+def connec_to_db() -> DbConnection:  # TOTO mettre ca ailleur, pas dans l'application
     return DbConnection()
 
 
@@ -43,11 +43,11 @@ class Application:
 
     def __init__(self) -> None:
         self.database = connec_to_db()
-        self.business = Business()
-        self.list_questions: list[Question] = []
+        self.business = Business()  # TODO mettre la creation de la db dans les UI
+        self.list_questions: list[Question] = []  # TODO put this in Form models (no state in Application)
         self.modif_crypted = False
 
-    def get_next_question(self, answer_list: AnswersList) -> Question:
+    def get_next_question(self, answer_list: FormAnswers) -> Question:
         """
         Get the id of the next question
 
@@ -76,7 +76,7 @@ class Application:
         self.list_questions.append(next_question)
         return next_question
 
-    def calcul_best_ais(self, nb_ai: int, answers: AnswersList) -> list[str]:
+    def calcul_best_ais(self, nb_ai: int, answers: FormAnswers) -> list[str]:
         """
         Calculate the name best AI to use for the user
 
@@ -85,27 +85,27 @@ class Application:
             - answers (list): list of the answers of the user
         """
         list_ai = self.database.get_all_ais()  # We get all existing AIs
-        return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, list_answers=answers)
+        return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, form_answers=answers)
 
-    def get_best_ais(self, username: User, form_name: str) -> list[str]:
+    def get_best_ais(self, username: Username, form_name: str) -> list[str]:
         """
         Method used to retreive all the N_best Ais stored in a answer
         """
         return self.database.get_best_ais(username, form_name)
 
-    def get_all_users(self) -> list[User]:
+    def get_all_users(self) -> list[Username]:
         """
         Return all users in the database
         """
         return self.database.get_all_users()
 
-    def get_all_forms_names(self, username: User) -> list[str]:
+    def get_all_forms_names(self, username: Username) -> list[str]:
         """
         Get all names of the forms of a user
         """
         return self.database.get_all_forms_names(username)
 
-    def get_list_answers(self, username: User, selected_form: str) -> AnswersList:
+    def get_list_answers(self, username: Username, selected_form: str) -> FormAnswers:
         """
         Get the list of answers of a form
         """
@@ -117,23 +117,23 @@ class Application:
         """
         return self.database.get_all_feedbacks()
 
-    def get_nb_selected_edge_stats(self) -> list[SelectedEdge]:
+    def get_nb_selected_answer_stats(self) -> list[Edge]:
         """
         Return a list with all existing edges and the number of time they had been selected
         Used in stats showing
         """
         return self.database.get_nb_selected_edge()
 
-    def check_user_exist(self, username: User) -> bool:
+    def user_exist(self, username: Username) -> bool:
         return self.database.check_node_exist(username)
 
-    def check_form_exist(self, username: User, form_name: str) -> bool:
+    def check_form_exist(self, username: Username, form_name: str) -> bool:
         """
         Check if a form exist for a specific user in the database
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
-    def save_answers(self, username: User, form_name: str, answers: AnswersList, list_best_ai: list[str]) -> bool:
+    def save_answers(self, username: Username, form_name: str, answers: FormAnswers, list_best_ai: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -149,7 +149,7 @@ class Application:
         return self.database.save_answers(username, form_name, answers, self.list_questions, list_best_ai)
 
     def change_answers(
-        self, answers: AnswersList, username: User, form_name: str, new_form_name: str, list_best_ai: list[str]
+        self, answers: FormAnswers, username: Username, form_name: str, new_form_name: str, list_best_ai: list[str]
     ) -> bool:
         """
         Change the answer in db
@@ -164,11 +164,11 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
-        return self.database.change_answers(
+        return self.database.update_answers(
             answers, username, form_name, new_form_name, self.list_questions, list_best_ai
         )
 
-    def save_feedback(self, username: User, feedback: Feedback) -> None:
+    def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """
         Save a feedback from a user in the database
 

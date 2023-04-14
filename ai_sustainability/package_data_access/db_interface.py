@@ -4,14 +4,14 @@ used to connect to the database and to run the queries
 """
 from abc import ABC, abstractmethod
 
-from ai_sustainability.utils.models import (
+from ai_sustainability.package_business.models import (
     AnswersList,
+    Edge,
     Feedback,
+    FormAnswers,
     Question,
-    SelectedEdge,
-    User,
-    UserAnswers,
     UserFeedback,
+    Username,
 )
 
 
@@ -25,7 +25,7 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    def get_next_question(self, actual_question: Question, answer: UserAnswers) -> Question:
+    def get_next_question(self, actual_question: Question, answer: AnswersList) -> Question:
         """
         get the next question
 
@@ -39,7 +39,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_all_users(self) -> list[User]:
+    def get_all_users(self) -> list[Username]:
         """
         Return all users in the database
             Return :
@@ -56,7 +56,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_feedback(self, username: User, feedback: Feedback) -> None:
+    def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """
         Save a feedback from a user in the database
 
@@ -79,7 +79,7 @@ class DBInterface(ABC):
 
     @abstractmethod
     def save_answers(
-        self, username: User, form_name: str, answers: AnswersList, questions: list[Question], best_ais: list[str]
+        self, username: Username, form_name: str, answers: FormAnswers, questions: list[Question], best_ais: list[str]
     ) -> bool:
         """
         Save the answers of a user in the database
@@ -109,10 +109,10 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def change_answers(
+    def update_answers(
         self,
-        answers: AnswersList,
-        username: User,
+        answers: FormAnswers,
+        username: Username,
         form_name: str,
         new_form_name: str,
         questions: list[Question],
@@ -132,7 +132,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_all_forms_names(self, username: User) -> list[str]:
+    def get_all_forms_names(self, username: Username) -> list[str]:
         """
         Get all names of the forms of a user (in fact, get all the id lol)
 
@@ -144,7 +144,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_list_answers(self, username: User, form_name: str) -> AnswersList:
+    def get_list_answers(self, username: Username, form_name: str) -> FormAnswers:
         """
         Get the list of answers of a form
 
@@ -157,7 +157,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_nb_selected_edge(self) -> list[SelectedEdge]:
+    def get_nb_selected_edge(self) -> list[Edge]:
         """
         Return a list of SelectedEdge with theb number of times edge was selected for each proposition
 
@@ -175,7 +175,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_best_ais(self, username: User, form_name: str) -> list[str]:
+    def get_best_ais(self, username: Username, form_name: str) -> list[str]:
         """
         Return the best ais for a form which was saved in the db
 

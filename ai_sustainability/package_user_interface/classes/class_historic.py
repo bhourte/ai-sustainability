@@ -1,3 +1,5 @@
+# TODO put it all in class_form and use it from class_form
+
 """
 Class which contains the hisoric of the different questions/answers of the users
 Streamlit class
@@ -5,8 +7,8 @@ inherit from class_form
 """
 import streamlit as st
 
+from ai_sustainability.package_business.models import AnswersList, Question, Username
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
-from ai_sustainability.utils.models import Question, User, UserAnswers
 
 
 class HistoricStreamlit(FormStreamlit):
@@ -25,14 +27,14 @@ class HistoricStreamlit(FormStreamlit):
     form_title = "Historic"
     page_icon = "📜"
 
-    def show_choice_user(self, list_username: list[User]) -> User:
+    def show_choice_user(self, list_username: list[Username]) -> Username:
         """
         Show a select box with all users
         """
-        list_username = [User("<Select a user>")] + list_username
+        list_username = [Username("<Select a user>")] + list_username
         question = "Select an user"
-        answer = User(str(st.selectbox(label=question, options=list_username, index=0)))
-        return answer if answer != "<Select a user>" else User("")
+        answer = Username(str(st.selectbox(label=question, options=list_username, index=0)))
+        return answer if answer != "<Select a user>" else Username("")
 
     def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
         """
@@ -47,17 +49,17 @@ class HistoricStreamlit(FormStreamlit):
             return ""
         return answer
 
-    def show_submission_button(self) -> bool:
+    def show_submission_button(self) -> bool:  # TODO use it from the calass_form
         """
         Display a button where the user can save the changes made in the form
         """
-        if st.button("Save changes", disabled=st.session_state.clicked):
+        if st.button("Save changes"):
             st.write("Changes saved")
             st.session_state.last_form_name = None
             return True
         return False
 
-    def show_question_as_admin(self, question: Question, previous_answers: UserAnswers) -> None:
+    def show_question_as_admin(self, question: Question, previous_answers: AnswersList) -> None:
         """
         Show a previous answered question with the admin view
         """

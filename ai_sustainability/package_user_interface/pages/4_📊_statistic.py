@@ -19,10 +19,11 @@ def main() -> None:
     if not username:
         return
 
+    # TODO put in class_stat
     if not st_statistic.check_if_admin(username):
         return
-    selected_edges = app.get_nb_selected_edge_stats()
-    st_statistic.display_statistic_edges(selected_edges)
+    selected_edges = app.get_nb_selected_answer_stats()
+    st_statistic.display_answers_statistic(selected_edges)
     st_statistic.display_statistic_ais()  # Don't do anything for now
 
 

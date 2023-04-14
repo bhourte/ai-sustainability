@@ -7,18 +7,18 @@ from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
-from ai_sustainability.package_data_access.db_interface import DBInterface
-from ai_sustainability.utils.models import (
+from ai_sustainability.package_business.models import (
+    Answer,
     AnswersList,
+    Edge,
     Feedback,
-    Proposition,
+    FormAnswers,
     Query,
     Question,
-    SelectedEdge,
-    User,
-    UserAnswers,
     UserFeedback,
+    Username,
 )
+from ai_sustainability.package_data_access.db_interface import DBInterface
 
 FIRST_NODE_ID = "1"
 _map = map
@@ -67,7 +67,7 @@ class DbConnection(DBInterface):
         run = self.gremlin_client.submit(query).all()
         return run.result()
 
-    def get_next_question(self, actual_question: Question, answer: UserAnswers) -> Question:
+    def get_next_question(self, actual_question: Question, answer: AnswersList) -> Question:
         """
         get the next question
 
@@ -100,7 +100,7 @@ class DbConnection(DBInterface):
             type=next_question["label"],
         )
 
-    def get_propositions(self, question_id: str) -> list[Proposition]:
+    def get_propositions(self, question_id: str) -> list[Answer]:
         """
         Get the propositions for a question in the database
 
@@ -115,8 +115,8 @@ class DbConnection(DBInterface):
         propositions = []
         for prop in props:
             propositions.append(
-                Proposition(
-                    proposition_id=prop["id"],
+                Answer(
+                    answer_id=prop["id"],
                     text=prop["properties"]["text"] if "text" in prop["properties"] else "",
                     help_text=prop["properties"]["help text"] if "help text" in prop["properties"] else "",
                     modif_crypted=prop["properties"]["modif_crypted"] == "true"
@@ -129,7 +129,7 @@ class DbConnection(DBInterface):
             )
         return propositions
 
-    def create_user_node(self, username: User) -> None:
+    def create_user_node(self, username: Username) -> None:
         """
         Create a user node in the database
 
@@ -139,7 +139,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.addV('user').property('partitionKey', 'Answer').property('id', '{username}')")
         self.run_gremlin_query(query)
 
-    def get_all_users(self) -> list[User]:
+    def get_all_users(self) -> list[Username]:
         """
         Return all users in the database
             Return :
@@ -161,7 +161,7 @@ class DbConnection(DBInterface):
             all_feedbacks.append(self.get_user_feedbacks(user))
         return all_feedbacks
 
-    def get_user_feedbacks(self, username: User) -> UserFeedback:
+    def get_user_feedbacks(self, username: Username) -> UserFeedback:
         """
         Return all feedbacks from a user in the database
 
@@ -174,7 +174,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{username}').outE().hasLabel('Feedback').values('text')")
         return UserFeedback(username, self.run_gremlin_query(query))
 
-    def save_feedback(self, username: User, feedback: Feedback) -> None:
+    def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """
         Save a feedback from a user in the database
 
@@ -186,7 +186,7 @@ class DbConnection(DBInterface):
             self.create_feedback_node(username)
         self.create_feedback_edge(username, feedback)
 
-    def check_feedback_exist(self, username: User) -> bool:
+    def check_feedback_exist(self, username: Username) -> bool:
         """
         Check if a feedback exist in the database
 
@@ -211,7 +211,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{node_id}')")
         return bool(self.run_gremlin_query(query))
 
-    def create_feedback_node(self, username: User) -> None:
+    def create_feedback_node(self, username: Username) -> None:
         """
         Create a feedback node in the database
 
@@ -222,7 +222,7 @@ class DbConnection(DBInterface):
         self.run_gremlin_query(query)
         time.sleep(0.2)  # used to wait the node creation before calling the edge creation
 
-    def create_feedback_edge(self, username: User, feedback: Feedback) -> None:
+    def create_feedback_edge(self, username: Username, feedback: Feedback) -> None:
         """
         Create a feedback edge in the database
 
@@ -238,7 +238,7 @@ class DbConnection(DBInterface):
             )
         )
 
-    def get_nb_feedback_from_user(self, username: User) -> int:
+    def get_nb_feedback_from_user(self, username: Username) -> int:
         """
         Return the number of feedbacks from a user
 
@@ -252,7 +252,7 @@ class DbConnection(DBInterface):
         return self.run_gremlin_query(query)[0]
 
     def save_answers(
-        self, username: User, form_name: str, answers: AnswersList, questions: list[Question], best_ais: list[str]
+        self, username: Username, form_name: str, answers: FormAnswers, questions: list[Question], best_ais: list[str]
     ) -> bool:
         """
         Save the answers of a user in the database
@@ -327,7 +327,7 @@ class DbConnection(DBInterface):
         self,
         source_node_id: str,
         target_node_id: str,
-        answers: UserAnswers,
+        answers: AnswersList,
     ) -> None:
         """
         Create an edge between two nodes
@@ -341,14 +341,20 @@ class DbConnection(DBInterface):
         for proposition in answers:
             self.run_gremlin_query(
                 Query(
-                    f"g.V('{source_node_id}').addE('Answer').to(g.V('{target_node_id}')).property('answer', '{proposition.text}').property('proposition_id', '{proposition.proposition_id}')"
+                    f"""
+                        g.V('{source_node_id}')
+                            .addE('Answer')
+                            .to(g.V('{target_node_id}'))
+                            .property('answer', '{proposition.text}')
+                            .property('proposition_id', '{proposition.answer_id}')
+                    """
                 )
             )
 
-    def change_answers(
+    def update_answers(
         self,
-        answers: AnswersList,
-        username: User,
+        answers: FormAnswers,
+        username: Username,
         form_name: str,
         new_form_name: str,
         questions: list[Question],
@@ -379,7 +385,7 @@ class DbConnection(DBInterface):
                 node_id = next_node_id[0]["value"]
         return self.save_answers(username, new_form_name, answers, questions, best_ais)
 
-    def get_all_forms_names(self, username: User) -> list[str]:
+    def get_all_forms_names(self, username: Username) -> list[str]:
         """
         Get all names of the forms of a user (in fact, get all the id lol)
 
@@ -392,7 +398,7 @@ class DbConnection(DBInterface):
         forms_id = self.run_gremlin_query(Query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()"))
         return list(_map(lambda x: x.split("-")[-1], forms_id))
 
-    def get_list_answers(self, username: User, form_name: str) -> AnswersList:
+    def get_list_answers(self, username: Username, form_name: str) -> FormAnswers:
         """
         Get the list of answers of a form
 
@@ -403,7 +409,7 @@ class DbConnection(DBInterface):
         Return:
             - list_answers (AnswersList): list of the answers
         """
-        list_answers = AnswersList()
+        list_answers = FormAnswers()
         node = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
         node_label = self.get_node_label(node)
         while node_label != "end":
@@ -412,7 +418,7 @@ class DbConnection(DBInterface):
             node_label = self.get_node_label(node)
         return list_answers
 
-    def get_answers(self, node_id: str) -> list[Proposition]:
+    def get_answers(self, node_id: str) -> list[Answer]:
         """
         Get the answers of a node (completed form)
 
@@ -427,8 +433,8 @@ class DbConnection(DBInterface):
         propositions = []
         for prop in props:
             propositions.append(
-                Proposition(
-                    proposition_id=prop["properties"]["proposition_id"],
+                Answer(
+                    answer_id=prop["properties"]["proposition_id"],
                     text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
                     help_text="",
                     modif_crypted=False,
@@ -449,7 +455,7 @@ class DbConnection(DBInterface):
         """
         return self.run_gremlin_query(Query(f"g.V('{node_id}').label()"))[0]
 
-    def get_nb_selected_edge(self) -> list[SelectedEdge]:
+    def get_nb_selected_edge(self) -> list[Edge]:
         """
         Return a list of SelectedEdge with theb number of times edge was selected for each proposition
 
@@ -471,7 +477,7 @@ class DbConnection(DBInterface):
 
         selected_edges = []
         for key, val in nb_selected_edge.items():
-            selected_edges.append(SelectedEdge(key, val[0], val[1]))
+            selected_edges.append(Edge(key, val[0], val[1]))
         return selected_edges
 
     def get_all_ais(self) -> list[str]:
@@ -483,7 +489,7 @@ class DbConnection(DBInterface):
         """
         return self.run_gremlin_query(Query(f"g.V('{FIRST_NODE_ID}').properties('list_AI').value()"))[0].split(", ")
 
-    def get_best_ais(self, username: User, form_name: str) -> list[str]:
+    def get_best_ais(self, username: Username, form_name: str) -> list[str]:
         """
         Return the best ais for a form which was saved in the db
 

@@ -4,16 +4,16 @@ This file is used to show the From page
 from decouple import config
 
 from ai_sustainability.package_application.application import Application
+from ai_sustainability.package_business.models import FormAnswers, Username
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
-from ai_sustainability.utils.models import AnswersList, User
 
 
-def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> tuple[AnswersList, bool]:
+def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> tuple[FormAnswers, bool]:
     """
     Function used to show the form to be completed by the user
     """
     keep_going = True
-    list_answers: AnswersList = []
+    list_answers: FormAnswers = []
     while keep_going:  # While we are not in the last question node
         actuel_question = app.get_next_question(list_answers)
         selected_answer = st_form.ask_question_user(actuel_question)
@@ -25,7 +25,7 @@ def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> t
     return list_answers, True
 
 
-def input_fotm_name_and_check(username: User, st_form: FormStreamlit, app: Application) -> tuple[str, bool]:
+def input_form_name_and_check(username: Username, st_form: FormStreamlit, app: Application) -> tuple[str, bool]:
     """
     Function used to show a box where the user can give a name to the form and check if the name is incorrect
     """
@@ -38,14 +38,18 @@ def input_fotm_name_and_check(username: User, st_form: FormStreamlit, app: Appli
     return form_name, False
 
 
+# TODO put the 2 function in class_form
+
+
 def main() -> None:
+    # TODO put all in class_form
     """
     This is the code used to show the form and used by the user to fill it
     """
     # Connection to the online gremlin database via db_connection.py
     st_form = FormStreamlit()
     app = Application()
-    n_best_ai = int(config("NBEST_AI"))
+    n_best_ai = int(config("NBEST_AI"))  # TODO put that in Application.py
 
     username = st_form.username
     if not username:
@@ -55,7 +59,7 @@ def main() -> None:
     if not is_ended:
         return
 
-    form_name, form_name_incorrect = input_fotm_name_and_check(username, st_form, app)
+    form_name, form_name_incorrect = input_form_name_and_check(username, st_form, app)
     if form_name_incorrect:
         return
 

@@ -30,7 +30,7 @@ def check_if_name_ok(text: str) -> tuple:
     return False, ""
 
 
-def validate_text_input(text: str) -> str:
+def sanitize_text_input(text: str) -> str:
     """
     Validate the answer to avoid errors in the gremlin query (if there is ' in the text for now on)
 

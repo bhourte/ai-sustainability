@@ -5,13 +5,13 @@ Streamlit class
 import plotly.graph_objects as go
 import streamlit as st
 
+from ai_sustainability.package_business.models import Edge
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.models import SelectedEdge
 
 
-class StatisticStreamlit:
+class StatisticStreamlit:  # TODO rename stat_page
     """
     Class used to show all the streamlit UI for the Form page
 
@@ -23,7 +23,7 @@ class StatisticStreamlit:
     """
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Statistic Page", page_icon="📊")
+        st.set_page_config(page_title="Statistic Page", page_icon="📊")  # TODO put in render
         st.title("📊Statistic")
         self.username = check_user_connection()
         st.session_state.clicked = False
@@ -37,29 +37,23 @@ class StatisticStreamlit:
         st.write("You can now see the statistic of the form")
         return True
 
-    def display_statistic_edges(self, edge_selected: list[SelectedEdge]) -> None:
+    def display_answers_statistic(self, edge_selected: list[Edge]) -> None:
         """
         Display bar graph of edges selected
 
         Parameters:
-            - edge_selected (dict): dictionnary with proposition_id as key and number of time it was selected as value
+            - edge_selected: dictionnary with proposition_id as key and number of time it was selected as value
         """
         if not edge_selected:
             st.write("There is no form answered")
             return
         with st.spinner("Loading..."):
             # sort the list on edges name
-            edge_selected.sort(key=lambda x: x.edge)
-            hover_text = []  # text with the in and out node
-            text = []  # Text of the selected answer
-            count_edges = []  # Number of times each edge was selected
-            for i in edge_selected:
-                node_in = i.edge.split("-")[0]
-                node_out = i.edge.split("-")[1]
-                hover_text.append(f"Q {node_in} to Q {node_out}")
-                text.append(i.text)
-                count_edges.append(i.nb_selected)
-            list_edge_name = sorted(list({k.edge for k in edge_selected}))  # To get the edges name in ascending order
+            edge_selected.sort(key=lambda x: x.answer_id)
+            hover_text = [repr(edge) for edge in edge_selected]  # text with the in and out node
+            text = [edge.text for edge in edge_selected]  # Text of the selected answer
+            count_edges = [edge.nb_selected for edge in edge_selected]  # Number of times each edge was selected
+            list_edge_name = sorted({k.answer_id for k in edge_selected})  # To get the edges name in ascending order
             fig = go.Figure(data=[go.Bar(x=list_edge_name, y=list(count_edges), hovertext=text, text=hover_text)])
             fig.update_layout(
                 title="Number of times each edge was selected",
