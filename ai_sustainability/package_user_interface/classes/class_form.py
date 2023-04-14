@@ -10,7 +10,7 @@ from ai_sustainability.package_business.models import Answer, AnswersList, Quest
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
-from ai_sustainability.utils.utils import check_if_name_ok, sanitize_text_input
+from ai_sustainability.utils import check_if_name_ok, sanitize_text_input
 
 EDIT_FORM_TEXT = (
     "If you want to change the name of the form, change it here (don't forget to press Enter to validate the name):"

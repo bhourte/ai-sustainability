@@ -15,6 +15,7 @@ from ai_sustainability.package_business.models import (
 from ai_sustainability.package_user_interface.classes.class_historic import (
     HistoricStreamlit,
 )
+from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 ADMIN_USERNAME = "Admin"  # TODO .env
 
@@ -144,8 +145,9 @@ def main() -> None:
     This is the code used to show the previous form completed by an User
     Different usage if User or Admin
     """
+    # TODO create a render function
     st_historic = HistoricStreamlit()
-    app = Application()
+    app = get_application()
     username = st_historic.username
     if not username:
         return

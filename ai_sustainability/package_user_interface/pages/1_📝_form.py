@@ -6,6 +6,7 @@ from decouple import config
 from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import FormAnswers, Username
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
+from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 
 def get_all_questions_and_answers(st_form: FormStreamlit, app: Application) -> tuple[FormAnswers, bool]:
@@ -43,12 +44,13 @@ def input_form_name_and_check(username: Username, st_form: FormStreamlit, app: A
 
 def main() -> None:
     # TODO put all in class_form
+    # TODO put in render
     """
     This is the code used to show the form and used by the user to fill it
     """
     # Connection to the online gremlin database via db_connection.py
     st_form = FormStreamlit()
-    app = Application()
+    app = get_application()
     n_best_ai = int(config("NBEST_AI"))  # TODO put that in Application.py
 
     username = st_form.username

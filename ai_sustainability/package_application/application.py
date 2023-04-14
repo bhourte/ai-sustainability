@@ -1,8 +1,6 @@
 """
 File with our Application class
 """
-import streamlit as st
-
 from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_business.models import (
     Edge,
@@ -13,11 +11,6 @@ from ai_sustainability.package_business.models import (
     Username,
 )
 from ai_sustainability.package_data_access.db_connection import DbConnection
-
-
-@st.cache_resource
-def connec_to_db() -> DbConnection:  # TOTO mettre ca ailleur, pas dans l'application
-    return DbConnection()
 
 
 class Application:
@@ -41,9 +34,9 @@ class Application:
         - save_feedback
     """
 
-    def __init__(self) -> None:
-        self.database = connec_to_db()
-        self.business = Business()  # TODO mettre la creation de la db dans les UI
+    def __init__(self, database: DbConnection) -> None:
+        self.database = database
+        self.business = Business()
         self.list_questions: list[Question] = []  # TODO put this in Form models (no state in Application)
         self.modif_crypted = False
 

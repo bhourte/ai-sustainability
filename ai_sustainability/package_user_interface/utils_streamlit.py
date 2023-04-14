@@ -8,8 +8,17 @@ method:
     - dash_error : show the error message if no_dash_in_my_text retrun True
 """
 import streamlit as st
+from ai_sustainability.package_application.application import Application
 
 from ai_sustainability.package_business.models import Username
+from ai_sustainability.package_data_access.db_connection import DbConnection
+
+
+@st.cache_resource
+def get_application() -> Application:
+    database = DbConnection()
+    app = Application(database)
+    return app
 
 
 def check_user_connection() -> Username:

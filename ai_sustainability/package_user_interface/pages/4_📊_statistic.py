@@ -1,10 +1,12 @@
 """
 This file is used to show the Statistic page
 """
-from ai_sustainability.package_application.application import Application
+import streamlit as st
+
 from ai_sustainability.package_user_interface.classes.class_statistic import (
     StatisticStreamlit,
 )
+from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 
 def main() -> None:
@@ -12,19 +14,15 @@ def main() -> None:
     This is the code used by the admin to see statistics from the answers of the users
     """
 
+    st.set_page_config(page_title="Statistic Page", page_icon="📊")
+    st.title("📊Statistic")
     # Connection to the online gremlin database via db_connection.py
-    st_statistic = StatisticStreamlit()
-    app = Application()
+    app = get_application()
+    st_statistic = StatisticStreamlit(app)
     username = st_statistic.username
     if not username:
         return
-
-    # TODO put in class_stat
-    if not st_statistic.check_if_admin(username):
-        return
-    selected_edges = app.get_nb_selected_answer_stats()
-    st_statistic.display_answers_statistic(selected_edges)
-    st_statistic.display_statistic_ais()  # Don't do anything for now
+    st_statistic.render()
 
 
 if __name__ == "__main__":

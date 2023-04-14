@@ -5,6 +5,7 @@ Streamlit class
 import plotly.graph_objects as go
 import streamlit as st
 
+from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import Edge
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
@@ -22,11 +23,17 @@ class StatisticStreamlit:  # TODO rename stat_page
         - display_statistic_ais : show stats based on the AIs (not implemented yet)
     """
 
-    def __init__(self) -> None:
-        st.set_page_config(page_title="Statistic Page", page_icon="📊")  # TODO put in render
-        st.title("📊Statistic")
+    def __init__(self, app: Application) -> None:
         self.username = check_user_connection()
         st.session_state.clicked = False
+        self.app = app
+
+    def render(self) -> None:
+        if not self.check_if_admin(self.username):
+            return
+        selected_edges = self.app.get_nb_selected_answer_stats()
+        self.display_answers_statistic(selected_edges)
+        self.display_statistic_ais()  # Don't do anything for now
 
     def check_if_admin(self, username: str) -> bool:
         if username != "Admin":

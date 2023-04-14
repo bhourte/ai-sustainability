@@ -8,6 +8,7 @@ from ai_sustainability.package_business.models import Username
 from ai_sustainability.package_user_interface.classes.class_feedback import (
     FeedbackStreamlit,
 )
+from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 
 def retrieve_user_feedback(app: Application, st_feedback: FeedbackStreamlit, username: Username) -> None:
@@ -28,19 +29,12 @@ def main() -> None:
 
     st.set_page_config(page_title="Feedback Page", page_icon="💬")
     st.title("💬Feedback")
-    st_feedback = FeedbackStreamlit()
-    app = Application()
+    app = get_application()
+    st_feedback = FeedbackStreamlit(app)
     username = st_feedback.username
     if not username:
         return
-
-    if username == "Admin":
-        return show_all_feedbacks(app, st_feedback)
-
-    if not app.user_exist(username):
-        return st_feedback.warn_unexisting_user()
-
-    retrieve_user_feedback(app, st_feedback, username)
+    st_feedback.render()
 
 
 if __name__ == "__main__":
