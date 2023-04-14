@@ -15,7 +15,6 @@ def main() -> None:
     """
 
     st.set_page_config(page_title="Statistic Page", page_icon="📊")
-    st.title("📊Statistic")
     # Connection to the online gremlin database via db_connection.py
     app = get_application()
     st_statistic = StatisticPage(app)

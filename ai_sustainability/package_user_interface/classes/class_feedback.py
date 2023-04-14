@@ -28,6 +28,7 @@ class FeedbackPage:
 
     def __init__(self, app: Application) -> None:
         self.app = app
+        st.title("💬Feedback")
         self.username = check_user_connection()
         st.session_state.clicked = False
 

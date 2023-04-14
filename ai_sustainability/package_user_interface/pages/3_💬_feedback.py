@@ -13,7 +13,6 @@ def main() -> None:
     """
 
     st.set_page_config(page_title="Feedback Page", page_icon="💬")
-    st.title("💬Feedback")
     app = get_application()
     st_feedback = FeedbackPage(app)
     username = st_feedback.username

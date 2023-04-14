@@ -18,15 +18,17 @@ class StatisticPage:
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
+        - render
         - check_if_admin : chek if the user is an admin, show some messages in both cases
         - display_statistic_edges : show stats based on the edges
         - display_statistic_ais : show stats based on the AIs (not implemented yet)
     """
 
     def __init__(self, app: Application) -> None:
+        self.app = app
+        st.title("📊Statistic")
         self.username = check_user_connection()
         st.session_state.clicked = False
-        self.app = app
 
     def render(self) -> None:
         if not self.check_if_admin(self.username):
