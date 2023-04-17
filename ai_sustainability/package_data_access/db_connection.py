@@ -2,6 +2,7 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
+from tkinter.tix import DirTree
 
 from decouple import config
 from gremlin_python import statics
@@ -12,6 +13,7 @@ from ai_sustainability.package_business.models import (
     AnswersList,
     Edge,
     Feedback,
+    Form,
     FormAnswers,
     Query,
     Question,
@@ -67,7 +69,7 @@ class DbConnection(DBInterface):
         run = self.gremlin_client.submit(query).all()
         return run.result()
 
-    def get_next_question(self, actual_question: Question, answer: AnswersList) -> Question:
+    def get_next_question(self, form: Form, question_number: int) -> Question:
         """
         get the next question
 
@@ -79,28 +81,37 @@ class DbConnection(DBInterface):
             - a Question corresponding to the next question according to
                 the actual_question and answer provided (Question)
         """
-        if actual_question.type in ("Q_Open", "Q_QRM"):
+        actual_question = None if not form.question_list else form.question_list[question_number - 1]
+        if actual_question is None:
+            query = Query(f"g.V('{FIRST_NODE_ID}')")
+        elif actual_question.type in ("Q_Open", "Q_QRM"):
             query = Query(f"g.V('{actual_question.question_id}').out()")
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
-            query = Query(f"g.V('{actual_question.question_id}').outE().has('text','{answer[0].text}').inV()")
-        elif actual_question.type == "start":
-            query = Query(f"g.V('{FIRST_NODE_ID}')")
+            query = Query(
+                f"g.V('{actual_question.question_id}').outE().has('text','{actual_question.answers_choosen[0].text}').inV()"
+            )
         elif actual_question.type == "end":
-            return Question("end", "end", [], "end", "end")
+            form.add_question(Question("end", "end", [], "end", "end"))
+            return form.question_list[-1]
         else:
             raise ValueError(f"Question type {actual_question.type} not supported")
         next_question = self.run_gremlin_query(query)[0]
-        return Question(
-            question_id=next_question["id"],
-            text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
-            answers=self.get_propositions(next_question["id"]),
-            help_text=next_question["properties"]["help text"][0]["value"]
-            if "help text" in next_question["properties"]
-            else "",
-            type=next_question["label"],
+        form.add_question(
+            Question(
+                question_id=next_question["id"],
+                text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
+                answers=self.get_propositions(next_question),
+                help_text=next_question["properties"]["help text"][0]["value"]
+                if "help text" in next_question["properties"]
+                else "",
+                type=next_question["label"],
+            )
         )
+        print("ICI")
+        print(form.question_list)
+        return form.question_list[-1]
 
-    def get_propositions(self, question_id: str) -> list[Answer]:
+    def get_propositions(self, question: dict) -> list[Answer]:
         """
         Get the propositions for a question in the database
 
@@ -110,14 +121,14 @@ class DbConnection(DBInterface):
         Return :
             - propositions : list of all propositions for the question (list of Proposition)
         """
-        query = Query(f"g.V('{question_id}').outE()")
+        query = Query(f"g.V('{question['id']}').outE()")
         props = self.run_gremlin_query(query)
         propositions = []
         for prop in props:
             propositions.append(
                 Answer(
                     answer_id=prop["id"],
-                    text=prop["properties"]["text"] if "text" in prop["properties"] else "",
+                    text=prop["properties"]["text"] if "text" in prop["properties"] else "Q_Next",
                     help_text=prop["properties"]["help text"] if "help text" in prop["properties"] else "",
                     modif_crypted=prop["properties"]["modif_crypted"] == "true"
                     if "modif_crypted" in prop["properties"]
@@ -251,9 +262,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{username}').outE().hasLabel('Feedback').count()")
         return self.run_gremlin_query(query)[0]
 
-    def save_answers(
-        self, username: Username, form_name: str, answers: FormAnswers, questions: list[Question], best_ais: list[str]
-    ) -> bool:
+    def save_answers(self, form: Form, best_ais: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -267,25 +276,27 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        if not self.check_node_exist(username):
-            self.create_user_node(username)
-        if self.check_form_exist(username, form_name):
+        if not self.check_node_exist(form.username):
+            self.create_user_node(form.username)
+        if self.check_form_exist(form.username, form.form_name):
             return False
         i = 0
-        while questions[i].type != "end":
-            new_node_name = f"{username}-answer{questions[i].question_id}-{form_name}"
+        while form.question_list[i].type != "end":
+            new_node_name = f"{form.username}-answer{form.question_list[i].question_id}-{form.form_name}"
             if not self.check_node_exist(new_node_name):
-                self.create_answer_node(questions[i], new_node_name)
-            next_new_node_name = f"{username}-answer{questions[i+1].question_id}-{form_name}"
+                self.create_answer_node(form.question_list[i], new_node_name)
+            next_new_node_name = f"{form.username}-answer{form.question_list[i+1].question_id}-{form.form_name}"
             if not self.check_node_exist(next_new_node_name):
-                self.create_answer_node(questions[i + 1], next_new_node_name)
-            self.create_answer_edges(new_node_name, next_new_node_name, answers[i])
+                self.create_answer_node(form.question_list[i + 1], next_new_node_name)
+            self.create_answer_edges(new_node_name, next_new_node_name, form.question_list[i].answers_choosen)
             i += 1
         # link between the User node and the first answer node
-        first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        first_node_id = f"{form.username}-answer{FIRST_NODE_ID}-{form.form_name}"
         self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(best_ais)[1:-1]}')"))
         self.run_gremlin_query(
-            Query(f"g.V('{username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')")
+            Query(
+                f"g.V('{form.username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')"
+            )
         )
         return True
 
@@ -351,15 +362,7 @@ class DbConnection(DBInterface):
                 )
             )
 
-    def update_answers(
-        self,
-        answers: FormAnswers,
-        username: Username,
-        form_name: str,
-        new_form_name: str,
-        questions: list[Question],
-        best_ais: list[str],
-    ) -> bool:
+    def update_answers(self, form: Form, new_form_name: str, best_ais: list[str]) -> bool:
         """
         Change the answer in db
 
@@ -374,7 +377,7 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
-        node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        node_id = f"{form.username}-answer{FIRST_NODE_ID}-{form.form_name}"
         keep_going = True
         while keep_going:
             next_node_id = self.run_gremlin_query(Query(f"g.V('{node_id}').out().properties('id')"))
@@ -383,7 +386,8 @@ class DbConnection(DBInterface):
                 keep_going = False
             else:
                 node_id = next_node_id[0]["value"]
-        return self.save_answers(username, new_form_name, answers, questions, best_ais)
+        form.set_name(new_form_name)
+        return self.save_answers(form, best_ais)
 
     def get_all_forms_names(self, username: Username) -> list[str]:
         """
@@ -417,6 +421,20 @@ class DbConnection(DBInterface):
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
             node_label = self.get_node_label(node)
         return list_answers
+
+    def get_previous_form(self, username: Username, selected_form_name: str) -> Form:
+        form = Form()
+        form.set_username(username)
+        form.set_name(selected_form_name)
+        node = f"{username}-answer{FIRST_NODE_ID}-{selected_form_name}"
+        question_number = 0
+        while self.get_node_label(node) != "end":
+            self.get_next_question(form, question_number)
+            answers = self.get_answers(node)
+            form.add_answers(answers, len(form.question_list))
+            node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
+            question_number += 1
+        return form
 
     def get_answers(self, node_id: str) -> list[Answer]:
         """

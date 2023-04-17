@@ -3,6 +3,7 @@ This file is used to show the Historic page
 """
 from typing import Generator
 
+import streamlit as st
 from decouple import config
 
 from ai_sustainability.package_application.application import Application
@@ -57,54 +58,28 @@ def historic_user(username: Username, st_historic: HistoricStreamlit, app: Appli
         return
 
     # get the list with all previous answers contained in the form
-    answer_end = Answer(answer_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
-    previous_form_answers = app.get_list_answers(username, selected_form) + FormAnswers([[answer_end]])
+    form = app.get_previous_form(username, selected_form)
     # TODO change all the "answer", previous_answers, etc names to clarify this all
 
-    keep_going = True
-    list_answers: FormAnswers = FormAnswers([])
-    i = 0
-    change_made = False
-    while keep_going:
-        next_question = app.get_next_question(list_answers)
-        selected_answer = st_historic.ask_question_user(
-            next_question, None if change_made else previous_form_answers[len(list_answers)]
-        )
-        if selected_answer is None:
-            return
-        keep_going = next_question.type != "end"
-        if keep_going:
-            list_answers.append(selected_answer)
-            # If not already changed and name answer different from previous one and question's label is not Q_Open :
-            # The form is modified and we do not fill it automatically with previous answers
-            if (
-                not change_made
-                and list_answers[i][0].text != previous_form_answers[i][0].text
-                and next_question.type != "Q_Open"
-            ):
-                change_made = True
-        i += 1
-
-    # If the form is not finish, we wait the user to enter a new answer
-    if next_question.type != "end":  # TODO change this condition to a function in Question class
+    form, is_ended = st_historic.get_all_questions_and_answers(form)
+    if not is_ended:
         return
 
     # We ask the user to give us a name for the form (potentially a new one)
-    new_form_name = st_historic.show_input_form_name(selected_form)
-    if not new_form_name:
+    new_form_name, form_name_incorrect = st_historic.input_form_name_and_check(form.form_name)
+    if form_name_incorrect:
         return
 
     # If the name is already taken by an other form
-    if app.check_form_exist(username, new_form_name) and new_form_name != selected_form:
+    if app.check_form_exist(username, new_form_name) and new_form_name != form.form_name:
         if st_historic.check_name_already_taken(username):
             return
 
-    n_best_ai = int(config("NBEST_AI"))
-    list_bests_ais = app.calcul_best_ais(n_best_ai, list_answers)
+    list_bests_ais = app.calcul_best_ais(form)
     st_historic.show_best_ai(list_bests_ais)
     if st_historic.show_submission_button():
         app.change_answers(
-            list_answers, username, selected_form, new_form_name, list_bests_ais
+            form, new_form_name, list_bests_ais
         )  # TODO change name to save_answer and change the function in DbConnection
 
 
@@ -127,7 +102,7 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
 
     # get the list with all previous answers contained in the form
     proposition_end = Answer(answer_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
-    previous_form_answers = app.get_list_answers(choosen_user, selected_form_name) + FormAnswers([[proposition_end]])
+    previous_form_answers = app.get_previous_form(choosen_user, selected_form_name) + FormAnswers([[proposition_end]])
     keep_going = True
     i = 0
     while keep_going:
@@ -145,9 +120,11 @@ def main() -> None:
     This is the code used to show the previous form completed by an User
     Different usage if User or Admin
     """
+    st.set_page_config(page_title="Historic Page", page_icon="📜")
+    st.title("📜Historic")
     # TODO create a render function
-    st_historic = HistoricStreamlit()
     app = get_application()
+    st_historic = HistoricStreamlit(app)
     username = st_historic.username
     if not username:
         return

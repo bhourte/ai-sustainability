@@ -1,11 +1,13 @@
 """
 File with our Application class
 """
+from decouple import config
+
 from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_business.models import (
     Edge,
     Feedback,
-    FormAnswers,
+    Form,
     Question,
     UserFeedback,
     Username,
@@ -37,10 +39,10 @@ class Application:
     def __init__(self, database: DbConnection) -> None:
         self.database = database
         self.business = Business()
-        self.list_questions: list[Question] = []  # TODO put this in Form models (no state in Application)
-        self.modif_crypted = False
+        # self.list_questions: list[Question] = []  # TODO put this in Form models (no state in Application)
+        # self.modif_crypted = False
 
-    def get_next_question(self, answer_list: FormAnswers) -> Question:
+    def get_next_question(self, form: Form, question_number: int) -> Question:
         """
         Get the id of the next question
 
@@ -50,26 +52,9 @@ class Application:
         Return :
             - a Question corresponding to the next question according to the actual_question and answer provided
         """
-        if len(answer_list) < len(self.list_questions):  # A previous answer is changed
-            self.list_questions = self.list_questions[: len(answer_list)]
-        if not answer_list:  # The form is empty, so we create a question 0 to initialise it
-            start = Question(question_id="0", text="", type="start", help_text="", answers=[])
-            self.list_questions.append(self.database.get_next_question(start, []))
-            return self.list_questions[-1]
+        return self.database.get_next_question(form, question_number)
 
-        if len(answer_list) > 1 and answer_list[1][0].text == "Yes":  # /!> hard code pour modif_crypted
-            self.modif_crypted = True
-        next_question = self.database.get_next_question(self.list_questions[-1], answer_list[-1])
-        if self.modif_crypted:  # We only take the proposition that can be shown (modif_crytpted = False)
-            list_proposition = []
-            for i in next_question.answers:
-                if not i.modif_crypted:
-                    list_proposition.append(i)
-            next_question.answers = list_proposition
-        self.list_questions.append(next_question)
-        return next_question
-
-    def calcul_best_ais(self, nb_ai: int, answers: FormAnswers) -> list[str]:
+    def calcul_best_ais(self, form: Form) -> list[str]:
         """
         Calculate the name best AI to use for the user
 
@@ -78,7 +63,8 @@ class Application:
             - answers (list): list of the answers of the user
         """
         list_ai = self.database.get_all_ais()  # We get all existing AIs
-        return self.business.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai, form_answers=answers)
+        nb_ai = int(config("NBEST_AI"))
+        return form.calcul_best_ais(nb_ai=nb_ai, list_ai=list_ai)
 
     def get_best_ais(self, username: Username, form_name: str) -> list[str]:
         """
@@ -98,11 +84,11 @@ class Application:
         """
         return self.database.get_all_forms_names(username)
 
-    def get_list_answers(self, username: Username, selected_form: str) -> FormAnswers:
+    def get_previous_form(self, username: Username, selected_form: str) -> Form:
         """
         Get the list of answers of a form
         """
-        return self.database.get_list_answers(username, selected_form)
+        return self.database.get_previous_form(username, selected_form)
 
     def get_all_feedbacks(self) -> list[UserFeedback]:
         """
@@ -126,7 +112,7 @@ class Application:
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
-    def save_answers(self, username: Username, form_name: str, answers: FormAnswers, list_best_ai: list[str]) -> bool:
+    def save_answers(self, form: Form, list_best_ai: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
@@ -139,11 +125,9 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
-        return self.database.save_answers(username, form_name, answers, self.list_questions, list_best_ai)
+        return self.database.save_answers(form, list_best_ai)
 
-    def change_answers(
-        self, answers: FormAnswers, username: Username, form_name: str, new_form_name: str, list_best_ai: list[str]
-    ) -> bool:
+    def change_answers(self, form: Form, new_form_name: str, list_best_ai: list[str]) -> bool:
         """
         Change the answer in db
 
@@ -157,9 +141,7 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
-        return self.database.update_answers(
-            answers, username, form_name, new_form_name, self.list_questions, list_best_ai
-        )
+        return self.database.update_answers(form, new_form_name, list_best_ai)
 
     def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """

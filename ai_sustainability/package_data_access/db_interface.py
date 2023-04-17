@@ -8,6 +8,7 @@ from ai_sustainability.package_business.models import (
     AnswersList,
     Edge,
     Feedback,
+    Form,
     FormAnswers,
     Question,
     UserFeedback,
@@ -25,7 +26,7 @@ class DBInterface(ABC):
         pass
 
     @abstractmethod
-    def get_next_question(self, actual_question: Question, answer: AnswersList) -> Question:
+    def get_next_question(self, form: Form, question_number: int) -> Question:
         """
         get the next question
 
@@ -78,17 +79,12 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_answers(
-        self, username: Username, form_name: str, answers: FormAnswers, questions: list[Question], best_ais: list[str]
-    ) -> bool:
+    def save_answers(self, form: Form, best_ais: list[str]) -> bool:
         """
         Save the answers of a user in the database
 
         Parameters:
-            - username (User): username of the user
-            - form_name (str): name of the form
-            - answers (AnswerList): list of the answers of the user
-            - questions (list[Question]): list of the questions of the form
+            - form: a Form class that represent a form
             - best_ais (list[str]): list of the best ais
 
         Return:
@@ -109,15 +105,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def update_answers(
-        self,
-        answers: FormAnswers,
-        username: Username,
-        form_name: str,
-        new_form_name: str,
-        questions: list[Question],
-        best_ais: list[str],
-    ) -> bool:
+    def update_answers(self, form: Form, new_form_name: str, best_ais: list[str]) -> bool:
         """
         Change the answer in db
 
@@ -144,7 +132,9 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_list_answers(self, username: Username, form_name: str) -> FormAnswers:
+    def get_list_answers(
+        self, username: Username, form_name: str
+    ) -> FormAnswers:  # TODO change name to get_previous_form
         """
         Get the list of answers of a form
 

@@ -7,7 +7,7 @@ import math
 
 import numpy as np
 
-from ai_sustainability.package_business.models import FormAnswers
+from ai_sustainability.package_business.models import Form, FormAnswers
 
 
 class Business:
@@ -21,10 +21,7 @@ class Business:
     def __init__(self) -> None:
         pass
 
-    # TODO ask chatGPT or create a class with magic methods or even beter, sort with lambda
-    def calcul_best_ais(
-        self, nb_ai: int, list_ai: list[str], form_answers: FormAnswers
-    ) -> list[str]:  # TODO put this in Form
+    def calcul_best_ais_old(self, nb_ai: int, list_ai: list[str], form_answers: FormAnswers) -> list[str]:  # TODO suppr
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for answer_list in form_answers:
             for answer in answer_list:
@@ -43,3 +40,18 @@ class Business:
 
     def get_best_coefs(self, count: int, coefs: list[float]) -> list[float]:
         return list(heapq.nlargest(count, np.array(coefs)))  # We sort and find the nb_ai best AIs
+
+    def calcul_best_ais(self, nb_ai: int, list_ai: list[str], form: Form) -> list[str]:  # TODO put this in Form
+        raw_coef_ai = np.array([1.0] * len(list_ai))
+        for question in form.question_list:
+            for answer in question.answers_choosen:
+                if answer.list_coef:
+                    raw_coef_ai = np.multiply(raw_coef_ai, np.array(answer.list_coef))
+        # we put all NaN value to -1
+        coef_ai = [-1 if math.isnan(coef) else coef for coef in raw_coef_ai]
+        list_bests_ais = []
+        for index, ai_name in enumerate(list_ai):
+            list_bests_ais.append((ai_name, coef_ai[index]))
+        list_bests_ais.sort(key=lambda x: x[1], reverse=True)
+        return []
+        return [x[0] for x in list_bests_ais][:nb_ai]

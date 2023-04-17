@@ -6,7 +6,14 @@ from typing import Optional
 
 import streamlit as st
 
-from ai_sustainability.package_business.models import Answer, AnswersList, Question
+from ai_sustainability.package_application.application import Application
+from ai_sustainability.package_business.models import (
+    Answer,
+    AnswersList,
+    Form,
+    Question,
+    Username,
+)
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
@@ -36,15 +43,12 @@ class FormStreamlit:
         - show_submission_button
         - set_locked : lock all the question of the form
         - show_best_ai
+        - get_all_questions_and_answers
+        - input_form_name_and_check
     """
 
-    page_title = "Form Page"
-    form_title = "Form"
-    page_icon = "📝"
-
-    def __init__(self) -> None:
-        st.set_page_config(page_title=self.page_title, page_icon=self.page_icon)
-        st.title(f"{self.page_icon}{self.form_title}")
+    def __init__(self, app: Application) -> None:
+        self.app = app
         self.username = check_user_connection()
 
     @property
@@ -197,3 +201,54 @@ class FormStreamlit:
         )
         for index, best_ai in enumerate(list_bests_ais):
             st.caption(f"{index + 1}) {best_ai}")
+
+    def get_all_questions_and_answers(self, form: Optional[Form] = None) -> tuple[Form, bool]:
+        """
+        Function used to show the form to be completed by the user
+        """
+        if form is None:
+            form = Form()
+        keep_going = True
+        question_number = 0
+        while keep_going:  # While we are not in the last question node
+            actual_question = self.app.get_next_question(form, question_number)
+            previous_answer = (
+                None
+                if not form.question_list[question_number].answers_choosen
+                else form.question_list[question_number].answers_choosen
+            )
+            question_number += 1
+            selected_answer = self.ask_question_user(actual_question, previous_answer)
+            if selected_answer is None:
+                return form, False
+            keep_going = actual_question.type != "end"
+            if keep_going:
+                form.add_answers(selected_answer, question_number)
+        return form, True
+
+    def input_form_name_and_check(self, previous_name: str = "") -> tuple[str, bool]:
+        """
+        Function used to show a box where the user can give a name to the form and check if the name is incorrect
+        """
+        form_name = self.show_input_form_name(previous_answer=previous_name)
+        if not form_name:
+            return "", True
+        if self.app.check_form_exist(self.username, form_name):
+            if self.check_name_already_taken(self.username):
+                return "", True
+        return form_name, False
+
+    def render(self) -> None:
+        form, is_ended = self.get_all_questions_and_answers()
+        if not is_ended:
+            return
+        form_name, form_name_incorrect = self.input_form_name_and_check()
+        if form_name_incorrect:
+            return
+        form.set_name(form_name)
+        form.set_username(self.username)
+
+        list_bests_ais = self.app.calcul_best_ais(form)
+        if self.show_submission_button():  # show the submission button and return True if it's clicked
+            self.show_best_ai(list_bests_ais)
+            self.app.save_answers(form, list_bests_ais)
