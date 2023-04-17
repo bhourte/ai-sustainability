@@ -59,12 +59,14 @@ def historic_user(username: Username, st_historic: HistoricStreamlit, app: Appli
 
     # get the list with all previous answers contained in the form
     form = app.get_previous_form(username, selected_form)
+    print(form.question_list)
     # TODO change all the "answer", previous_answers, etc names to clarify this all
 
     form, is_ended = st_historic.get_all_questions_and_answers(form)
     if not is_ended:
         return
 
+    print(form.question_list)
     # We ask the user to give us a name for the form (potentially a new one)
     new_form_name, form_name_incorrect = st_historic.input_form_name_and_check(form.form_name)
     if form_name_incorrect:

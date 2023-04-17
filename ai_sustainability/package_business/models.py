@@ -82,12 +82,11 @@ class Form:
     username: Username
     form_name: str
     question_list: list[Question]
-    already_completed: bool
+    already_completed: bool = False
     modif_crypted: bool = False
 
-    def __init__(self, already_completed: bool = False) -> None:
+    def __init__(self) -> None:
         self.question_list = []
-        self.already_completed = already_completed
 
     def add_question(self, question: Question) -> None:
         if self.modif_crypted:  # We only take the proposition with modif_crytpted property set to false
@@ -95,19 +94,27 @@ class Form:
             for i in question.answers:
                 if not i.modif_crypted:
                     list_proposition.append(i)
-            question.answers = list_proposition
+            question.answers = list_propo4sition
         self.question_list.append(question)
 
     def add_answers(self, answers: AnswersList, question_number: int) -> None:
-        print(self.question_list)
-        # /!\ hard code for modif_crypted here :
-        if question_number < len(self.question_list):
+        if self.already_completed:
+            if not self.check_changes(answers, question_number):
+                return
+        if not self.already_completed and question_number < len(self.question_list):
             self.question_list = self.question_list[:question_number]
-        print("ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-        print(self.question_list)
         self.question_list[-1].answers_choosen = answers
+        # /!\ hard code for modif_crypted here :
         if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
             self.modif_crypted = True
+
+    def check_changes(self, answers: AnswersList, question_number: int) -> bool:
+        for index, answer in enumerate(answers):
+            if answer.text != self.question_list[question_number - 1].answers_choosen[index].text:
+                print("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOL")
+                self.already_completed = False
+                return True
+        return False
 
     def set_name(self, form_name: str) -> None:
         self.form_name = form_name

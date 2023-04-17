@@ -206,17 +206,20 @@ class FormStreamlit:
         """
         Function used to show the form to be completed by the user
         """
+        print("ICIIIIIIIIIIIIIIIIIIIIII   1")
         if form is None:
             form = Form()
         keep_going = True
         question_number = 0
         while keep_going:  # While we are not in the last question node
+            print("ICIIIIIIIIIIIIIIIIIIIIII   2")
             actual_question = self.app.get_next_question(form, question_number)
             previous_answer = (
                 None
                 if not form.question_list[question_number].answers_choosen
                 else form.question_list[question_number].answers_choosen
             )
+            print("ICIIIIIIIIIIIIIIIIIIIIII   3")
             question_number += 1
             selected_answer = self.ask_question_user(actual_question, previous_answer)
             if selected_answer is None:
@@ -224,6 +227,7 @@ class FormStreamlit:
             keep_going = actual_question.type != "end"
             if keep_going:
                 form.add_answers(selected_answer, question_number)
+            print("ICIIIIIIIIIIIIIIIIIIIIII   4")
         return form, True
 
     def input_form_name_and_check(self, previous_name: str = "") -> tuple[str, bool]:

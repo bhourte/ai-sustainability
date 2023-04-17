@@ -2,7 +2,6 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
-from tkinter.tix import DirTree
 
 from decouple import config
 from gremlin_python import statics
@@ -81,6 +80,8 @@ class DbConnection(DBInterface):
             - a Question corresponding to the next question according to
                 the actual_question and answer provided (Question)
         """
+        if form.already_completed and len(form.question_list) > question_number:
+            return form.question_list[question_number]
         actual_question = None if not form.question_list else form.question_list[question_number - 1]
         if actual_question is None:
             query = Query(f"g.V('{FIRST_NODE_ID}')")
@@ -91,7 +92,8 @@ class DbConnection(DBInterface):
                 f"g.V('{actual_question.question_id}').outE().has('text','{actual_question.answers_choosen[0].text}').inV()"
             )
         elif actual_question.type == "end":
-            form.add_question(Question("end", "end", [], "end", "end"))
+            # form.add_question(Question("end", "end", [], "end", "end"))
+            print("XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
             return form.question_list[-1]
         else:
             raise ValueError(f"Question type {actual_question.type} not supported")
@@ -107,8 +109,6 @@ class DbConnection(DBInterface):
                 type=next_question["label"],
             )
         )
-        print("ICI")
-        print(form.question_list)
         return form.question_list[-1]
 
     def get_propositions(self, question: dict) -> list[Answer]:
@@ -431,9 +431,11 @@ class DbConnection(DBInterface):
         while self.get_node_label(node) != "end":
             self.get_next_question(form, question_number)
             answers = self.get_answers(node)
-            form.add_answers(answers, len(form.question_list))
+            form.question_list[-1].answers_choosen = answers
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
             question_number += 1
+        self.get_next_question(form, question_number)
+        form.already_completed = True
         return form
 
     def get_answers(self, node_id: str) -> list[Answer]:
