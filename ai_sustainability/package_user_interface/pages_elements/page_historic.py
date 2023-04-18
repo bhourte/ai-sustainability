@@ -106,9 +106,7 @@ class HistoricStreamlit:
         list_bests_ais = self.app.calcul_best_ais(new_form)
         self.show_best_ai(list_bests_ais)
         if self.show_submission_button():
-            self.app.change_answers(
-                new_form, new_form_name, list_bests_ais
-            )  # TODO change name to save_answer and change the function in DbConnection
+            self.app.save_answers(new_form, list_bests_ais, new_form_name)
 
     def render_as_admin(self) -> None:
         """

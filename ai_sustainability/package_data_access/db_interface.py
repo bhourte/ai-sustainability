@@ -77,7 +77,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_answers(self, form: Form, best_ais: list[str]) -> bool:
+    def save_answers(self, form: Form, best_ais: list[str], new_form_name: str = "") -> bool:
         """
         Save the answers of a user in the database
 
@@ -103,18 +103,12 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def update_answers(self, form: Form, new_form_name: str, best_ais: list[str]) -> bool:
+    def drop_form(self, form: Form) -> None:
         """
-        Change the answer in db
+        Drop a form present in db
 
         Parameters:
-            - answers (list): list of answers
-            - username (str): username of the user
-            - form_name (str): name of the form
-            - new_form_name (str): new name of the form
-
-        Return:
-            - True if the answers are saved, False if the form already exist
+            - form : the we want to delete in the db
         """
 
     @abstractmethod

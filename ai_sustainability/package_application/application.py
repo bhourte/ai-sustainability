@@ -108,7 +108,7 @@ class Application:
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
-    def save_answers(self, form: Form, list_best_ai: list[str]) -> bool:
+    def save_answers(self, form: Form, list_best_ai: list[str], new_form_name: str = "") -> bool:
         """
         Save the answers of a user in the database
 
@@ -121,23 +121,7 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
-        return self.database.save_answers(form, list_best_ai)
-
-    def change_answers(self, form: Form, new_form_name: str, list_best_ai: list[str]) -> bool:
-        """
-        Change the answer in db
-
-        Parameters:
-            - answers (list): list of answers
-            - username (str): username of the user
-            - form_name (str): name of the form
-            - new_form_name (str): new name of the form
-            - list_best_ai (list[str]): list of the n best AIs selected for this form
-
-        Return:
-            - bool: True if the answers are well saved, False if the form already exist
-        """
-        return self.database.update_answers(form, new_form_name, list_best_ai)
+        return self.database.save_answers(form, list_best_ai, new_form_name)
 
     def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """

@@ -259,7 +259,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{username}').outE().hasLabel('Feedback').count()")
         return self.run_gremlin_query(query)[0]
 
-    def save_answers(self, form: Form, best_ais: list[str]) -> bool:
+    def save_answers(self, form: Form, best_ais: list[str], new_form_name: str = "") -> bool:
         """
         Save the answers of a user in the database
 
@@ -273,6 +273,9 @@ class DbConnection(DBInterface):
         Return:
             - True if the answers are saved, False if the form already exist
         """
+        if new_form_name:
+            self.drop_form(form)
+        form.set_name(new_form_name)
         if not self.check_node_exist(form.username):
             self.create_user_node(form.username)
         if self.check_form_exist(form.username, form.form_name):
@@ -360,7 +363,7 @@ class DbConnection(DBInterface):
                 )
             )
 
-    def update_answers(self, form: Form, new_form_name: str, best_ais: list[str]) -> bool:
+    def drop_form(self, form: Form) -> None:
         """
         Change the answer in db
 
@@ -384,8 +387,6 @@ class DbConnection(DBInterface):
                 keep_going = False
             else:
                 node_id = next_node_id[0]["value"]
-        form.set_name(new_form_name)
-        return self.save_answers(form, best_ais)
 
     def get_all_forms_names(self, username: Username) -> list[str]:
         """
