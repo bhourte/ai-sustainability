@@ -3,76 +3,12 @@ This file is used to show the Historic page
 """
 import streamlit as st
 
-from ai_sustainability.package_application.application import Application
-from ai_sustainability.package_business.models import Username
-from ai_sustainability.package_user_interface.classes.class_historic import (
+from ai_sustainability.package_user_interface.classes.page_historic import (
     HistoricStreamlit,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 ADMIN_USERNAME = "Admin"  # TODO .env
-
-
-def historic_user(username: Username, st_historic: HistoricStreamlit, app: Application) -> None:
-    """
-    Function used to show a form with the User view
-    """
-    list_answered_form = app.get_all_forms_names(username)
-    selected_form = st_historic.show_choice_form(list_answered_form)
-    if not selected_form:  # if none form selected, don't show the rest
-        return
-
-    # get the list with all previous answers contained in the form
-    form = app.get_previous_form(username, selected_form)
-    print(form.question_list)
-    # TODO change all the "answer", previous_answers, etc names to clarify this all
-
-    form, is_ended = st_historic.get_all_questions_and_answers(form)
-    if not is_ended:
-        return
-
-    print(form.question_list)
-    # We ask the user to give us a name for the form (potentially a new one)
-    new_form_name, form_name_incorrect = st_historic.input_form_name_and_check(form.form_name)
-    if form_name_incorrect:
-        return
-
-    # If the name is already taken by an other form
-    if app.check_form_exist(username, new_form_name) and new_form_name != form.form_name:
-        if st_historic.check_name_already_taken(username):
-            return
-
-    list_bests_ais = app.calcul_best_ais(form)
-    st_historic.show_best_ai(list_bests_ais)
-    if st_historic.show_submission_button():
-        app.change_answers(
-            form, new_form_name, list_bests_ais
-        )  # TODO change name to save_answer and change the function in DbConnection
-
-
-def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
-    """
-    Function used to show a form with the Admin view
-    """
-    list_username = app.get_all_users()
-
-    # The admin select an user
-    choosen_user = st_historic.show_choice_user(list_username)
-    if not choosen_user:  # if no user selected, don't show the rest
-        return
-
-    # The admin select a form of the choosen user
-    list_answered_form = app.get_all_forms_names(choosen_user)
-    selected_form_name = st_historic.show_choice_form(list_answered_form, is_admin=True)
-    if not selected_form_name:  # if no form selected, don't show the rest
-        return
-
-    # get the list with all previous answers contained in the form
-    previous_form_answers = app.get_previous_form(choosen_user, selected_form_name)
-    st_historic.show_form_as_admin(previous_form_answers)
-
-    list_bests_ais = app.get_best_ais(choosen_user, selected_form_name)
-    st_historic.show_best_ai(list_bests_ais)
 
 
 def main() -> None:
@@ -91,10 +27,10 @@ def main() -> None:
 
     # Connected as an User
     if username != ADMIN_USERNAME:
-        historic_user(username, st_historic, app)
+        st_historic.historic_user(username)
     # Connected as an Admin
     else:
-        historic_admin(st_historic, app)
+        st_historic.historic_admin()
 
 
 if __name__ == "__main__":

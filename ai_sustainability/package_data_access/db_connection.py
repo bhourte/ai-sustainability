@@ -2,6 +2,7 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
+from hmac import new
 
 from decouple import config
 from gremlin_python import statics
@@ -91,23 +92,21 @@ class DbConnection(DBInterface):
                 f"g.V('{actual_question.question_id}').outE().has('text','{actual_question.answers_choosen[0].text}').inV()"
             )
         elif actual_question.type == "end":
-            # form.add_question(Question("end", "end", [], "end", "end"))
-            print("XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
             return form.question_list[-1]
         else:
             raise ValueError(f"Question type {actual_question.type} not supported")
         next_question = self.run_gremlin_query(query)[0]
-        form.add_question(
-            Question(
-                question_id=next_question["id"],
-                text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
-                answers=self.get_propositions(next_question),
-                help_text=next_question["properties"]["help text"][0]["value"]
-                if "help text" in next_question["properties"]
-                else "",
-                type=next_question["label"],
-            )
+        new_question = Question(
+            question_id=next_question["id"],
+            text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
+            help_text=next_question["properties"]["help text"][0]["value"]
+            if "help text" in next_question["properties"]
+            else "",
+            answers=[],
+            type=next_question["label"],
         )
+        new_question.set_answers(self.get_propositions(next_question))
+        form.add_question(new_question)
         return form.question_list[-1]
 
     def get_propositions(self, question: dict) -> list[Answer]:
@@ -470,8 +469,6 @@ class DbConnection(DBInterface):
                 if edge["proposition_id"] not in nb_selected_edge:
                     query = Query(f"g.E('{edge['proposition_id']}')")
                     answer_dict = self.run_gremlin_query(query)[0]
-                    print("#################################")
-                    print(answer_dict)
                     text = "Q_Next" if "text" not in answer_dict["properties"] else answer_dict["properties"]["text"]
                     answer = Answer(answer_id=answer_dict["id"], text=text)
                     nb_selected_edge[edge["proposition_id"]] = [answer, 0]
@@ -479,7 +476,7 @@ class DbConnection(DBInterface):
 
         selected_edges = []
         for _, val in nb_selected_edge.items():
-            selected_edges.append(AnswersStats((val[0], val[1])))
+            selected_edges.append((val[0], val[1]))
         return selected_edges
 
     def get_all_ais(self) -> list[str]:

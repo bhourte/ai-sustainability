@@ -7,13 +7,8 @@ inherit from class_form
 """
 import streamlit as st
 
-from ai_sustainability.package_business.models import (
-    AnswersList,
-    Form,
-    Question,
-    Username,
-)
-from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
+from ai_sustainability.package_business.models import Form, Username
+from ai_sustainability.package_user_interface.classes.page_form import FormStreamlit
 
 
 class HistoricStreamlit(FormStreamlit):
@@ -27,10 +22,6 @@ class HistoricStreamlit(FormStreamlit):
         - show_submission_button : display a button where the user can save the changes made in the form
         - show_question_as_admin : show a previous answered question with the admin view
     """
-
-    page_title = "Historic Page"
-    form_title = "Historic"
-    page_icon = "📜"
 
     def show_choice_user(self, list_username: list[Username]) -> Username:
         """
@@ -64,7 +55,7 @@ class HistoricStreamlit(FormStreamlit):
             return True
         return False
 
-    def show_form_as_admin(self, form: Form) -> None:
+    def show_form_as_text(self, form: Form) -> None:
         """
         Show a previous answered question with the admin view
         """
@@ -76,3 +67,61 @@ class HistoricStreamlit(FormStreamlit):
             st.subheader(f"{form.question_list[actual_question].text} :")
             st.caption(answers, unsafe_allow_html=True)
             actual_question += 1
+
+    def historic_user(self, username: Username) -> None:
+        """
+        Function used to show a form with the User view
+        """
+        list_answered_form = self.app.get_all_forms_names(username)
+        selected_form = self.show_choice_form(list_answered_form)
+        if not selected_form:  # if none form selected, don't show the rest
+            return
+
+        # get the list with all previous answers contained in the form
+        form = self.app.get_previous_form(username, selected_form)
+        # TODO change all the "answer", previous_answers, etc names to clarify this all
+
+        form, is_ended = self.get_all_questions_and_answers(form)
+        if not is_ended:
+            return
+
+        # We ask the user to give us a name for the form (potentially a new one)
+        new_form_name, form_name_incorrect = self.input_form_name_and_check(form.form_name)
+        if form_name_incorrect:
+            return
+
+        # If the name is already taken by an other form
+        if self.app.check_form_exist(username, new_form_name) and new_form_name != form.form_name:
+            if self.check_name_already_taken(username):
+                return
+
+        list_bests_ais = self.app.calcul_best_ais(form)
+        self.show_best_ai(list_bests_ais)
+        if self.show_submission_button():
+            self.app.change_answers(
+                form, new_form_name, list_bests_ais
+            )  # TODO change name to save_answer and change the function in DbConnection
+
+    def historic_admin(self) -> None:
+        """
+        Function used to show a form with the Admin view
+        """
+        list_username = self.app.get_all_users()
+
+        # The admin select an user
+        choosen_user = self.show_choice_user(list_username)
+        if not choosen_user:  # if no user selected, don't show the rest
+            return
+
+        # The admin select a form of the choosen user
+        list_answered_form = self.app.get_all_forms_names(choosen_user)
+        selected_form_name = self.show_choice_form(list_answered_form, is_admin=True)
+        if not selected_form_name:  # if no form selected, don't show the rest
+            return
+
+        # get the list with all previous answers contained in the form
+        previous_form_answers = self.app.get_previous_form(choosen_user, selected_form_name)
+        self.show_form_as_text(previous_form_answers)
+
+        list_bests_ais = self.app.get_best_ais(choosen_user, selected_form_name)
+        self.show_best_ai(list_bests_ais)

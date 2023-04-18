@@ -3,7 +3,7 @@ This file is used to show the Feedback page
 """
 import streamlit as st
 
-from ai_sustainability.package_user_interface.classes.class_feedback import FeedbackPage
+from ai_sustainability.package_user_interface.classes.page_feedback import FeedbackPage
 from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 

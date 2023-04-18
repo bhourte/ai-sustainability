@@ -12,7 +12,7 @@ from ai_sustainability.package_business.models import (
     AnswersList,
     Form,
     Question,
-    Username,
+    get_end_answer,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
@@ -70,9 +70,7 @@ class FormStreamlit:
         elif question.type == "Q_QRM":
             answers = self.show_qrm_question(question, previous_answers)
         elif question.type == "end":  # This is the end (of the form)
-            proposition_end = Answer(
-                answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[]
-            )  # TODO put this in a function
+            proposition_end = get_end_answer()
             return AnswersList([proposition_end])
         else:
             print("Error, question label no recognised")
@@ -84,8 +82,11 @@ class FormStreamlit:
     def show_open_question(
         self, question: Question, previous_answers: Optional[AnswersList] = None
     ) -> Optional[AnswersList]:
-        if previous_answers is None:  # If it has not to be auto-completed before
-            previous_answers = [Answer(answer_id=question.answers[0].answer_id, text="")]
+        if previous_answers and len(previous_answers) > 1:
+            raise ValueError("A previous Answer of a open question can not have multiples values")
+        previous_answer = (
+            previous_answers[0] if previous_answers else Answer(answer_id=question.answers[0].answer_id, text="")
+        )
         # We show the question text area
         answer_text = sanitize_text_input(
             str(
@@ -93,21 +94,21 @@ class FormStreamlit:
                     label=question.text,
                     height=100,
                     label_visibility="visible",
-                    value=previous_answers[0].text,
+                    value=previous_answer.text,
                     help=question.help_text,
                     disabled=self.locked,
                 )
             )
         )
-        previous_answers[0].text = answer_text
-        return previous_answers if answer_text else None
+        previous_answer.text = answer_text
+        return AnswersList([previous_answer]) if answer_text else None
 
     def show_qcm_question(
         self, question: Question, previous_answers: Optional[AnswersList] = None
     ) -> Optional[AnswersList]:
-        previous_answer = (
-            previous_answers[0] if previous_answers else None
-        )  # TODO do the same for open_question + check if more than one elmt -> raise ValueError
+        if previous_answers and len(previous_answers) > 1:
+            raise ValueError("A previous Answer of a QCM question can not have multiples values")
+        previous_answer = previous_answers[0] if previous_answers else None
         options = ["<Select an option>"] + self.get_answers_text_list(question)
         # If it has to be auto-completed before
         previous_index = options.index(previous_answer.text) if previous_answer is not None else 0
@@ -206,20 +207,17 @@ class FormStreamlit:
         """
         Function used to show the form to be completed by the user
         """
-        print("ICIIIIIIIIIIIIIIIIIIIIII   1")
         if form is None:
             form = Form()
         keep_going = True
         question_number = 0
         while keep_going:  # While we are not in the last question node
-            print("ICIIIIIIIIIIIIIIIIIIIIII   2")
             actual_question = self.app.get_next_question(form, question_number)
             previous_answer = (
                 None
                 if not form.question_list[question_number].answers_choosen
                 else form.question_list[question_number].answers_choosen
             )
-            print("ICIIIIIIIIIIIIIIIIIIIIII   3")
             question_number += 1
             selected_answer = self.ask_question_user(actual_question, previous_answer)
             if selected_answer is None:
@@ -227,7 +225,6 @@ class FormStreamlit:
             keep_going = actual_question.type != "end"
             if keep_going:
                 form.add_answers(selected_answer, question_number)
-            print("ICIIIIIIIIIIIIIIIIIIIIII   4")
         return form, True
 
     def input_form_name_and_check(self, previous_name: str = "") -> tuple[str, bool]:

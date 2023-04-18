@@ -45,7 +45,6 @@ class FeedbackPage:
 
     def show_all_feedbacks(self) -> None:
         all_feedbacks = self.app.get_all_feedbacks()
-        print(all_feedbacks)
         if not all_feedbacks:
             st.write("There is no user in the database.")
             return
@@ -54,7 +53,6 @@ class FeedbackPage:
             st.write("There is no feedback in the database.")
 
     def show_user_feedback(self, user_feedback: UserFeedback) -> bool:
-        print(user_feedback)
         with st.expander("Feedbacks from " + user_feedback.user):
             for index, value in enumerate(user_feedback.feedbacks):
                 st.write(f"feedback {index+1} : {value}")

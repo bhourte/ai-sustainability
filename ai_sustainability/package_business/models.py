@@ -48,20 +48,32 @@ class Answer:
         return f"Q{self.question_in_id} to Q{self.question_out_id}"
 
 
+def get_end_answer() -> Answer:
+    return Answer(answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[])
+
+
 AnswersList = list[Answer]  # List of answers selected by the user in QuestionAnswer propositions
 AnswersStats = tuple[Answer, int]  # Answer and number of time it has been selected
 
 
 @dataclass
-class Question:  # TODO chek that 2 answer does not have the same text
+class Question:
     """Dataclass corresponding to one question stored in the database (a vertice/node in the database)"""
 
     question_id: str
     text: str
-    answers: list[Answer]
     help_text: str
+    answers: list[Answer]
     type: str
     answers_choosen: AnswersList = field(default_factory=AnswersList)
+
+    def set_answers(self, answers_list: list[Answer]) -> None:
+        """Check that 2 Answer does not have the same text and set self.answers"""
+        for i, answer_i in enumerate(answers_list):
+            for j in range(i + 1, len(answers_list)):
+                if answer_i.text == answers_list[j].text:
+                    raise ValueError("A Question can not have 2 Answer with the same text")
+        self.answers = answers_list
 
 
 @dataclass
