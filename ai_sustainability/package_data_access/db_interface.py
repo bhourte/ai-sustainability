@@ -5,11 +5,9 @@ used to connect to the database and to run the queries
 from abc import ABC, abstractmethod
 
 from ai_sustainability.package_business.models import (
-    AnswersList,
-    Edge,
+    AnswersStats,
     Feedback,
     Form,
-    FormAnswers,
     Question,
     UserFeedback,
     Username,
@@ -132,22 +130,20 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_list_answers(
-        self, username: Username, form_name: str
-    ) -> FormAnswers:  # TODO change name to get_previous_form
+    def get_previous_form(self, username: Username, selected_form_name: str) -> Form:
         """
-        Get the list of answers of a form
+        Get a Form
 
         Parameters:
-            - username (User): username of the user
-            - form_name (str): name of the form
+            - username (Username): username of the user
+            - selected_form_name (str): name of the form
 
         Return:
             - list_answers (AnswersList): list of the answers
         """
 
     @abstractmethod
-    def get_nb_selected_edge(self) -> list[Edge]:
+    def get_nb_selected_edge(self) -> list[AnswersStats]:
         """
         Return a list of SelectedEdge with theb number of times edge was selected for each proposition
 

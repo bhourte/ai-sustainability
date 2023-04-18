@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from ai_sustainability.package_application.application import Application
-from ai_sustainability.package_business.models import Edge
+from ai_sustainability.package_business.models import AnswersStats
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
 )
@@ -46,7 +46,7 @@ class StatisticPage:
         st.write("You can now see the statistic of the form")
         return True
 
-    def display_answers_statistic(self, edge_selected: list[Edge]) -> None:
+    def display_answers_statistic(self, edge_selected: list[AnswersStats]) -> None:
         """
         Display bar graph of edges selected
 
@@ -58,11 +58,11 @@ class StatisticPage:
             return
         with st.spinner("Loading..."):
             # sort the list on edges name
-            edge_selected.sort(key=lambda x: x.answer_id)
+            edge_selected.sort(key=lambda x: x[0].answer_id)
             hover_text = [repr(edge) for edge in edge_selected]  # text with the in and out node
-            text = [edge.text for edge in edge_selected]  # Text of the selected answer
-            count_edges = [edge.nb_selected for edge in edge_selected]  # Number of times each edge was selected
-            list_edge_name = sorted({k.answer_id for k in edge_selected})  # To get the edges name in ascending order
+            text = [edge[0].text for edge in edge_selected]  # Text of the selected answer
+            count_edges = [edge[1] for edge in edge_selected]  # Number of times each edge was selected
+            list_edge_name = sorted({k[0].answer_id for k in edge_selected})  # To get the edges name in ascending order
             fig = go.Figure(data=[go.Bar(x=list_edge_name, y=list(count_edges), hovertext=text, text=hover_text)])
             fig.update_layout(
                 title="Number of times each edge was selected",

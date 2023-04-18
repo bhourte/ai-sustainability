@@ -8,8 +8,6 @@ from ai_sustainability.package_user_interface.utils_streamlit import get_applica
 
 
 def main() -> None:
-    # TODO put all in class_form
-    # TODO put in render
     """
     This is the code used to show the form and used by the user to fill it
     """

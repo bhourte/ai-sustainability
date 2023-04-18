@@ -1,5 +1,7 @@
 """
 This file contained all function used by the business part of our application
+
+THIS FILE IS USELESS NOW
 """
 
 import heapq
@@ -7,7 +9,7 @@ import math
 
 import numpy as np
 
-from ai_sustainability.package_business.models import Form, FormAnswers
+from ai_sustainability.package_business.models import AnswersList, Form
 
 
 class Business:
@@ -21,7 +23,9 @@ class Business:
     def __init__(self) -> None:
         pass
 
-    def calcul_best_ais_old(self, nb_ai: int, list_ai: list[str], form_answers: FormAnswers) -> list[str]:  # TODO suppr
+    def calcul_best_ais_old(
+        self, nb_ai: int, list_ai: list[str], form_answers: list[AnswersList]
+    ) -> list[str]:  # TODO suppr
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for answer_list in form_answers:
             for answer in answer_list:

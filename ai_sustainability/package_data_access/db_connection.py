@@ -10,10 +10,9 @@ from gremlin_python.driver import client, serializer
 from ai_sustainability.package_business.models import (
     Answer,
     AnswersList,
-    Edge,
+    AnswersStats,
     Feedback,
     Form,
-    FormAnswers,
     Query,
     Question,
     UserFeedback,
@@ -402,26 +401,6 @@ class DbConnection(DBInterface):
         forms_id = self.run_gremlin_query(Query(f"g.V('{username}').outE().hasLabel('Answer').inV().id()"))
         return list(_map(lambda x: x.split("-")[-1], forms_id))
 
-    def get_list_answers(self, username: Username, form_name: str) -> FormAnswers:
-        """
-        Get the list of answers of a form
-
-        Parameters:
-            - username (User): username of the user
-            - form_name (str): name of the form
-
-        Return:
-            - list_answers (AnswersList): list of the answers
-        """
-        list_answers = FormAnswers()
-        node = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
-        node_label = self.get_node_label(node)
-        while node_label != "end":
-            list_answers.append(self.get_answers(node))
-            node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
-            node_label = self.get_node_label(node)
-        return list_answers
-
     def get_previous_form(self, username: Username, selected_form_name: str) -> Form:
         form = Form()
         form.set_username(username)
@@ -446,13 +425,13 @@ class DbConnection(DBInterface):
             - node_id (str): id of the node
 
         Return:
-            - list of the answers (list[Proposition])
+            - list of the answers (list[Answer])
         """
         query = Query(f"g.V('{node_id}').outE()")
         props = self.run_gremlin_query(query)
-        propositions = []
+        answers = []
         for prop in props:
-            propositions.append(
+            answers.append(
                 Answer(
                     answer_id=prop["properties"]["proposition_id"],
                     text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
@@ -461,7 +440,7 @@ class DbConnection(DBInterface):
                     list_coef=prop["properties"]["list_coef"] if "list_coef" in prop["properties"] else [],
                 )
             )
-        return propositions
+        return answers
 
     def get_node_label(self, node_id: str) -> str:
         """
@@ -475,7 +454,7 @@ class DbConnection(DBInterface):
         """
         return self.run_gremlin_query(Query(f"g.V('{node_id}').label()"))[0]
 
-    def get_nb_selected_edge(self) -> list[Edge]:
+    def get_nb_selected_edge(self) -> list[AnswersStats]:
         """
         Return a list of SelectedEdge with theb number of times edge was selected for each proposition
 
@@ -485,19 +464,22 @@ class DbConnection(DBInterface):
         query = Query("g.E().hasLabel('Answer').valueMap()")
         result = self.run_gremlin_query(query)
 
-        nb_selected_edge: dict = {}  # key : proposition_id, value : [answer, nb_selected]
+        nb_selected_edge: dict = {}  # key : proposition_id, value : [Answer dataclass, nb_selected]
         for edge in result:
             if "proposition_id" in edge:
                 if edge["proposition_id"] not in nb_selected_edge:
-                    if self.get_node_label(edge["proposition_id"].split("-")[0]) == "Q_Open":
-                        nb_selected_edge[edge["proposition_id"]] = ["Q_Next", 0]
-                    else:
-                        nb_selected_edge[edge["proposition_id"]] = [edge["answer"], 0]
+                    query = Query(f"g.E('{edge['proposition_id']}')")
+                    answer_dict = self.run_gremlin_query(query)[0]
+                    print("#################################")
+                    print(answer_dict)
+                    text = "Q_Next" if "text" not in answer_dict["properties"] else answer_dict["properties"]["text"]
+                    answer = Answer(answer_id=answer_dict["id"], text=text)
+                    nb_selected_edge[edge["proposition_id"]] = [answer, 0]
                 nb_selected_edge[edge["proposition_id"]][1] += 1
 
         selected_edges = []
-        for key, val in nb_selected_edge.items():
-            selected_edges.append(Edge(key, val[0], val[1]))
+        for _, val in nb_selected_edge.items():
+            selected_edges.append(AnswersStats((val[0], val[1])))
         return selected_edges
 
     def get_all_ais(self) -> list[str]:

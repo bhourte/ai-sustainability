@@ -5,7 +5,7 @@ from decouple import config
 
 from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_business.models import (
-    Edge,
+    AnswersStats,
     Feedback,
     Form,
     Question,
@@ -26,7 +26,7 @@ class Application:
         - get_best_ais
         - get_all_users
         - get_all_forms_names
-        - get_list_answers
+        - get_previous_form
         - get_all_feedbacks
         - get_nb_selected_edge_stats
         - check_user_exist
@@ -39,8 +39,6 @@ class Application:
     def __init__(self, database: DbConnection) -> None:
         self.database = database
         self.business = Business()
-        # self.list_questions: list[Question] = []  # TODO put this in Form models (no state in Application)
-        # self.modif_crypted = False
 
     def get_next_question(self, form: Form, question_number: int) -> Question:
         """
@@ -96,7 +94,7 @@ class Application:
         """
         return self.database.get_all_feedbacks()
 
-    def get_nb_selected_answer_stats(self) -> list[Edge]:
+    def get_nb_selected_answer_stats(self) -> list[AnswersStats]:
         """
         Return a list with all existing edges and the number of time they had been selected
         Used in stats showing

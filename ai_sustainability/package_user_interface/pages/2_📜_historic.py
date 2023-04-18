@@ -1,51 +1,16 @@
 """
 This file is used to show the Historic page
 """
-from typing import Generator
-
 import streamlit as st
-from decouple import config
 
 from ai_sustainability.package_application.application import Application
-from ai_sustainability.package_business.models import (
-    Answer,
-    AnswersList,
-    FormAnswers,
-    Username,
-)
+from ai_sustainability.package_business.models import Username
 from ai_sustainability.package_user_interface.classes.class_historic import (
     HistoricStreamlit,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 ADMIN_USERNAME = "Admin"  # TODO .env
-
-
-def get_form_list_answers(
-    *, app: Application, st_historic: HistoricStreamlit, list_answers: FormAnswers, previous_form_answers: FormAnswers
-) -> Generator[AnswersList, None, None]:
-    keep_going = True
-    i = 0
-    change_made = False
-    while keep_going:
-        next_question = app.get_next_question(list_answers)
-        selected_answer = st_historic.ask_question_user(
-            next_question, None if change_made else previous_form_answers[len(list_answers)]
-        )
-        if selected_answer is None:
-            break
-        keep_going = next_question.type != "end"
-        if keep_going:
-            yield selected_answer
-            # If not already changed and name answer different from previous one and question's label is not Q_Open :
-            # The form is modified and we do not fill it automatically with previous answers
-            if (
-                not change_made
-                and list_answers[i][0].text != previous_form_answers[i][0].text
-                and next_question.type != "Q_Open"
-            ):
-                change_made = True
-        i += 1
 
 
 def historic_user(username: Username, st_historic: HistoricStreamlit, app: Application) -> None:

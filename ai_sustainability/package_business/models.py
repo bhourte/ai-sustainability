@@ -1,4 +1,3 @@
-# TODO faire une nouvelle dataclass Form qui gere un formulaire
 """
 File with all dataclass and Type we use in the form application
 
@@ -50,9 +49,7 @@ class Answer:
 
 
 AnswersList = list[Answer]  # List of answers selected by the user in QuestionAnswer propositions
-FormAnswers = list[AnswersList]  # TODO replace it by the Form dataclass
-Edge = tuple[Answer, int]  # Answer and number of time it has been selected
-# TODO change the "Edge" name
+AnswersStats = tuple[Answer, int]  # Answer and number of time it has been selected
 
 
 @dataclass
@@ -139,5 +136,5 @@ class Form:
         for index, ai_name in enumerate(list_ai):
             list_bests_ais.append((ai_name, coef_ai[index]))
         list_bests_ais.sort(key=lambda x: x[1], reverse=True)
-        return []
+        return []  # TODO change here to got the good ais
         return [x[0] for x in list_bests_ais][:nb_ai]
