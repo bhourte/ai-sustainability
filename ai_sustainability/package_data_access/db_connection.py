@@ -426,16 +426,16 @@ class DbConnection(DBInterface):
         form = Form()
         form.set_username(username)
         form.set_name(selected_form_name)
+        form.already_completed = True
         node = f"{username}-answer{FIRST_NODE_ID}-{selected_form_name}"
         question_number = 0
         while self.get_node_label(node) != "end":
             self.get_next_question(form, question_number)
             answers = self.get_answers(node)
-            form.question_list[-1].answers_choosen = answers
+            form.add_previous_answers(answers)
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
             question_number += 1
         self.get_next_question(form, question_number)
-        form.already_completed = True
         return form
 
     def get_answers(self, node_id: str) -> list[Answer]:

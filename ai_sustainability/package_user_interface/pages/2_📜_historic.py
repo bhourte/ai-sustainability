@@ -103,16 +103,9 @@ def historic_admin(st_historic: HistoricStreamlit, app: Application) -> None:
         return
 
     # get the list with all previous answers contained in the form
-    proposition_end = Answer(answer_id="end", text="end", help_text="end", modif_crypted=False, list_coef=[])
-    previous_form_answers = app.get_previous_form(choosen_user, selected_form_name) + FormAnswers([[proposition_end]])
-    keep_going = True
-    i = 0
-    while keep_going:
-        list_answers = previous_form_answers[:i]
-        next_question = app.get_next_question(list_answers)
-        st_historic.show_question_as_admin(next_question, previous_form_answers[i])
-        keep_going = next_question.type != "end"
-        i += 1
+    previous_form_answers = app.get_previous_form(choosen_user, selected_form_name)
+    st_historic.show_form_as_admin(previous_form_answers)
+
     list_bests_ais = app.get_best_ais(choosen_user, selected_form_name)
     st_historic.show_best_ai(list_bests_ais)
 

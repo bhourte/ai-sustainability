@@ -237,7 +237,7 @@ class FormStreamlit:
         form_name = self.show_input_form_name(previous_answer=previous_name)
         if not form_name:
             return "", True
-        if self.app.check_form_exist(self.username, form_name):
+        if form_name != previous_name and self.app.check_form_exist(self.username, form_name):
             if self.check_name_already_taken(self.username):
                 return "", True
         return form_name, False

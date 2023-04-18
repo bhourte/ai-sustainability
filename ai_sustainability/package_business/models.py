@@ -94,7 +94,7 @@ class Form:
             for i in question.answers:
                 if not i.modif_crypted:
                     list_proposition.append(i)
-            question.answers = list_propo4sition
+            question.answers = list_proposition
         self.question_list.append(question)
 
     def add_answers(self, answers: AnswersList, question_number: int) -> None:
@@ -108,10 +108,15 @@ class Form:
         if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
             self.modif_crypted = True
 
+    def add_previous_answers(self, answers: AnswersList) -> None:
+        self.question_list[-1].answers_choosen = answers
+        # /!\ hard code for modif_crypted here :
+        if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
+            self.modif_crypted = True
+
     def check_changes(self, answers: AnswersList, question_number: int) -> bool:
         for index, answer in enumerate(answers):
             if answer.text != self.question_list[question_number - 1].answers_choosen[index].text:
-                print("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOL")
                 self.already_completed = False
                 return True
         return False

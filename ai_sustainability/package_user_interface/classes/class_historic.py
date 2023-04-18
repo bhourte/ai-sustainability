@@ -7,7 +7,12 @@ inherit from class_form
 """
 import streamlit as st
 
-from ai_sustainability.package_business.models import AnswersList, Question, Username
+from ai_sustainability.package_business.models import (
+    AnswersList,
+    Form,
+    Question,
+    Username,
+)
 from ai_sustainability.package_user_interface.classes.class_form import FormStreamlit
 
 
@@ -59,14 +64,15 @@ class HistoricStreamlit(FormStreamlit):
             return True
         return False
 
-    def show_question_as_admin(self, question: Question, previous_answers: AnswersList) -> None:
+    def show_form_as_admin(self, form: Form) -> None:
         """
         Show a previous answered question with the admin view
         """
-        if question.type == "end":
-            return
-        answers = ""
-        for previous_answer in previous_answers:
-            answers += f"{previous_answer.text} <br>"
-        st.subheader(f"{question.text} :")
-        st.caption(answers, unsafe_allow_html=True)
+        actual_question = 0
+        while form.question_list[actual_question].type != "end":
+            answers = ""
+            for previous_answer in form.question_list[actual_question].answers_choosen:
+                answers += f"{previous_answer.text} <br>"
+            st.subheader(f"{form.question_list[actual_question].text} :")
+            st.caption(answers, unsafe_allow_html=True)
+            actual_question += 1
