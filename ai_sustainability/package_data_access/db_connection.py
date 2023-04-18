@@ -2,7 +2,6 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
-from hmac import new
 
 from decouple import config
 from gremlin_python import statics
@@ -356,6 +355,7 @@ class DbConnection(DBInterface):
                             .to(g.V('{target_node_id}'))
                             .property('answer', '{proposition.text}')
                             .property('proposition_id', '{proposition.answer_id}')
+                            .property('list_coef', '{str(proposition.list_coef)[1:-1]}')
                     """
                 )
             )
@@ -436,7 +436,9 @@ class DbConnection(DBInterface):
                     text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
                     help_text="",
                     modif_crypted=False,
-                    list_coef=prop["properties"]["list_coef"] if "list_coef" in prop["properties"] else [],
+                    list_coef=[]
+                    if "list_coef" not in prop["properties"] or not prop["properties"]["list_coef"]
+                    else [float(coef) for coef in (prop["properties"]["list_coef"].split(", "))],
                 )
             )
         return answers

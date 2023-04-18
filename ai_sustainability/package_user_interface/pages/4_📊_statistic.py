@@ -3,7 +3,7 @@ This file is used to show the Statistic page
 """
 import streamlit as st
 
-from ai_sustainability.package_user_interface.classes.page_statistic import (
+from ai_sustainability.package_user_interface.pages_elements.page_statistic import (
     StatisticPage,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import get_application

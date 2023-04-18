@@ -3,7 +3,6 @@ File with our Application class
 """
 from decouple import config
 
-from ai_sustainability.package_business.business import Business
 from ai_sustainability.package_business.models import (
     AnswersStats,
     Feedback,
@@ -38,7 +37,6 @@ class Application:
 
     def __init__(self, database: DbConnection) -> None:
         self.database = database
-        self.business = Business()
 
     def get_next_question(self, form: Form, question_number: int) -> Question:
         """

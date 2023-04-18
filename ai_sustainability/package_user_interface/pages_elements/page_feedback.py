@@ -3,6 +3,7 @@ Class for feedback page,
 Streamlit class
 """
 import streamlit as st
+from decouple import config
 
 from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import Feedback, UserFeedback, Username
@@ -33,7 +34,7 @@ class FeedbackPage:
         st.session_state.clicked = False
 
     def render(self) -> None:
-        if self.username == "Admin":
+        if self.username == config("ADMIN_USERNAME"):
             self.show_all_feedbacks()
             return
 

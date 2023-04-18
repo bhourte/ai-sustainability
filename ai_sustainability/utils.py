@@ -9,6 +9,9 @@ method:
 """
 
 
+from typing import Tuple
+
+
 def check_if_name_ok(text: str) -> tuple:
     """
     Check if there is a special character in the name
@@ -42,3 +45,14 @@ def sanitize_text_input(text: str) -> str:
     """
     text = text.replace('"', '\\"')
     return text.replace("'", "\\'")
+
+
+def select_n_best_ais(nb_ai: int, list_ai_coef: list[Tuple[str, int]]) -> list[str]:
+    list_ai_coef.sort(key=lambda x: x[1], reverse=True)
+    print(list_ai_coef)
+    list_best_ais: list[str] = []
+    for i in range(nb_ai):
+        best_ai = list_ai_coef.pop(1)
+        if best_ai[1] > 0:
+            list_best_ais.append(best_ai[0])
+    return list_best_ais

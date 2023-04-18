@@ -3,7 +3,9 @@ This file is used to show the From page
 """
 import streamlit as st
 
-from ai_sustainability.package_user_interface.classes.page_form import FormStreamlit
+from ai_sustainability.package_user_interface.pages_elements.page_form import (
+    FormStreamlit,
+)
 from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 

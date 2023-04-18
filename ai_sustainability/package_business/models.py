@@ -21,6 +21,8 @@ from typing import NewType
 
 import numpy as np
 
+from ai_sustainability.utils import select_n_best_ais
+
 Username = NewType("Username", str)
 Query = NewType("Query", str)
 Feedback = NewType("Feedback", str)
@@ -89,8 +91,8 @@ class Form:
     """Dataclass corresponding to a Form completed by a user"""
 
     username: Username
-    form_name: str
     question_list: list[Question]
+    form_name: str = ""
     already_completed: bool = False
     modif_crypted: bool = False
 
@@ -116,6 +118,8 @@ class Form:
         # /!\ hard code for modif_crypted here :
         if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
             self.modif_crypted = True
+        else:
+            self.modif_crypted = False
 
     def add_previous_answers(self, answers: AnswersList) -> None:
         self.question_list[-1].answers_choosen = answers
@@ -147,6 +151,4 @@ class Form:
         list_bests_ais = []
         for index, ai_name in enumerate(list_ai):
             list_bests_ais.append((ai_name, coef_ai[index]))
-        list_bests_ais.sort(key=lambda x: x[1], reverse=True)
-        return []  # TODO change here to got the good ais
-        return [x[0] for x in list_bests_ais][:nb_ai]
+        return select_n_best_ais(nb_ai, list_bests_ais)

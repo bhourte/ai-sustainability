@@ -1,8 +1,7 @@
 """
-Class which contains the form composed of the different questions/answers
-Streamlit class
+File used to show a Form
 """
-from typing import Optional
+from typing import Optional, Tuple
 
 import streamlit as st
 
@@ -12,10 +11,8 @@ from ai_sustainability.package_business.models import (
     AnswersList,
     Form,
     Question,
+    Username,
     get_end_answer,
-)
-from ai_sustainability.package_user_interface.utils_streamlit import (
-    check_user_connection,
 )
 from ai_sustainability.utils import check_if_name_ok, sanitize_text_input
 
@@ -26,30 +23,24 @@ INPUT_FORM_TEXT = "Give a name to your form here"
 WARNING_FORM_ALREADY_EXIST = "You already have a form with this name, please pick an other name or change your previous form in the historic page."
 
 
-class FormStreamlit:
+class FormRender:
     """
-    Class used to show all the streamlit UI for the Form page
+    Class used to show a Form in any page
 
     Methods :
         - __init__ : initialise the UI and check if the user is connected
-        - show_question : select with methode use in function of the question label
+        - ask_question_user : select with methode use in function of the question label
         - show_open_question : show a Q_open question
         - show_qcm_question : show a Q_QCM and Q_QCM_Bool question
         - show_qrm_question : show a Q_QRM question
-        - get_proposition_list : return a list[str] with all proposition of a question
-        - check_name
-        - input_form_name
-        - error_name_already_taken
-        - show_submission_button
         - set_locked : lock all the question of the form
-        - show_best_ai
         - get_all_questions_and_answers
-        - input_form_name_and_check
+        - render
     """
 
-    def __init__(self, app: Application) -> None:
+    def __init__(self, username: Username, app: Application) -> None:
         self.app = app
-        self.username = check_user_connection()
+        self.username = username
 
     @property
     def locked(self) -> bool:
@@ -109,7 +100,7 @@ class FormStreamlit:
         if previous_answers and len(previous_answers) > 1:
             raise ValueError("A previous Answer of a QCM question can not have multiples values")
         previous_answer = previous_answers[0] if previous_answers else None
-        options = ["<Select an option>"] + self.get_answers_text_list(question)
+        options = ["<Select an option>"] + [answer.text for answer in question.answers]
         # If it has to be auto-completed before
         previous_index = options.index(previous_answer.text) if previous_answer is not None else 0
         # We show the question selectbox
@@ -136,7 +127,7 @@ class FormStreamlit:
         previous_answers_text_list = [previous_answer.text for previous_answer in previous_answers or []]
         answers_text_list = st.multiselect(
             label=question.text,
-            options=self.get_answers_text_list(question),
+            options=[answer.text for answer in question.answers],
             default=previous_answers_text_list,
             help=question.help_text,
             disabled=self.locked,
@@ -148,60 +139,6 @@ class FormStreamlit:
             if answer.text in answers_text_list:
                 list_answers.append(answer)
         return list_answers
-
-    def get_answers_text_list(self, question: Question) -> list[str]:
-        return [answer.text for answer in question.answers]
-
-    def check_name(self, form_name: str) -> str:
-        dash, char = check_if_name_ok(form_name)
-        if dash:
-            st.warning(f"Please don't use the {char} character in your form name")
-            return ""
-        return sanitize_text_input(form_name)
-
-    def show_input_form_name(self, previous_answer="") -> str:
-        text = EDIT_FORM_TEXT if previous_answer else INPUT_FORM_TEXT
-        form_name = st.text_input(text, previous_answer, disabled=self.locked)
-        return self.check_name(form_name)
-
-    def check_name_already_taken(self, form_name: str) -> bool:
-        if st.session_state.last_form_name != form_name:
-            st.warning(WARNING_FORM_ALREADY_EXIST)
-            return True
-        return False
-
-    def set_locked(self) -> None:
-        self.locked = True
-
-    def show_submission_button(self) -> bool:
-        if st.button("Submit", on_click=self.set_locked, disabled=self.locked):
-            st.write("Answers saved")
-            st.session_state.last_form_name = None
-            return True
-        return False
-
-    def show_best_ai(self, list_bests_ais: list[str]) -> None:
-        """
-            Method used to show the n best AI obtained after the user has completed the Form
-            The number of AI choosen is based on the nbai wanted by the user and
-            the maximum of available AI for the use of the user
-            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
-
-        Parameters:
-            - list_bests_ais (list): list of the n best AI
-        """
-        if not list_bests_ais:  # If no AI corresponding the the choices
-            st.subheader(
-                "There is no AI corresponding to your request, please make other choices in the form", anchor=None
-            )
-            return
-
-        st.subheader(
-            f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
-            anchor=None,
-        )
-        for index, best_ai in enumerate(list_bests_ais):
-            st.caption(f"{index + 1}) {best_ai}")
 
     def get_all_questions_and_answers(self, form: Optional[Form] = None) -> tuple[Form, bool]:
         """
@@ -227,6 +164,19 @@ class FormStreamlit:
                 form.add_answers(selected_answer, question_number)
         return form, True
 
+    def render_as_text(self, form: Form) -> None:
+        """
+        Show a previous answered question with the admin view
+        """
+        actual_question = 0
+        while form.question_list[actual_question].type != "end":
+            answers = ""
+            for previous_answer in form.question_list[actual_question].answers_choosen:
+                answers += f"{previous_answer.text} <br>"
+            st.subheader(f"{form.question_list[actual_question].text} :")
+            st.caption(answers, unsafe_allow_html=True)
+            actual_question += 1
+
     def input_form_name_and_check(self, previous_name: str = "") -> tuple[str, bool]:
         """
         Function used to show a box where the user can give a name to the form and check if the name is incorrect
@@ -239,17 +189,29 @@ class FormStreamlit:
                 return "", True
         return form_name, False
 
-    def render(self) -> None:
-        form, is_ended = self.get_all_questions_and_answers()
-        if not is_ended:
-            return
-        form_name, form_name_incorrect = self.input_form_name_and_check()
-        if form_name_incorrect:
-            return
-        form.set_name(form_name)
-        form.set_username(self.username)
+    def check_name(self, form_name: str) -> str:
+        dash, char = check_if_name_ok(form_name)
+        if dash:
+            st.warning(f"Please don't use the {char} character in your form name")
+            return ""
+        return sanitize_text_input(form_name)
 
-        list_bests_ais = self.app.calcul_best_ais(form)
-        if self.show_submission_button():  # show the submission button and return True if it's clicked
-            self.show_best_ai(list_bests_ais)
-            self.app.save_answers(form, list_bests_ais)
+    def show_input_form_name(self, previous_answer="") -> str:
+        text = EDIT_FORM_TEXT if previous_answer else INPUT_FORM_TEXT
+        form_name = st.text_input(text, previous_answer, disabled=self.locked)
+        return self.check_name(form_name)
+
+    def check_name_already_taken(self, form_name: str) -> bool:
+        if st.session_state.last_form_name != form_name:
+            st.warning(WARNING_FORM_ALREADY_EXIST)
+            return True
+        return False
+
+    def render(self, form: Optional[Form] = None) -> Tuple[Optional[Form], str]:
+        form, is_ended = self.get_all_questions_and_answers(form)
+        if not is_ended:
+            return None, ""
+        form_name, form_name_incorrect = self.input_form_name_and_check(form.form_name)
+        if form_name_incorrect:
+            return None, ""
+        return form, form_name

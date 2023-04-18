@@ -4,6 +4,7 @@ Streamlit class
 """
 import plotly.graph_objects as go
 import streamlit as st
+from decouple import config
 
 from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import AnswersStats
@@ -38,7 +39,7 @@ class StatisticPage:
         self.display_statistic_ais()  # Don't do anything for now
 
     def check_if_admin(self, username: str) -> bool:
-        if username != "Admin":
+        if username != config("ADMIN_USERNAME"):
             st.write("You are not an Admin")
             st.write("You can't access to this page")
             return False
