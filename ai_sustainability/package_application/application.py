@@ -31,7 +31,6 @@ class Application:
         - check_user_exist
         - check_form_exist
         - save_answers
-        - change_answers
         - save_feedback
     """
 

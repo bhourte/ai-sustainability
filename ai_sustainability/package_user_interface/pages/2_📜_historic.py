@@ -1,4 +1,3 @@
-# TODO regler bug quand on ajoute une option sur la derniere question
 """
 This file is used to show the Historic page
 """

@@ -7,12 +7,12 @@ New models :
     - Query
     - Feedback
     - UserAnswers
-    - AnswersList
+    - AnswersStats
   Dataclass :
-    - Proposition
+    - Answer
     - Question
     - UserFeedback
-    - SelectedEdge
+    - Form
 """
 
 import math
@@ -128,6 +128,10 @@ class Form:
             self.modif_crypted = True
 
     def check_changes(self, answers: AnswersList, question_number: int) -> bool:
+        if len(answers) != len(self.question_list[question_number - 1].answers_choosen):
+            print("ICIIIIIIIIIIIIIIIIIIIII")
+            self.already_completed = False
+            return True
         for index, answer in enumerate(answers):
             if answer.text != self.question_list[question_number - 1].answers_choosen[index].text:
                 self.already_completed = False

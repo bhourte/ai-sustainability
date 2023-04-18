@@ -161,6 +161,7 @@ class FormRender:
                 return form, False
             keep_going = actual_question.type != "end"
             if keep_going:
+                print(selected_answer)
                 form.add_answers(selected_answer, question_number)
         return form, True
 
