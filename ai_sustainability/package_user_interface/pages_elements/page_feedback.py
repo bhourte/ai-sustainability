@@ -5,10 +5,10 @@ Streamlit class
 import streamlit as st
 from decouple import config
 
-from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import Feedback, UserFeedback, Username
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
+    get_application,
 )
 from ai_sustainability.utils import sanitize_text_input
 
@@ -27,9 +27,8 @@ class FeedbackPage:
         - retrieve_feedback
     """
 
-    def __init__(self, app: Application) -> None:
-        self.app = app
-        st.title("💬Feedback")
+    def __init__(self) -> None:
+        self.app = get_application()
         self.username = check_user_connection()
         st.session_state.clicked = False
 

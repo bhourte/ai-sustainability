@@ -124,7 +124,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_previous_form(self, username: Username, selected_form_name: str) -> Form:
+    def retrieve_previous_form(self, username: Username, selected_form_name: str) -> Form:
         """
         Get a Form
 

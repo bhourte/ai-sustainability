@@ -28,8 +28,8 @@ class Application:
         - get_previous_form
         - get_all_feedbacks
         - get_nb_selected_edge_stats
-        - check_user_exist
-        - check_form_exist
+        - user_exist
+        - form_exist
         - save_answers
         - save_feedback
     """
@@ -39,23 +39,20 @@ class Application:
 
     def get_next_question(self, form: Form, question_number: int) -> Question:
         """
-        Get the id of the next question
+        Get the next question
 
         Parameters :
-            - answer : all answers given by the user for the question
+            - form : the actual Form used by the user
+            - <uestion_number
 
         Return :
-            - a Question corresponding to the next question according to the actual_question and answer provided
+            - a Question corresponding to the next question according to the answers given in the Form
         """
         return self.database.get_next_question(form, question_number)
 
     def calcul_best_ais(self, form: Form) -> list[str]:
         """
         Calculate the name best AI to use for the user
-
-        Parameters:
-            - nb_ai (int): number of AI to return
-            - answers (list): list of the answers of the user
         """
         list_ai = self.database.get_all_ais()  # We get all existing AIs
         nb_ai = int(config("NBEST_AI"))
@@ -81,9 +78,9 @@ class Application:
 
     def get_previous_form(self, username: Username, selected_form: str) -> Form:
         """
-        Get the list of answers of a form
+        Get a already completed Form stord in the DB
         """
-        return self.database.get_previous_form(username, selected_form)
+        return self.database.retrieve_previous_form(username, selected_form)
 
     def get_all_feedbacks(self) -> list[UserFeedback]:
         """
@@ -99,11 +96,14 @@ class Application:
         return self.database.get_nb_selected_edge()
 
     def user_exist(self, username: Username) -> bool:
+        """
+        Check if a User exist for a specific user in the database
+        """
         return self.database.check_node_exist(username)
 
-    def check_form_exist(self, username: Username, form_name: str) -> bool:
+    def form_exist(self, username: Username, form_name: str) -> bool:
         """
-        Check if a form exist for a specific user in the database
+        Check if a Form exist for a specific user in the database
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
@@ -112,10 +112,9 @@ class Application:
         Save the answers of a user in the database
 
         Parameters:
-            - username (str): username of the user
-            - form_name (str): name of the form
-            - answers (list): list of the answers of the user
-            - list_best_ai (list[str]): list of the n best AIs selected for this form
+            - form : the Form to save in the DB
+            - list_best_ai : list of the n best AIs selected for this form
+            - new_form_name : the name of the form (if not "", we want to update the Form present in the database)
 
         Return:
             - bool: True if the answers are well saved, False if the form already exist
@@ -127,7 +126,7 @@ class Application:
         Save a feedback from a user in the database
 
         Parameters :
-            - username : the username of the user (str)
-            - feedback : the feedback given by the user (str)
+            - username : the username of the user
+            - feedback : the feedback given by the user
         """
         self.database.save_feedback(username, feedback)

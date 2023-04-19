@@ -6,10 +6,10 @@ import plotly.graph_objects as go
 import streamlit as st
 from decouple import config
 
-from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import AnswersStats
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
+    get_application,
 )
 
 
@@ -25,9 +25,8 @@ class StatisticPage:
         - display_statistic_ais : show stats based on the AIs (not implemented yet)
     """
 
-    def __init__(self, app: Application) -> None:
-        self.app = app
-        st.title("📊Statistic")
+    def __init__(self) -> None:
+        self.app = get_application()
         self.username = check_user_connection()
         st.session_state.clicked = False
 

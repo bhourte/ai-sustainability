@@ -7,7 +7,6 @@ from decouple import config
 from ai_sustainability.package_user_interface.pages_elements.page_historic import (
     HistoricStreamlit,
 )
-from ai_sustainability.package_user_interface.utils_streamlit import get_application
 
 
 def main() -> None:
@@ -17,8 +16,7 @@ def main() -> None:
     """
     st.set_page_config(page_title="Historic Page", page_icon="📜")
     st.title("📜Historic")
-    app = get_application()
-    st_historic = HistoricStreamlit(app)
+    st_historic = HistoricStreamlit()
     username = st_historic.username
     if not username:
         return

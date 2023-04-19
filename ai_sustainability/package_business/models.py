@@ -1,4 +1,3 @@
-# TODO regler le probleme avec les help_text (question + answers)
 """
 File with all dataclass and Type we use in the form application
 
@@ -71,11 +70,13 @@ class Question:
     answers_choosen: AnswersList = field(default_factory=AnswersList)
 
     def set_answers(self, answers_list: list[Answer]) -> None:
-        """Check that 2 Answer does not have the same text and set self.answers"""
+        """Check that 2 Answer does not have the same text and set self.answers and self.help_text"""
         for i, answer_i in enumerate(answers_list):
             for j in range(i + 1, len(answers_list)):
                 if answer_i.text == answers_list[j].text:
                     raise ValueError("A Question can not have 2 Answer with the same text")
+            if answer_i.help_text:
+                self.help_text += f"  \n{answer_i.text} : {answer_i.help_text}"
         self.answers = answers_list
 
 
@@ -130,7 +131,6 @@ class Form:
 
     def check_changes(self, answers: AnswersList, question_number: int) -> bool:
         if len(answers) != len(self.question_list[question_number - 1].answers_choosen):
-            print("ICIIIIIIIIIIIIIIIIIIIII")
             self.already_completed = False
             return True
         for index, answer in enumerate(answers):

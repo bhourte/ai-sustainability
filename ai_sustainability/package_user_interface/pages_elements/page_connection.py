@@ -21,8 +21,7 @@ class ConnectionStreamlit:
     _username: Username = Username("")
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Connection Page", page_icon="👤")
-        st.title("👤Connection")
+        pass
 
     def setup_username(self) -> None:
         username = Username(

@@ -50,7 +50,7 @@ def sanitize_text_input(text: str) -> str:
 def select_n_best_ais(nb_ai: int, list_ai_coef: list[Tuple[str, int]]) -> list[str]:
     list_ai_coef.sort(key=lambda x: x[1], reverse=True)
     list_best_ais: list[str] = []
-    for i in range(nb_ai):
+    for _ in range(nb_ai):
         best_ai = list_ai_coef.pop(1)
         if best_ai[1] > 0:
             list_best_ais.append(best_ai[0])

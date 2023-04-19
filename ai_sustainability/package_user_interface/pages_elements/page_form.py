@@ -4,12 +4,12 @@ Streamlit class
 """
 import streamlit as st
 
-from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_user_interface.pages_elements.form_element import (
     FormRender,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
+    get_application,
 )
 
 
@@ -25,10 +25,10 @@ class FormStreamlit:
         - render
     """
 
-    def __init__(self, app: Application) -> None:
-        self.app = app
+    def __init__(self) -> None:
+        self.app = get_application()
         self.username = check_user_connection()
-        self.form_ui = FormRender(self.username, app)
+        self.form_ui = FormRender(self.username, self.app)
 
     def set_locked(self) -> None:
         self.form_ui.locked = True

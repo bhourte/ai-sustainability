@@ -4,14 +4,15 @@ Streamlit class
 inherit from class_form
 """
 import streamlit as st
+from decouple import config
 
-from ai_sustainability.package_application.application import Application
 from ai_sustainability.package_business.models import Username
 from ai_sustainability.package_user_interface.pages_elements.form_element import (
     FormRender,
 )
 from ai_sustainability.package_user_interface.utils_streamlit import (
     check_user_connection,
+    get_application,
 )
 
 
@@ -24,13 +25,16 @@ class HistoricStreamlit:
         - show_choice_user : show a select box with all users
         - show_choice_form : show a select box with all forms of a user
         - show_submission_button : display a button where the user can save the changes made in the form
-        - show_question_as_admin : show a previous answered question with the admin view
+        - show_best_ai : show the n best AIs
+        - render_as_user : show a editable Form already completed
+        - render_as_admin : show a previous answered Form with the admin view
     """
 
-    def __init__(self, app: Application) -> None:
-        self.app = app
+    def __init__(self) -> None:
+        self.app = get_application()
         self.username = check_user_connection()
-        self.form_ui = FormRender(self.username, app)
+        self.form_ui = FormRender(self.username, self.app)
+        st.session_state.clicked = False
 
     def show_choice_user(self, list_username: list[Username]) -> Username:
         """
@@ -41,18 +45,18 @@ class HistoricStreamlit:
         answer = Username(str(st.selectbox(label=question, options=list_username, index=0)))
         return answer if answer != "<Select a user>" else Username("")
 
-    def show_choice_form(self, list_answered_form: list[str], is_admin: bool = False) -> str:
+    def show_choice_form(self, list_answered_form_name: list[str]) -> str:
         """
         Show a select box with all forms of a user
         """
-        list_form_name = ["<Select a form>"] + list_answered_form
-        question = "Select a form" if is_admin else "Select the previous form you want to see again or edit"
-        answer = str(st.selectbox(label=question, options=list_form_name, index=0))
-        if answer == "<Select a form>":
-            # we put that here, so it's executed only one time and the form is not blocked by the session_state
-            st.session_state.clicked = False
-            return ""
-        return answer
+        list_form_name = ["<Select a form>"] + list_answered_form_name
+        question = (
+            "Select a form"
+            if self.username == config("ADMIN_USERNAME")
+            else "Select the previous form you want to see again or edit"
+        )
+        selected_form_name = str(st.selectbox(label=question, options=list_form_name, index=0))
+        return selected_form_name if selected_form_name != "<Select a form>" else ""
 
     def show_submission_button(self) -> bool:
         """
@@ -64,7 +68,7 @@ class HistoricStreamlit:
             return True
         return False
 
-    def show_best_ai(self, list_bests_ais: list[str]) -> None:
+    def show_best_ai(self, list_bests_ais: list[str]) -> None:  # TODO voir si on la laisse ici ou dans form_ui
         """
             Method used to show the n best AI obtained after the user has completed the Form
             The number of AI choosen is based on the nbai wanted by the user and
@@ -89,7 +93,7 @@ class HistoricStreamlit:
 
     def render_as_user(self, username: Username) -> None:
         """
-        Function used to show a form with the User view
+        Function used to select and show a form with the User view
         """
         list_answered_form = self.app.get_all_forms_names(username)
         selected_form = self.show_choice_form(list_answered_form)
@@ -105,13 +109,12 @@ class HistoricStreamlit:
 
         list_bests_ais = self.app.calcul_best_ais(new_form)
         self.show_best_ai(list_bests_ais)
-        print(new_form.question_list)
         if self.show_submission_button():
             self.app.save_answers(new_form, list_bests_ais, new_form_name)
 
     def render_as_admin(self) -> None:
         """
-        Function used to show a form with the Admin view
+        Function used to select and show a form with the Admin view
         """
         list_username = self.app.get_all_users()
 
@@ -122,7 +125,7 @@ class HistoricStreamlit:
 
         # The admin select a form of the choosen user
         list_answered_form = self.app.get_all_forms_names(choosen_user)
-        selected_form_name = self.show_choice_form(list_answered_form, is_admin=True)
+        selected_form_name = self.show_choice_form(list_answered_form)
         if not selected_form_name:  # if no form selected, don't show the rest
             return
 
