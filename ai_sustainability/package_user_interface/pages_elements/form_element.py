@@ -2,7 +2,6 @@
 File used to show a Form
 """
 from typing import Optional, Tuple
-from uu import decode
 
 import streamlit as st
 from decouple import config
