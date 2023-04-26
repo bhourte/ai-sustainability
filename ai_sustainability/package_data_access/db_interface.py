@@ -90,7 +90,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def check_form_exist(self, username: str, form_name: str) -> bool:
+    def check_form_exist(self, username: Username, form_name: str) -> bool:
         """
         Check if a form exist in the database
 

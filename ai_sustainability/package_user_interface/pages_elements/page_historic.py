@@ -68,29 +68,6 @@ class HistoricStreamlit:
             return True
         return False
 
-    def show_best_ai(self, list_bests_ais: list[str]) -> None:  # TODO voir si on la laisse ici ou dans form_ui
-        """
-            Method used to show the n best AI obtained after the user has completed the Form
-            The number of AI choosen is based on the nbai wanted by the user and
-            the maximum of available AI for the use of the user
-            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
-
-        Parameters:
-            - list_bests_ais (list): list of the n best AI
-        """
-        if not list_bests_ais:  # If no AI corresponding the the choices
-            st.subheader(
-                "There is no AI corresponding to your request, please make other choices in the form", anchor=None
-            )
-            return
-
-        st.subheader(
-            f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
-            anchor=None,
-        )
-        for index, best_ai in enumerate(list_bests_ais):
-            st.caption(f"{index + 1}) {best_ai}")
-
     def render_as_user(self, username: Username) -> None:
         """
         Function used to select and show a form with the User view
@@ -108,7 +85,7 @@ class HistoricStreamlit:
             return
 
         list_bests_ais = self.app.calcul_best_ais(new_form)
-        self.show_best_ai(list_bests_ais)
+        self.form_ui.show_best_ai(list_bests_ais)
         if self.show_submission_button():
             self.app.save_answers(new_form, list_bests_ais, new_form_name)
 
@@ -134,4 +111,12 @@ class HistoricStreamlit:
         self.form_ui.render_as_text(previous_form_answers)
 
         list_bests_ais = self.app.get_best_ais(choosen_user, selected_form_name)
-        self.show_best_ai(list_bests_ais)
+        self.form_ui.show_best_ai(list_bests_ais)
+
+    def render(self) -> None:
+        # Connected as an Admin
+        if self.username == config("ADMIN_USERNAME"):
+            self.render_as_admin()
+        # Connected as an User
+        else:
+            self.render_as_user(self.username)

@@ -48,7 +48,7 @@ class Business:
     def calcul_best_ais(self, nb_ai: int, list_ai: list[str], form: Form) -> list[str]:  # TODO put this in Form
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for question in form.question_list:
-            for answer in question.answers_choosen:
+            for answer in question.choosen_answers:
                 if answer.list_coef:
                     raw_coef_ai = np.multiply(raw_coef_ai, np.array(answer.list_coef))
         # we put all NaN value to -1

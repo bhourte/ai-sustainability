@@ -17,11 +17,11 @@ New models :
 
 import math
 from dataclasses import dataclass, field
-from typing import NewType
+from typing import NewType, Optional
 
 import numpy as np
 
-from ai_sustainability.utils import select_n_best_ais
+from ai_sustainability.utils import get_n_best
 
 Username = NewType("Username", str)
 Query = NewType("Query", str)
@@ -39,19 +39,25 @@ class Answer:
     list_coef: list[float] = field(default_factory=list)
 
     @property
-    def question_in_id(self) -> str:
+    def _question_in_id(self) -> str:
         return self.answer_id.split("-")[0]
 
     @property
-    def question_out_id(self) -> str:
+    def _question_out_id(self) -> str:
         return self.answer_id.split("-")[1]
 
     def __repr__(self) -> str:
-        return f"Q{self.question_in_id} to Q{self.question_out_id}"
+        return f"Q{self._question_in_id} to Q{self._question_out_id}"
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Answer):
+            if self.answer_id == other.answer_id or self.text == other.text:
+                return True
+        return False
 
-def get_end_answer() -> Answer:
-    return Answer(answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[])
+    @classmethod
+    def create_end_answer(cls) -> "Answer":
+        return Answer(answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[])
 
 
 AnswersList = list[Answer]  # List of answers selected by the user in QuestionAnswer propositions
@@ -64,20 +70,40 @@ class Question:
 
     question_id: str
     text: str
-    help_text: str
-    answers: list[Answer]
     type: str
-    answers_choosen: AnswersList = field(default_factory=AnswersList)
+    _possible_answers: list[Answer] = field(default_factory=AnswersList)
+    choosen_answers: AnswersList = field(default_factory=AnswersList)
 
-    def set_answers(self, answers_list: list[Answer]) -> None:
-        """Check that 2 Answer does not have the same text and set self.answers and self.help_text"""
+    @property
+    def help_text(self) -> str:
+        return self._help_text + "  \n".join(
+            f"{answer_i.text} : {answer_i.help_text}" for answer_i in self.possible_answers
+        )
+
+    @help_text.setter
+    def help_text(self, value: str) -> None:
+        self._help_text = value
+
+    @property
+    def possible_answers(self) -> list[Answer]:
+        return self._possible_answers
+
+    @possible_answers.setter
+    def possible_answers(self, answers_list: list[Answer]) -> None:
+        """Check that 2 Answer does not have the same text and set self.answers"""
         for i, answer_i in enumerate(answers_list):
             for j in range(i + 1, len(answers_list)):
-                if answer_i.text == answers_list[j].text:
+                if answer_i == answers_list[j]:
                     raise ValueError("A Question can not have 2 Answer with the same text")
-            if answer_i.help_text:
-                self.help_text += f"  \n{answer_i.text} : {answer_i.help_text}"
-        self.answers = answers_list
+        self._possible_answers = answers_list
+
+    def maj_answers_crypted(self) -> None:
+        """Only keep answers with modif_crypted == false"""
+        new_answers_list: list[Answer] = []
+        for answer in self.possible_answers:
+            if not answer.modif_crypted:
+                new_answers_list.append(answer)
+        self.possible_answers = new_answers_list
 
 
 @dataclass
@@ -92,63 +118,53 @@ class UserFeedback:
 class Form:
     """Dataclass corresponding to a Form completed by a user"""
 
-    username: Username
-    question_list: list[Question]
+    # TODO faire en sorte que l'on puisse creer un form depuis la db sans passer par les methodes ci-dessous
+
+    username: Optional[Username] = None
+    question_list: list[Question] = field(default_factory=list)
     form_name: str = ""
     already_completed: bool = False
-    modif_crypted: bool = False
 
-    def __init__(self) -> None:
-        self.question_list = []
+    @property
+    def last_question(self) -> Question:
+        return self.question_list[-1]
+
+    @property
+    def modif_crypted(self) -> bool:
+        if not self.question_list or len(self.question_list) < 2:
+            return False
+        return self.question_list[1].choosen_answers[0].text == "Yes"
 
     def add_question(self, question: Question) -> None:
         if self.modif_crypted:  # We only take the proposition with modif_crytpted property set to false
-            list_proposition = []
-            for i in question.answers:
-                if not i.modif_crypted:
-                    list_proposition.append(i)
-            question.answers = list_proposition
+            question.maj_answers_crypted()
         self.question_list.append(question)
 
     def add_answers(self, answers: AnswersList, question_number: int) -> None:
         if self.already_completed:
             if not self.check_changes(answers, question_number):
                 return
-        if not self.already_completed and question_number < len(self.question_list):
+        is_not_last_question = question_number < len(self.question_list)
+        if not self.already_completed and is_not_last_question:
             self.question_list = self.question_list[:question_number]
-        self.question_list[-1].answers_choosen = answers
-        # /!\ hard code for modif_crypted here :
-        if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
-            self.modif_crypted = True
-        else:
-            self.modif_crypted = False
-
-    def add_previous_answers(self, answers: AnswersList) -> None:
-        self.question_list[-1].answers_choosen = answers
-        # /!\ hard code for modif_crypted here :
-        if len(self.question_list) > 1 and self.question_list[1].answers_choosen[0].text == "Yes":
-            self.modif_crypted = True
+        self.last_question.choosen_answers = answers
 
     def check_changes(self, answers: AnswersList, question_number: int) -> bool:
-        if len(answers) != len(self.question_list[question_number - 1].answers_choosen):
+        # TODO put this in Question class (.set_answers), et/ou check if new answers (à voir si on le fait, semble tres complexe)
+        question = self.question_list[question_number - 1]
+        if len(answers) != len(question.choosen_answers):
             self.already_completed = False
             return True
         for index, answer in enumerate(answers):
-            if answer.text != self.question_list[question_number - 1].answers_choosen[index].text:
+            if answer.text != question.choosen_answers[index].text:
                 self.already_completed = False
                 return True
         return False
 
-    def set_name(self, form_name: str) -> None:
-        self.form_name = form_name
-
-    def set_username(self, usename: Username) -> None:
-        self.username = usename
-
     def calcul_best_ais(self, nb_ai: int, list_ai: list[str]) -> list[str]:
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for question in self.question_list:
-            for answer in question.answers_choosen:
+            for answer in question.choosen_answers:
                 if answer.list_coef:
                     raw_coef_ai = np.multiply(raw_coef_ai, np.array(answer.list_coef))
         # we put all NaN value to -1
@@ -156,4 +172,4 @@ class Form:
         list_bests_ais = []
         for index, ai_name in enumerate(list_ai):
             list_bests_ais.append((ai_name, coef_ai[index]))
-        return select_n_best_ais(nb_ai, list_bests_ais)
+        return get_n_best(nb_ai, list_bests_ais)

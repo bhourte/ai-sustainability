@@ -17,16 +17,12 @@ def main() -> None:
     st.set_page_config(page_title="Historic Page", page_icon="📜")
     st.title("📜Historic")
     st_historic = HistoricStreamlit()
+
     username = st_historic.username
     if not username:
         return
 
-    # Connected as an User
-    if username != config("ADMIN_USERNAME"):
-        st_historic.render_as_user(username)
-    # Connected as an Admin
-    else:
-        st_historic.render_as_admin()
+    st_historic.render()
 
 
 if __name__ == "__main__":

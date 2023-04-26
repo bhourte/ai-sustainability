@@ -2,6 +2,7 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
+from typing import Optional
 
 from decouple import config
 from gremlin_python import statics
@@ -81,7 +82,7 @@ class DbConnection(DBInterface):
             query = Query(f"g.V('{actual_question.question_id}').out()")
         elif actual_question.type in ("Q_QCM", "Q_QCM_Bool"):
             query = Query(
-                f"g.V('{actual_question.question_id}').outE().has('text','{actual_question.answers_choosen[0].text}').inV()"
+                f"g.V('{actual_question.question_id}').outE().has('text','{actual_question.choosen_answers[0].text}').inV()"
             )
         elif actual_question.type == END_TYPE:
             return form.question_list[-1]
@@ -91,13 +92,12 @@ class DbConnection(DBInterface):
         new_question = Question(
             question_id=next_question["id"],
             text=next_question["properties"]["text"][0]["value"] if "text" in next_question["properties"] else "",
-            help_text=next_question["properties"]["help text"][0]["value"]
-            if "help text" in next_question["properties"]
-            else "",
-            answers=[],
             type=next_question["label"],
         )
-        new_question.set_answers(self.get_propositions(new_question))
+        new_question.help_text = (
+            next_question["properties"]["help text"][0]["value"] if "help text" in next_question["properties"] else ""
+        )
+        new_question.possible_answers = self.get_propositions(new_question)
         form.add_question(new_question)
         return form.question_list[-1]
 
@@ -124,10 +124,12 @@ class DbConnection(DBInterface):
             )
         return answers_list
 
-    def create_user_node(self, username: Username) -> None:
+    def create_user_node(self, username: Optional[Username]) -> None:
         """
         Create a User node in the database
         """
+        if username is None:
+            return
         query = Query(f"g.addV('user').property('partitionKey', 'Answer').property('id', '{username}')")
         self.run_gremlin_query(query)
 
@@ -168,10 +170,12 @@ class DbConnection(DBInterface):
         """
         return self.check_node_exist(f"feedback{username}")
 
-    def check_node_exist(self, node_id: str) -> bool:
+    def check_node_exist(self, node_id: Optional[str]) -> bool:
         """
         Check if a node exists in the database
         """
+        if node_id is None or not node_id:
+            return False
         query = Query(f"g.V('{node_id}')")
         return bool(self.run_gremlin_query(query))
 
@@ -211,7 +215,7 @@ class DbConnection(DBInterface):
         """
         if new_form_name:
             self.drop_form(form)
-            form.set_name(new_form_name)
+            form.form_name = new_form_name
         if not self.check_node_exist(form.username):
             self.create_user_node(form.username)
         if self.check_form_exist(form.username, form.form_name):
@@ -224,11 +228,13 @@ class DbConnection(DBInterface):
             next_new_node_name = f"{form.username}-answer{form.question_list[i+1].question_id}-{form.form_name}"
             if not self.check_node_exist(next_new_node_name):
                 self.create_answer_node(form.question_list[i + 1], next_new_node_name)
-            self.create_answer_edges(new_node_name, next_new_node_name, form.question_list[i].answers_choosen)
+            self.create_answer_edges(new_node_name, next_new_node_name, form.question_list[i].choosen_answers)
             i += 1
         # link between the User node and the first answer node
         first_node_id = f"{form.username}-answer{FIRST_NODE_ID}-{form.form_name}"
-        self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(best_ais)[1:-1]}')"))
+        string_best_ais = ", ".join(best_ais)
+        print(str(string_best_ais))
+        self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(string_best_ais)[1:-1]}')"))
         self.run_gremlin_query(
             Query(
                 f"g.V('{form.username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')"
@@ -236,10 +242,12 @@ class DbConnection(DBInterface):
         )
         return True
 
-    def check_form_exist(self, username: str, form_name: str) -> bool:
+    def check_form_exist(self, username: Optional[Username], form_name: str) -> bool:
         """
         Check if a Form exist in the database
         """
+        if username is None:
+            return False
         return self.check_node_exist(f"{username}-answer{FIRST_NODE_ID}-{form_name}")
 
     def create_answer_node(self, question: Question, new_node_id: str) -> None:
@@ -313,15 +321,15 @@ class DbConnection(DBInterface):
         Retrieve a already answered Form from the database
         """
         form = Form()
-        form.set_username(username)
-        form.set_name(selected_form_name)
+        form.username = username
+        form.form_name = selected_form_name
         form.already_completed = True
         node = f"{username}-answer{FIRST_NODE_ID}-{selected_form_name}"
         question_number = 0
         while self.get_node_label(node) != END_TYPE:
             self.get_next_question(form, question_number)
             answers = self.get_answers(node)
-            form.add_previous_answers(answers)
+            form.last_question.choosen_answers = answers
             node = self.run_gremlin_query(Query(f"g.V('{node}').outE().inV().id()"))[0]
             question_number += 1
         self.get_next_question(form, question_number)

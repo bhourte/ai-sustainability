@@ -47,11 +47,11 @@ def sanitize_text_input(text: str) -> str:
     return text.replace("'", "\\'")
 
 
-def select_n_best_ais(nb_ai: int, list_ai_coef: list[Tuple[str, int]]) -> list[str]:
-    list_ai_coef.sort(key=lambda x: x[1], reverse=True)
-    list_best_ais: list[str] = []
-    for _ in range(nb_ai):
-        best_ai = list_ai_coef.pop(1)
-        if best_ai[1] > 0:
-            list_best_ais.append(best_ai[0])
-    return list_best_ais
+def get_n_best(n_best: int, list_names_and_values: list[Tuple[str, int]]) -> list[str]:
+    """Method used to get the n_best higher value in a Tuple[name, value]"""
+    list_names_and_values.sort(key=lambda x: x[1], reverse=True)
+    best_name = []
+    for name, value in list_names_and_values:
+        if value > 0:
+            best_name.append(name)
+    return best_name[:n_best]

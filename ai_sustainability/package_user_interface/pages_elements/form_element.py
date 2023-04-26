@@ -1,7 +1,7 @@
 """
 File used to show a Form
 """
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 import streamlit as st
 from decouple import config
@@ -13,7 +13,6 @@ from ai_sustainability.package_business.models import (
     Form,
     Question,
     Username,
-    get_end_answer,
 )
 from ai_sustainability.utils import check_if_name_ok, sanitize_text_input
 
@@ -71,7 +70,7 @@ class FormRender:
         elif question.type == "Q_QRM":
             answers = self.show_qrm_question(question, previous_answers)
         elif question.type == END_TYPE:  # This is the end (of the form)
-            proposition_end = get_end_answer()
+            proposition_end = Answer.create_end_answer()
             return AnswersList([proposition_end])
         else:
             print("Error, question label no recognised")
@@ -86,7 +85,9 @@ class FormRender:
         if previous_answers and len(previous_answers) > 1:
             raise ValueError("A previous Answer of a open question can not have multiples values")
         previous_answer = (
-            previous_answers[0] if previous_answers else Answer(answer_id=question.answers[0].answer_id, text="")
+            previous_answers[0]
+            if previous_answers
+            else Answer(answer_id=question.possible_answers[0].answer_id, text="")
         )
         # We show the question text area
         answer_text = sanitize_text_input(
@@ -110,7 +111,7 @@ class FormRender:
         if previous_answers and len(previous_answers) > 1:
             raise ValueError("A previous Answer of a QCM question can not have multiples values")
         previous_answer = previous_answers[0] if previous_answers else None
-        options = ["<Select an option>"] + [answer.text for answer in question.answers]
+        options = ["<Select an option>"] + [answer.text for answer in question.possible_answers]
         # If it has to be auto-completed before
         previous_index = options.index(previous_answer.text) if previous_answer is not None else 0
         # We show the question selectbox
@@ -125,7 +126,7 @@ class FormRender:
         )
         if selected_answer_text == "<Select an option>":
             return None
-        for answer in question.answers:
+        for answer in question.possible_answers:
             if answer.text == selected_answer_text:
                 return AnswersList([answer])
         raise RuntimeError("A non-existing answer can not be selected.")
@@ -137,7 +138,7 @@ class FormRender:
         previous_answers_text_list = [previous_answer.text for previous_answer in previous_answers or []]
         answers_text_list = st.multiselect(
             label=question.text,
-            options=[answer.text for answer in question.answers],
+            options=[answer.text for answer in question.possible_answers],
             default=previous_answers_text_list,
             help=question.help_text,
             disabled=self.locked,
@@ -145,7 +146,7 @@ class FormRender:
         if not answers_text_list:
             return None
         list_answers = []
-        for answer in question.answers:
+        for answer in question.possible_answers:
             if answer.text in answers_text_list:
                 list_answers.append(answer)
         return list_answers
@@ -162,8 +163,8 @@ class FormRender:
             actual_question = self.app.get_next_question(form, question_number)
             previous_answer = (
                 None
-                if not form.question_list[question_number].answers_choosen
-                else form.question_list[question_number].answers_choosen
+                if not form.question_list[question_number].choosen_answers
+                else form.question_list[question_number].choosen_answers
             )
             question_number += 1
             selected_answer = self.ask_question_user(actual_question, previous_answer)
@@ -220,8 +221,31 @@ class FormRender:
         actual_question = 0
         while form.question_list[actual_question].type != END_TYPE:
             answers = ""
-            for previous_answer in form.question_list[actual_question].answers_choosen:
+            for previous_answer in form.question_list[actual_question].choosen_answers:
                 answers += f"{previous_answer.text} <br>"
             st.subheader(f"{form.question_list[actual_question].text} :")
             st.caption(answers, unsafe_allow_html=True)
             actual_question += 1
+
+    def show_best_ai(self, list_bests_ais: list[str]) -> None:
+        """
+            Method used to show the n best AI obtained after the user has completed the Form
+            The number of AI choosen is based on the nbai wanted by the user and
+            the maximum of available AI for the use of the user
+            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
+
+        Parameters:
+            - list_bests_ais (list): list of the n best AI
+        """
+        if not list_bests_ais:  # If no AI corresponding the the choices
+            st.subheader(
+                "There is no AI corresponding to your request, please make other choices in the form", anchor=None
+            )
+            return
+
+        st.subheader(
+            f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
+            anchor=None,
+        )
+        for index, best_ai in enumerate(list_bests_ais):
+            st.caption(f"{index + 1}) {best_ai}")
