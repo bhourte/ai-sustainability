@@ -202,6 +202,10 @@ if __name__ == "__main__":
     # db_gestion.run_gremlin_query("g.V().drop()")
     # db_gestion.run_gremlin_query("g.E().drop()")
     # db_gestion.create_script("../data.json", "../script.json")
-    # # db_gestion.create_script_with_weight("../data_weight.json", "../script_weight.json", "../Weight_matrix.xlsx")
-    db_gestion.import_graph("ai_sustainability/datas/script.json")
-    db_gestion.close()
+    # db_gestion.create_script_with_weight(
+    #     "ai_sustainability/datas/data.json",
+    #     "ai_sustainability/datas/script_weight.json",
+    #     "ai_sustainability/datas/Weight_matrix.xlsx",
+    # )
+    # db_gestion.import_graph("ai_sustainability/datas/script_weight.json")
+    # db_gestion.close()

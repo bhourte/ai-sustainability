@@ -118,8 +118,6 @@ class UserFeedback:
 class Form:
     """Dataclass corresponding to a Form completed by a user"""
 
-    # TODO faire en sorte que l'on puisse creer un form depuis la db sans passer par les methodes ci-dessous
-
     username: Optional[Username] = None
     question_list: list[Question] = field(default_factory=list)
     form_name: str = ""
@@ -150,7 +148,6 @@ class Form:
         self.last_question.choosen_answers = answers
 
     def check_changes(self, answers: AnswersList, question_number: int) -> bool:
-        # TODO put this in Question class (.set_answers), et/ou check if new answers (à voir si on le fait, semble tres complexe)
         question = self.question_list[question_number - 1]
         if len(answers) != len(question.choosen_answers):
             self.already_completed = False

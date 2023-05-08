@@ -1,7 +1,7 @@
 """
 This file contained all function used by the business part of our application
 
-THIS FILE IS USELESS NOW
+/!\ THIS FILE IS USELESS NOW /!\
 """
 
 import heapq
