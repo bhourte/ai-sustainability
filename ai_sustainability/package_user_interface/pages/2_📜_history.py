@@ -2,7 +2,6 @@
 This file is used to show the Historic page
 """
 import streamlit as st
-from decouple import config
 
 from ai_sustainability.package_user_interface.pages_elements.page_history import (
     HistoricStreamlit,
