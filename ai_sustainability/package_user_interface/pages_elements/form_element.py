@@ -3,6 +3,7 @@ File used to show a Form
 """
 from typing import Optional, Tuple
 
+import plotly.graph_objects as go
 import streamlit as st
 from decouple import config
 
@@ -227,7 +228,7 @@ class FormRender:
             st.caption(answers, unsafe_allow_html=True)
             actual_question += 1
 
-    def show_best_ai(self, list_bests_ais: list[str]) -> None:
+    def show_best_ai(self, list_bests_ais: list[Tuple[str, float]]|list[str]) -> None:
         """
             Method used to show the n best AI obtained after the user has completed the Form
             The number of AI choosen is based on the nbai wanted by the user and
@@ -249,3 +250,10 @@ class FormRender:
         )
         for index, best_ai in enumerate(list_bests_ais):
             st.caption(f"{index + 1}) {best_ai}" if isinstance(list_bests_ais[0], str) else f"{index + 1}) {best_ai[0]}")
+
+    def show_best_ai_graph(self, list_best_ais: list[Tuple[str, float]]) -> None:
+        if list_best_ais:
+            labels = [i[0] for i in list_best_ais]
+            values = [i[1] for i in list_best_ais]
+            fig = go.Figure(data=[go.Pie(labels=labels, values=values, hovertemplate="%{label}<br>Score: %{value:.2f}")])
+            st.plotly_chart(fig)

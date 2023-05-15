@@ -1,6 +1,9 @@
 """
 File with our Application class
 """
+
+from typing import Tuple
+
 from decouple import config
 
 from ai_sustainability.package_business.models import (
@@ -50,7 +53,7 @@ class Application:
         """
         return self.database.get_next_question(form, question_number)
 
-    def calcul_best_ais(self, form: Form) -> list[str]:
+    def calcul_best_ais(self, form: Form) -> list[Tuple[str, float]]:
         """
         Calculate the name best AI to use for the user
         """
@@ -107,7 +110,7 @@ class Application:
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
-    def save_answers(self, form: Form, list_best_ai: list[str], new_form_name: str = "") -> bool:
+    def save_answers(self, form: Form, list_best_ai: list[Tuple[str, float]], new_form_name: str = "") -> bool:
         """
         Save the answers of a user in the database
 

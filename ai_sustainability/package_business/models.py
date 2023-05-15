@@ -17,7 +17,7 @@ New models :
 
 import math
 from dataclasses import dataclass, field
-from typing import NewType, Optional
+from typing import NewType, Optional, Tuple
 
 import numpy as np
 
@@ -158,7 +158,7 @@ class Form:
                 return True
         return False
 
-    def calcul_best_ais(self, nb_ai: int, list_ai: list[str]) -> list[str]:
+    def calcul_best_ais(self, nb_ai: int, list_ai: list[str]) -> list[Tuple[str, float]]:
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for question in self.question_list:
             for answer in question.choosen_answers:

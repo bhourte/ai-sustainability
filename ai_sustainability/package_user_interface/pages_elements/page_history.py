@@ -86,6 +86,7 @@ class HistoricStreamlit:
 
         list_bests_ais = self.app.calcul_best_ais(new_form)
         self.form_ui.show_best_ai(list_bests_ais)
+        self.form_ui.show_best_ai_graph(list_bests_ais)
         if self.show_submission_button():
             self.app.save_answers(new_form, list_bests_ais, new_form_name)
 

@@ -50,6 +50,7 @@ class FormStreamlit:
         list_bests_ais = self.app.calcul_best_ais(form)
         if self.show_submission_button():  # show the submission button and return True if it's clicked
             self.form_ui.show_best_ai(list_bests_ais)
+            self.form_ui.show_best_ai_graph(list_bests_ais)
             self.app.save_answers(form, list_bests_ais)
 
 
