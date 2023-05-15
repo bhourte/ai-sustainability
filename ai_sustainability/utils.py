@@ -47,11 +47,11 @@ def sanitize_text_input(text: str) -> str:
     return text.replace("'", "\\'")
 
 
-def get_n_best(n_best: int, list_names_and_values: list[Tuple[str, int]]) -> list[str]:
-    """Method used to get the n_best higher value in a Tuple[name, value]"""
+def get_n_best(n_best: int, list_names_and_values: list[Tuple[str, float]]) -> list[Tuple[str, float]]:
+    """Method used to get the n_best higher value in a Tuple[name, coef]"""
     list_names_and_values.sort(key=lambda x: x[1], reverse=True)
     best_name = []
     for name, value in list_names_and_values:
         if value > 0:
-            best_name.append(name)
+            best_name.append((name, value))
     return best_name[:n_best]

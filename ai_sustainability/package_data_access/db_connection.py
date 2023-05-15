@@ -2,7 +2,7 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 import time
-from typing import Optional
+from typing import Optional, Tuple
 
 from decouple import config
 from gremlin_python import statics
@@ -206,7 +206,7 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{username}').outE().hasLabel('Feedback').count()")
         return self.run_gremlin_query(query)[0]
 
-    def save_answers(self, form: Form, best_ais: list[str], new_form_name: str = "") -> bool:
+    def save_answers(self, form: Form, best_ais: list[Tuple[str, float]], new_form_name: str = "") -> bool:
         """
         Save a Form completed by a User in the database, and drop the previous version of the Form if it's exist
 
@@ -232,9 +232,8 @@ class DbConnection(DBInterface):
             i += 1
         # link between the User node and the first answer node
         first_node_id = f"{form.username}-answer{FIRST_NODE_ID}-{form.form_name}"
-        string_best_ais = ", ".join(best_ais)
-        print(str(string_best_ais))
-        self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(string_best_ais)[1:-1]}')"))
+        string_best_ais = ", ".join([ai[0] for ai in best_ais])
+        self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(string_best_ais)}')"))
         self.run_gremlin_query(
             Query(
                 f"g.V('{form.username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')"

@@ -1,7 +1,7 @@
 """
 File used to show a Form
 """
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 import streamlit as st
 from decouple import config
@@ -248,4 +248,4 @@ class FormRender:
             anchor=None,
         )
         for index, best_ai in enumerate(list_bests_ais):
-            st.caption(f"{index + 1}) {best_ai}")
+            st.caption(f"{index + 1}) {best_ai}" if isinstance(list_bests_ais[0], str) else f"{index + 1}) {best_ai[0]}")

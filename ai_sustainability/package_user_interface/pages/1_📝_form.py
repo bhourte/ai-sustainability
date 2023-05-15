@@ -39,28 +39,6 @@ class FormStreamlit:
             return True
         return False
 
-    def show_best_ai(self, list_bests_ais: list[str]) -> None:
-        """
-            Method used to show the n best AI obtained after the user has completed the Form
-            The number of AI choosen is based on the nbai wanted by the user and
-            the maximum of available AI for the use of the user
-            (If there is only 3 AI possible, but the user asked for 5, only 3 will be shown)
-
-        Parameters:
-            - list_bests_ais (list): list of the n best AI
-        """
-        if not list_bests_ais:  # If no AI corresponding the the choices
-            st.subheader(
-                "There is no AI corresponding to your request, please make other choices in the form", anchor=None
-            )
-            return
-
-        st.subheader(
-            f"There is {len(list_bests_ais)} IA corresponding to your specifications, here they are in order of the most efficient to the least:",
-            anchor=None,
-        )
-        for index, best_ai in enumerate(list_bests_ais):
-            st.caption(f"{index + 1}) {best_ai}")
 
     def render(self) -> None:
         form, form_name = self.form_ui.render()
@@ -71,7 +49,7 @@ class FormStreamlit:
 
         list_bests_ais = self.app.calcul_best_ais(form)
         if self.show_submission_button():  # show the submission button and return True if it's clicked
-            self.show_best_ai(list_bests_ais)
+            self.form_ui.show_best_ai(list_bests_ais)
             self.app.save_answers(form, list_bests_ais)
 
 
