@@ -196,7 +196,7 @@ if __name__ == "__main__":
     COLLECTION = config("DATABASENAME")
     PRIMARYKEY = config("PRIMARYKEY")
 
-    db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
+    # db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
     # db_gestion.save_graph("ai_sustainability/datas/data.json")
     # db_gestion.save_graph("ai_sustainability/datas/data_weight.json")
     # db_gestion.run_gremlin_query("g.V().drop()")
