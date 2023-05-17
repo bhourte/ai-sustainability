@@ -255,5 +255,5 @@ class FormRender:
         if list_best_ais:
             labels = [i[0] for i in list_best_ais]
             values = [i[1] for i in list_best_ais]
-            fig = go.Figure(data=[go.Pie(labels=labels, values=values, hovertemplate="%{label}<br>Score: %{value:.2f}")])
+            fig = go.Figure(data=[go.Pie(labels=labels, values=values, hovertemplate="%{label}<br>Score: %{value:.2f}<extra></extra>")])
             st.plotly_chart(fig)
