@@ -17,6 +17,7 @@ New models :
 
 import math
 from dataclasses import dataclass, field
+from token import OP
 from typing import NewType, Optional, Tuple
 
 import numpy as np
@@ -36,6 +37,7 @@ class Answer:
     text: str
     help_text: str = ""
     modif_crypted: bool = False
+    metric: Optional[str] = None
     list_coef: list[float] = field(default_factory=list)
 
     @property
@@ -57,7 +59,7 @@ class Answer:
 
     @classmethod
     def create_end_answer(cls) -> "Answer":
-        return Answer(answer_id="end", text="end", help_text="", modif_crypted=False, list_coef=[])
+        return Answer(answer_id="end", text="end", help_text="", modif_crypted=False, metric=None, list_coef=[])
 
 
 AnswersList = list[Answer]  # List of answers selected by the user in QuestionAnswer propositions
@@ -122,6 +124,7 @@ class Form:
     question_list: list[Question] = field(default_factory=list)
     form_name: str = ""
     already_completed: bool = False
+    experiment_id: Optional[str] = None
 
     @property
     def last_question(self) -> Question:

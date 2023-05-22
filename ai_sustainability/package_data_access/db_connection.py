@@ -117,6 +117,7 @@ class DbConnection(DBInterface):
                     modif_crypted=answer["properties"]["modif_crypted"] == "true"
                     if "modif_crypted" in answer["properties"]
                     else False,
+                    metric=None if "metric" not in answer["properties"] else answer["properties"]["metric"].split(","),
                     list_coef=[float(coef) for coef in (answer["properties"]["list_coef"].split(", "))]
                     if "list_coef" in answer["properties"]
                     else [],
@@ -206,7 +207,9 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{username}').outE().hasLabel('Feedback').count()")
         return self.run_gremlin_query(query)[0]
 
-    def save_answers(self, form: Form, best_ais: list[Tuple[str, float]], new_form_name: str = "") -> bool:
+    def save_answers(
+        self, form: Form, best_ais: list[Tuple[str, float]], mlflow_id: Optional[str] = "", new_form_name: str = ""
+    ) -> bool:
         """
         Save a Form completed by a User in the database, and drop the previous version of the Form if it's exist
 
@@ -234,6 +237,8 @@ class DbConnection(DBInterface):
         first_node_id = f"{form.username}-answer{FIRST_NODE_ID}-{form.form_name}"
         string_best_ais = ", ".join([ai[0] for ai in best_ais])
         self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(string_best_ais)}')"))
+        if mlflow_id is not None:
+            self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('mlflow_id', '{mlflow_id}')"))
         self.run_gremlin_query(
             Query(
                 f"g.V('{form.username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')"
@@ -282,9 +287,7 @@ class DbConnection(DBInterface):
         """
         time.sleep(0.05)  # we wait to be sure that the previous nodes are well created
         for proposition in answers:
-            self.run_gremlin_query(
-                Query(
-                    f"""
+            query = f"""
                         g.V('{source_node_id}')
                             .addE('Answer')
                             .to(g.V('{target_node_id}'))
@@ -292,8 +295,9 @@ class DbConnection(DBInterface):
                             .property('proposition_id', '{proposition.answer_id}')
                             .property('list_coef', '{str(proposition.list_coef)[1:-1]}')
                     """
-                )
-            )
+            if proposition.metric is not None:
+                query += f""".property('metric', "{','.join(proposition.metric)}")"""
+            self.run_gremlin_query(Query(query))
 
     def drop_form(self, form: Form) -> None:
         """
@@ -324,6 +328,7 @@ class DbConnection(DBInterface):
         form.form_name = selected_form_name
         form.already_completed = True
         node = f"{username}-answer{FIRST_NODE_ID}-{selected_form_name}"
+        form.experiment_id = self.get_experiment(node)
         question_number = 0
         while self.get_node_label(node) != END_TYPE:
             self.get_next_question(form, question_number)
@@ -333,6 +338,12 @@ class DbConnection(DBInterface):
             question_number += 1
         self.get_next_question(form, question_number)
         return form
+
+    def get_experiment(self, first_node: str) -> Optional[str]:
+        """Retrieve the mlflow's experiment id of a previous completed form"""
+        query = Query(f"g.V('{first_node}')")
+        node = self.run_gremlin_query(query)[0]
+        return node["properties"]["mlflow_id"][0]["value"] if "mlflow_id" in node["properties"] else None
 
     def get_answers(self, node_id: str) -> list[Answer]:
         """
@@ -348,6 +359,7 @@ class DbConnection(DBInterface):
                     text=prop["properties"]["answer"] if "answer" in prop["properties"] else "",
                     help_text="",
                     modif_crypted=False,
+                    metric=prop["properties"]["metric"] if "metric" in prop["properties"] else None,
                     list_coef=[]
                     if "list_coef" not in prop["properties"] or not prop["properties"]["list_coef"]
                     else [float(coef) for coef in (prop["properties"]["list_coef"].split(", "))],

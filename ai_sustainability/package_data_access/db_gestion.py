@@ -127,18 +127,19 @@ class DbGestion:
 
         data = pd.read_excel(matrix_path)
         ids = list(data["id_edges"])
-        list_ai = list(data.drop(["id_edges", "text"], axis=1).keys())
+        metrics = list(data["metric"])
+        list_ai = list(data.drop(["id_edges", "text", "metric"], axis=1).keys())
         ais = str(list_ai[0])
         i = 1
         while i < len(list_ai):
             ais += ", " + str(list_ai[i])
             i += 1
-        data = data.drop(["id_edges", "text"], axis=1)
+        data = data.drop(["id_edges", "text", "metric"], axis=1)
         matrix = data.to_numpy()
         dico_matrix = {}
 
         i = 0
-        while i < 40:
+        while i < len(ids):
             dico_matrix[ids[i]] = list(matrix[i])
             i += 1
 
@@ -161,6 +162,8 @@ class DbGestion:
                     if prop != "list_coef":
                         query += f".property('{prop}', '{edge['properties'][prop]}')"
             query += f".property('list_coef', '{str(dico_matrix[edge['id']])[1:-1]}')"
+            if isinstance(metrics[ids.index(edge["id"])], str):  # To now which metric use for each choice in then form
+                query += f""".property('metric', '{metrics[ids.index(edge["id"])]}')"""
             querys.append(query)
         with open(script_path, "w", encoding="utf-8") as file:
             json.dump(querys, file, ensure_ascii=False, indent=4)
@@ -196,16 +199,16 @@ if __name__ == "__main__":
     COLLECTION = config("DATABASENAME")
     PRIMARYKEY = config("PRIMARYKEY")
 
-    # db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
+    db_gestion = DbGestion(ENDPOINT, DATABASE, COLLECTION, PRIMARYKEY)
     # db_gestion.save_graph("ai_sustainability/datas/data.json")
     # db_gestion.save_graph("ai_sustainability/datas/data_weight.json")
-    # db_gestion.run_gremlin_query("g.V().drop()")
-    # db_gestion.run_gremlin_query("g.E().drop()")
+    db_gestion.run_gremlin_query("g.V().drop()")
+    db_gestion.run_gremlin_query("g.E().drop()")
     # db_gestion.create_script("ai_sustainability/datas/data.json", "ai_sustainability/datas/script.json")
-    # db_gestion.create_script_with_weight(
-    #     "ai_sustainability/datas/data.json",
-    #     "ai_sustainability/datas/script_weight.json",
-    #     "ai_sustainability/datas/Weight_matrix.xlsx",
-    # )
-    # db_gestion.import_graph("ai_sustainability/datas/script_weight.json")
-    # db_gestion.close()
+    db_gestion.create_script_with_weight(
+        "ai_sustainability/datas/data.json",
+        "ai_sustainability/datas/script_weight_bis.json",
+        "ai_sustainability/datas/Weight_matrix.xlsx",
+    )
+    db_gestion.import_graph("ai_sustainability/datas/script_weight_bis.json")
+    db_gestion.close()

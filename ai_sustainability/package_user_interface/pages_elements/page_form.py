@@ -35,7 +35,6 @@ class FormStreamlit:
 
     def show_submission_button(self) -> bool:
         if st.button("Submit", on_click=self.set_locked, disabled=self.form_ui.locked):
-            st.write("Answers saved")
             st.session_state.last_form_name = None
             return True
         return False
@@ -50,4 +49,13 @@ class FormStreamlit:
         list_bests_ais = self.app.calcul_best_ais(form)
         if self.show_submission_button():  # show the submission button and return True if it's clicked
             self.form_ui.show_best_ai(list_bests_ais)
-            self.app.save_answers(form, list_bests_ais)
+            self.form_ui.show_best_ai_graph(list_bests_ais)
+
+            with st.spinner("Saving..."):
+                experiment_id = self.app.create_experiment(self.username, form_name)
+                if experiment_id is not None:
+                    st.caption(f"The mlflow's experiment id corresponding to this form is : {experiment_id}")
+                else:
+                    st.warning("A problem occurred while creating the mlflow experiment. ")
+                self.app.save_answers(form, list_bests_ais, experiment_id)
+                st.write("Answers saved")

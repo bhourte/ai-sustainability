@@ -3,7 +3,7 @@ This file contains the interface for all database connection classes,
 used to connect to the database and to run the queries
 """
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ai_sustainability.package_business.models import (
     AnswersStats,
@@ -78,7 +78,9 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def save_answers(self, form: Form, best_ais: list[Tuple[str, float]], new_form_name: str = "") -> bool:
+    def save_answers(
+        self, form: Form, best_ais: list[Tuple[str, float]], mlflow_id: Optional[str] = "", new_form_name: str = ""
+    ) -> bool:
         """
         Save the answers of a user in the database
 

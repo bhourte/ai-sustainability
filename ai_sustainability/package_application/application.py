@@ -2,10 +2,11 @@
 File with our Application class
 """
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from decouple import config
 
+from ai_sustainability.package_business.launch_mlflow import create_experiment
 from ai_sustainability.package_business.models import (
     AnswersStats,
     Feedback,
@@ -15,6 +16,8 @@ from ai_sustainability.package_business.models import (
     Username,
 )
 from ai_sustainability.package_data_access.db_connection import DbConnection
+
+URI = "http://localhost:5000"
 
 
 class Application:
@@ -35,6 +38,7 @@ class Application:
         - form_exist
         - save_answers
         - save_feedback
+        - create_experiment
     """
 
     def __init__(self, database: DbConnection) -> None:
@@ -110,7 +114,9 @@ class Application:
         """
         return self.database.check_node_exist(f"{username}-answer1-{form_name}")
 
-    def save_answers(self, form: Form, list_best_ai: list[Tuple[str, float]], new_form_name: str = "") -> bool:
+    def save_answers(
+        self, form: Form, list_best_ai: list[Tuple[str, float]], mlflow_id: Optional[str] = "", new_form_name: str = ""
+    ) -> bool:
         """
         Save the answers of a user in the database
 
@@ -122,7 +128,7 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
-        return self.database.save_answers(form, list_best_ai, new_form_name)
+        return self.database.save_answers(form, list_best_ai, mlflow_id, new_form_name)
 
     def save_feedback(self, username: Username, feedback: Feedback) -> None:
         """
@@ -133,3 +139,8 @@ class Application:
             - feedback : the feedback given by the user
         """
         self.database.save_feedback(username, feedback)
+
+    def create_experiment(self, username: Username, form_name: str) -> Optional[str]:
+        """Method used to create an mlflow experiment and return the experiment ID"""
+        name = "experiment-" + username + "-" + form_name
+        return create_experiment(URI, name)

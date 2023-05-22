@@ -87,8 +87,14 @@ class HistoricStreamlit:
         list_bests_ais = self.app.calcul_best_ais(new_form)
         self.form_ui.show_best_ai(list_bests_ais)
         self.form_ui.show_best_ai_graph(list_bests_ais)
+
+        if new_form.experiment_id is not None:
+            st.caption(f"The mlflow's experiment id corresponding to this form is : {new_form.experiment_id}")
+        else:
+            st.warning("There is no mlflow experiment for this form.")
+
         if self.show_submission_button():
-            self.app.save_answers(new_form, list_bests_ais, new_form_name)
+            self.app.save_answers(new_form, list_bests_ais, new_form.experiment_id, new_form_name)
 
     def render_as_admin(self) -> None:
         """
@@ -113,6 +119,13 @@ class HistoricStreamlit:
 
         list_bests_ais = self.app.get_best_ais(choosen_user, selected_form_name)
         self.form_ui.show_best_ai(list_bests_ais)
+
+        if previous_form_answers.experiment_id is not None:
+            st.caption(
+                f"The mlflow's experiment id corresponding to this form is : {previous_form_answers.experiment_id}"
+            )
+        else:
+            st.warning("There is no mlflow experiment for this form.")
 
     def render(self) -> None:
         # Connected as an Admin
