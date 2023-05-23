@@ -87,6 +87,7 @@ class Business:
         if not run_page:
             return None
         used_metric = self.replace_accuracy(used_metric)
+        print(used_metric)
         create_coef = self.create_coef_matrix(run_page, used_metric)
         if create_coef is None:
             return None
