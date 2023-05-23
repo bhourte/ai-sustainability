@@ -1,7 +1,5 @@
 """File with all mlflow log function to log all metrics and parameters"""
 import mlflow
-import numpy as np
-import pandas as pd
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score
 
 

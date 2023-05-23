@@ -8,7 +8,7 @@ from ai_sustainability.package_business.models import Username
 from ai_validation.application import Application
 
 
-@st.cache_resource
+# @st.cache_resource
 def get_application() -> Application:
     app = Application()
     return app
@@ -41,7 +41,6 @@ def show_ordered_ais(list_of_ai: list[tuple[str, float, str]]) -> None:
         - list_of_ai: list of tuple as : (ai_name, ai_score), in which the 1st ai as the best scoreand so on
     """
     for ai_name, ai_score, params in list_of_ai:
-        print(params)
         st.metric(label=ai_name, value=ai_score, help=params)
 
 

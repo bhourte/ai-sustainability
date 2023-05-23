@@ -13,6 +13,24 @@ class Business:
     def __init__(self) -> None:
         pass
 
+    def replace_accuracy(self, used_metric: list[str]) -> list[str]:
+        """Method used to replace the Accuracy term by the good ones"""
+        new_metrics: list[str] = []
+        for i in used_metric:
+            if i == "Accuracy":
+                for j in used_metric:
+                    if j in [
+                        "f1_score_handmade",
+                        "f1_score",
+                        "evaluation_accuracy",
+                        "max_error",
+                        "mean_absolute_error",
+                    ]:
+                        new_metrics.append(j)
+            else:
+                new_metrics.append(i)
+        return new_metrics
+
     def get_param(self, run: Run) -> str:
         """Method used to get the list of all param of a run, except nb_sample_train and nb_features"""
         dico = run.data.to_dictionary()["params"]
@@ -34,8 +52,6 @@ class Business:
                 if metric_j not in run_data["metrics"]:
                     if metric_j == "Duration":
                         list_coef[j][i] = run_i.info.end_time - run_i.info.start_time
-                    elif metric_j == "Accuracy":
-                        raise NotImplementedError("Accuracy pas encore implementer pour l'instant")  # TODO
                     else:
                         return None
                 else:
@@ -49,17 +65,20 @@ class Business:
         for i, elmt_i in enumerate(list_coef):
             if used_metric[i] in [
                 "f1_score_handmade",
-                "max_error",
-                "mean_absolute_error",
                 "f1_score",
                 "evaluation_accuracy",
-                "Accuracy",
             ]:
                 list_coef[i] = elmt_i / max(elmt_i)
-            elif used_metric[i] in ["Duration", "false_negatives", "false_positives"]:
+            elif used_metric[i] in [
+                "Duration",
+                "false_negatives",
+                "false_positives",
+                "max_error",
+                "mean_absolute_error",
+            ]:
                 list_coef[i] = min(elmt_i) / elmt_i
             else:
-                return None
+                raise NotImplementedError("A not implemented metric has been stored in the database answer, how ???")
         list_coef = list_coef.T
         return [(ai_i, np.prod(list_coef[i]), list_params[i]) for i, ai_i in enumerate(list_ai)]
 
@@ -67,6 +86,7 @@ class Business:
         """Method used to rank all ais an return them in an ordered list of tuple"""
         if not run_page:
             return None
+        used_metric = self.replace_accuracy(used_metric)
         create_coef = self.create_coef_matrix(run_page, used_metric)
         if create_coef is None:
             return None
