@@ -17,9 +17,6 @@ from ai_sustainability.package_business.models import (
 )
 from ai_sustainability.package_data_access.db_connection import DbConnection
 
-URI = "http://localhost:5000"
-
-
 class Application:
     """
     Class used to make the link between the database and the UI
@@ -143,4 +140,4 @@ class Application:
     def create_experiment(self, username: Username, form_name: str) -> Optional[str]:
         """Method used to create an mlflow experiment and return the experiment ID"""
         name = "experiment-" + username + "-" + form_name
-        return create_experiment(URI, name)
+        return create_experiment(config("URI"), name)
