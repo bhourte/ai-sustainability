@@ -33,15 +33,31 @@ def select_experiment(list_exp_name: list[str], list_exp_ids: list[str]) -> str:
     )
 
 
-def show_ordered_ais(list_of_ai: list[tuple[str, float, str]]) -> None:
+def show_ordered_ais(list_of_ai: list[tuple[str, float, str, str]]) -> None:
     """
     Function used to show an ordered list of ais
 
     parameters:
-        - list_of_ai: list of tuple as : (ai_name, ai_score), in which the 1st ai as the best scoreand so on
+        - list_of_ai: list of tuple as : (ai_name, ai_score, str of parametrers, str of metrics)
+        in which the 1st ai has the best score and so on
     """
-    for ai_name, ai_score, params in list_of_ai:
-        st.metric(label=ai_name, value=ai_score, help=params)
+    for i, (ai_name, ai_score, params, metrics) in enumerate(list_of_ai):
+        col1, col2, col3 = st.columns([1, 15, 15])
+        with col1:
+            st.caption(body=f"{i+1})")
+        with col2:
+            st.caption(body=ai_name, help=params)
+        with col3:
+            st.caption(body=f"score : {ai_score}", help=metrics)
+
+
+def show_calculation(list_metrics: list[str]) -> None:
+    """Function used to show how the score is calculated from each metrics"""
+    text = " * ".join(list_metrics)
+    st.subheader(
+        body=f"How score is obtained : \n {text}",
+        help="Each metrcis is normalized between 0 and 1 before being put in the calculation",
+    )
 
 
 def show_best_ai_graph(list_of_ais: list[tuple[str, float]]) -> None:
@@ -84,8 +100,9 @@ def main() -> None:
     if val is None:
         st.warning("There is no runs done for this experiment, or no correct runs.")
         return
-    ranked_ais = val
+    ranked_ais, list_metrics = val
     show_ordered_ais(ranked_ais)
+    show_calculation(list_metrics)
     show_best_ai_graph(ranked_ais)
 
 

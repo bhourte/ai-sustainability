@@ -296,7 +296,12 @@ class DbConnection(DBInterface):
                             .property('list_coef', '{str(proposition.list_coef)[1:-1]}')
                     """
             if proposition.metric is not None:
-                query += f""".property('metric', "{','.join(proposition.metric)}")"""
+                if isinstance(proposition.metric, str):
+                    query += f""".property('metric', "{proposition.metric}")"""
+                elif isinstance(proposition.metric, list):
+                    query += f""".property('metric', "{','.join(proposition.metric)}")"""
+                else:
+                    raise RuntimeError("Unknow problem with metrics in Answer")
             self.run_gremlin_query(Query(query))
 
     def drop_form(self, form: Form) -> None:

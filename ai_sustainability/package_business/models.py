@@ -17,7 +17,6 @@ New models :
 
 import math
 from dataclasses import dataclass, field
-from token import OP
 from typing import NewType, Optional, Tuple
 
 import numpy as np
