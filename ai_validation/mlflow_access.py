@@ -8,8 +8,6 @@ from mlflow.exceptions import MlflowException
 from mlflow.store.entities import PagedList
 from mlflow.tracking import MlflowClient
 
-from ai_sustainability.package_business.models import Username
-
 
 class MlflowConnector:
     """Class used to connect to an mlflow server"""
@@ -17,7 +15,7 @@ class MlflowConnector:
     def __init__(self) -> None:
         self.client = MlflowClient(tracking_uri=config("URI"))
 
-    def get_experiment(self, selected_user: Username, all_user: bool = False) -> Optional[Tuple[list[str], list[str]]]:
+    def get_experiment(self, selected_user: str, all_user: bool = False) -> Optional[Tuple[list[str], list[str]]]:
         """Method used to get all experiment name from a username"""
         try:
             experiments = self.client.search_experiments()

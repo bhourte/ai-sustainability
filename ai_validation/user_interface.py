@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 import streamlit as st
 from decouple import config
 
-from ai_sustainability.package_business.models import Username
 from ai_validation.application import Application
 
 
@@ -20,12 +19,12 @@ class UserInterface:
     def __init__(self) -> None:
         self.app = get_application()
 
-    def select_user(self, list_username: list[Username]) -> Username:
+    def select_user(self, list_username: list[str]) -> str:
         """Method used to show all user and used to select one"""
-        list_username = [Username("<Select a user>"), Username("<All user>")] + list_username
+        list_username = ["<Select a user>", "<All user>"] + list_username
         question = "Select an user"
-        selected_user = Username(str(st.selectbox(label=question, options=list_username, index=0)))
-        return selected_user if selected_user != "<Select a user>" else Username("")
+        selected_user = str(st.selectbox(label=question, options=list_username, index=0))
+        return selected_user if selected_user != "<Select a user>" else ""
 
     def select_experiment(self, list_exp_name: list[str], list_exp_ids: list[str]) -> str:
         """Method used to show all not empty experiment and used to select one"""

@@ -6,8 +6,6 @@ from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
 
-from ai_sustainability.package_business.models import Query, Username
-
 FIRST_NODE_ID = "1"
 END_TYPE = config("END_TYPE")
 statics.load_statics(globals())
@@ -42,7 +40,7 @@ class DbAccess:
         """
         self.gremlin_client.close()
 
-    def run_gremlin_query(self, query: Query) -> list:
+    def run_gremlin_query(self, query: str) -> list:
         """
         Run a gremlin query
 
@@ -55,25 +53,25 @@ class DbAccess:
         run = self.gremlin_client.submit(query).all()
         return run.result()
 
-    def get_all_users(self) -> list[Username]:
+    def get_all_users(self) -> list[str]:
         """
         Return all Username in the database
         """
-        return self.run_gremlin_query(Query("g.V().hasLabel('user').id()"))
+        return self.run_gremlin_query("g.V().hasLabel('user').id()")
 
-    def get_all_metrics(self, username: Username, form_name: str) -> list[str]:
+    def get_all_metrics(self, username: str, form_name: str) -> list[str]:
         """
         Return all the needed metrics to evaluate a list of ai based on a completed form
         """
         list_metrics: list[str] = []
         first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
-        query = Query(f"g.V('{first_node_id}')")
+        query = f"g.V('{first_node_id}')"
         node = self.run_gremlin_query(query)[0]
         while node["label"] != "end":
-            query_edge = Query(f"g.V('{node['id']}').outE()")
+            query_edge = f"g.V('{node['id']}').outE()"
             out_edge = self.run_gremlin_query(query_edge)[0]
             if "metric" in out_edge["properties"]:
                 list_metrics += out_edge["properties"]["metric"].split(",")
-            query = Query(f"g.V('{node['id']}').out()")
+            query = f"g.V('{node['id']}').out()"
             node = self.run_gremlin_query(query)[0]
         return list_metrics

@@ -3,7 +3,6 @@
 
 from typing import Optional, Tuple
 
-from ai_sustainability.package_business.models import Username
 from ai_validation.business import Business
 from ai_validation.db_access import DbAccess
 from ai_validation.mlflow_access import MlflowConnector
@@ -17,11 +16,11 @@ class Application:
         self.mlflow_connector = MlflowConnector()
         self.business = Business()
 
-    def get_all_user(self) -> list[Username]:
+    def get_all_user(self) -> list[str]:
         return self.database.get_all_users()
 
     def get_experiment_from_user(
-        self, selected_user: Username, all_user: bool = False
+        self, selected_user: str, all_user: bool = False
     ) -> Optional[Tuple[list[str], list[str]]]:
         return self.mlflow_connector.get_experiment(selected_user, all_user)
 
@@ -35,5 +34,5 @@ class Application:
         selected_experiment = selected_experiment_name.split("-")
         if len(selected_experiment) <= 2:
             return None
-        used_metric = self.database.get_all_metrics(Username(selected_experiment[-2]), selected_experiment[-1])
+        used_metric = self.database.get_all_metrics(selected_experiment[-2], selected_experiment[-1])
         return self.business.rank_ais(run_page, used_metric)
