@@ -132,4 +132,5 @@ dmypy.json
 # MLflow files
 mlruns/
 mlartifacts/
+# Dataset file
 ai_evaluation_tests/datasets/
