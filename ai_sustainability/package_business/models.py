@@ -77,9 +77,11 @@ class Question:
 
     @property
     def help_text(self) -> str:
-        return self._help_text + "  \n".join(
-            f"{answer_i.text} : {answer_i.help_text}" for answer_i in self.possible_answers
-        )
+        text = self._help_text
+        for answer in self.possible_answers:
+            if answer.help_text:
+                text += f"  \n{answer.text} : {answer.help_text}"
+        return text
 
     @help_text.setter
     def help_text(self, value: str) -> None:
