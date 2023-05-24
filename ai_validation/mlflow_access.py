@@ -23,7 +23,7 @@ class MlflowConnector:
             experiments = self.client.search_experiments()
         except MlflowException:
             return None
-        if not all_user:
+        if not all_user:  # If we need to only keep experiment of a specific user
             new_list = []
             for i in experiments:
                 if len(i.name.split("-")) > 1 and i.name.split("-")[1] == selected_user:

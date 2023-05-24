@@ -28,7 +28,7 @@ class Application:
     def get_ai_from_experiment(self, selected_experiment_id: str) -> Optional[Tuple[list, list]]:
         """
         Function used to get all ai raked and there hyper parameters
-        Return : list[(ai_name:str, coef:float, param:str)]
+        Return : (list[(ai_name:str, coef:float, param:str)], used_metric:list)
         """
         selected_experiment_name = self.mlflow_connector.get_experiment_name(selected_experiment_id)
         run_page = self.mlflow_connector.get_one_run(selected_experiment_id)

@@ -41,7 +41,7 @@ class UserInterface:
 
     def show_ordered_ais(self, list_of_ai: list[tuple[str, float, str, str]]) -> None:
         """
-        Function used to show an ordered list of ais
+        Method used to show an ordered list of ais
 
         parameters:
             - list_of_ai: list of tuple as : (ai_name, ai_score, str of parametrers, str of metrics)
@@ -57,7 +57,7 @@ class UserInterface:
                 st.caption(body=f"score : {ai_score}", help=metrics)
 
     def show_calculation(self, list_metrics: list[str]) -> None:
-        """Function used to show how the score is calculated from each metrics"""
+        """Method used to show how the score is calculated from each metrics"""
         text = " * ".join(list_metrics)
         st.subheader(
             body=f"How score is obtained : \n {text}",
@@ -77,7 +77,7 @@ class UserInterface:
 
     def render(self) -> None:
         """
-        This is the code used to show the form and used by the user to fill it
+        This is the code used to render the form and used by the user to fill it
         """
         st.set_page_config(page_title="Result page", page_icon="🔍")
         st.title("🔍 Result")
