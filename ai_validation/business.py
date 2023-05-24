@@ -91,7 +91,7 @@ class Business:
         list_params: list[str],
         list_metrics: list[str],
     ) -> list[Tuple[str, float, str, str]]:
-        """Method used to create a list that link each ai with its coeficient, hyperparameters explainer and metrics explainer"""
+        """Method used to create a list that link each ai with its coeficient, hyperparameters and metrics"""
         for i, elmt_i in enumerate(list_coef):
             # 2 way to normalize coeficients (if higher is beter or worse)
             if used_metric[i] in [
