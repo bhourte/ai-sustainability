@@ -239,6 +239,7 @@ class DbConnection(DBInterface):
         self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('best_ais', '{str(string_best_ais)}')"))
         if mlflow_id is not None:
             self.run_gremlin_query(Query(f"g.V('{first_node_id}').property('mlflow_id', '{mlflow_id}')"))
+        time.sleep(0.05)  # we wait to be sure that the previous nodes are well created
         self.run_gremlin_query(
             Query(
                 f"g.V('{form.username}').addE('Answer').to(g.V('{first_node_id}')).property('partitionKey', 'Answer')"

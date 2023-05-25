@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 
 from decouple import config
 
-from ai_sustainability.package_business.launch_mlflow import create_experiment
+from ai_sustainability.package_business.launch_mlflow import MlFlow
 from ai_sustainability.package_business.models import (
     AnswersStats,
     Feedback,
@@ -16,6 +16,7 @@ from ai_sustainability.package_business.models import (
     Username,
 )
 from ai_sustainability.package_data_access.db_connection import DbConnection
+
 
 class Application:
     """
@@ -40,6 +41,7 @@ class Application:
 
     def __init__(self, database: DbConnection) -> None:
         self.database = database
+        self.mlflow = MlFlow()
 
     def get_next_question(self, form: Form, question_number: int) -> Question:
         """
@@ -125,6 +127,8 @@ class Application:
         Return:
             - bool: True if the answers are well saved, False if the form already exist
         """
+        if new_form_name and form.username is not None and form.experiment_id is not None:
+            self.change_experiment_name(form.username, form.form_name, new_form_name)
         return self.database.save_answers(form, list_best_ai, mlflow_id, new_form_name)
 
     def save_feedback(self, username: Username, feedback: Feedback) -> None:
@@ -140,4 +144,10 @@ class Application:
     def create_experiment(self, username: Username, form_name: str) -> Optional[str]:
         """Method used to create an mlflow experiment and return the experiment ID"""
         name = "experiment-" + username + "-" + form_name
-        return create_experiment(config("URI"), name)
+        return self.mlflow.create_experiment(name)
+
+    def change_experiment_name(self, username: Username, old_form_name: str, new_form_name: str) -> Optional[str]:
+        """method used to change the name of an mlflow experiment and return the corresponding ID"""
+        old_experiment_name = "experiment-" + username + "-" + old_form_name
+        new_experiment_name = "experiment-" + username + "-" + new_form_name
+        return self.mlflow.change_experiment_name(old_experiment_name, new_experiment_name)
