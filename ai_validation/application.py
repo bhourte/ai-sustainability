@@ -19,10 +19,15 @@ class Application:
     def get_all_user(self) -> list[str]:
         return self.database.get_all_users()
 
+    def get_metrics(self, username: str, form_name: str, replace_accuracy: bool = True) -> list[str]:
+        # Use replace_accuracy if an "Accuracy" metric is log in the mlflow experience
+        raw_metrics = self.database.get_all_metrics(username, form_name)
+        return self.business.replace_accuracy(raw_metrics) if replace_accuracy else raw_metrics
+
     def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
         return self.mlflow_connector.get_experiment(selected_user)
 
-    def get_ai_from_experiment(self, selected_experiment_id: str) -> Optional[Tuple[list, list]]:
+    def get_ai_from_experiment(self, selected_experiment_id: str, used_metric: list[str]) -> Optional[list]:
         """
         Function used to get all ai raked and there hyper parameters
         Return : Tuple(list:list[(ai_name:str, coef:float, param:str)], used_metric:list)
@@ -32,5 +37,4 @@ class Application:
         if len(selected_experiment) <= 2:
             return None
         run_page = self.mlflow_connector.get_run_page(selected_experiment_id)
-        used_metric = self.database.get_all_metrics(selected_experiment[-2], selected_experiment[-1])
         return self.business.rank_ais(run_page, used_metric)

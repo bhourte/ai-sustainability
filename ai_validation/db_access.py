@@ -63,6 +63,8 @@ class DbAccess:
         """
         Return all the needed metrics to evaluate a list of ai based on a completed form
         """
+        print(username)
+        print(form_name)
         list_metrics: list[str] = []
         first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
         query = f"g.V('{first_node_id}')"

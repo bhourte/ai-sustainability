@@ -113,19 +113,14 @@ class Business:
         list_coef = list_coef.T
         return [(ai_i, np.prod(list_coef[i]), list_params[i], list_metrics[i]) for i, ai_i in enumerate(list_ai)]
 
-    def rank_ais(self, run_page: PagedList[Run], used_metric: list[str]) -> Optional[Tuple[list, list]]:
-        """
-        Method used to rank all ais an return them in an ordered list of tuple
-        and return also the list of used metrics
-        """
+    def rank_ais(self, run_page: PagedList[Run], used_metric: list[str]) -> Optional[list[Tuple[str, float, str, str]]]:
+        """Method used to rank all ais an return them in an ordered list of tuple"""
         if not run_page:
             return None
 
-        used_metric = self.replace_accuracy(used_metric)
-        print(used_metric)
         list_coef, list_ai, list_params, list_metrics = self.create_coef_matrix(run_page, used_metric)
 
         list_ranking = self.create_ai_list_with_coef(list_coef, list_ai, used_metric, list_params, list_metrics)
 
         list_ranking.sort(key=lambda x: x[1], reverse=True)
-        return list_ranking, used_metric
+        return list_ranking
