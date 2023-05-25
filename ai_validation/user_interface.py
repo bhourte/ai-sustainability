@@ -17,10 +17,12 @@ class UserInterface:
     """Class used to show all result of experiment based on the form"""
 
     def __init__(self) -> None:
+        st.set_page_config(page_title="Result page", page_icon="🔍")
+        st.title("🔍 Result")
         self.app = get_application()
 
     def select_user(self, list_username: list[str]) -> str:
-        """Method used to show all user and used to select one"""
+        """Method used to show all user and select one"""
         list_username = ["<Select a user>", "<All user>"] + list_username
         question = "Select an user"
         selected_user = str(st.selectbox(label=question, options=list_username, index=0))
@@ -83,9 +85,8 @@ class UserInterface:
         selected_user = self.select_user(list_user)
         if not selected_user:
             return
-        all_user = selected_user == "<All user>"
 
-        exp = self.app.get_experiment_from_user(selected_user, all_user)
+        exp = self.app.get_experiment_from_user(None if selected_user == "<All user>" else selected_user)
         if exp is None:
             st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
             return
@@ -108,7 +109,5 @@ class UserInterface:
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Result page", page_icon="🔍")
-    st.title("🔍 Result")
     ui = UserInterface()
     ui.render()

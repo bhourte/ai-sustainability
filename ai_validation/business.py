@@ -32,12 +32,9 @@ class Business:
         return new_metrics
 
     def get_param(self, run: Run) -> str:
-        """Method used to get a string explaining all param of a single run"""
+        """Method used to get a string explaining all params of a single run"""
         dico = run.data.to_dictionary()["params"]
-        list_param: list[str] = ["There are all used hyperparameters for this AI :"]
-        for i in dico:
-            list_param.append(f"{i} : {dico[i]}")
-        return "  \n".join(list_param)
+        return "There are all used hyperparameters for this AI :" + "  \n".join([f"{i} : {dico[i]}" for i in dico])
 
     def get_metrics(self, run: Run, metric_used: list[str]) -> str:
         """Method used to get a string explaining all metrics and their value of a single run"""
@@ -91,7 +88,10 @@ class Business:
         list_params: list[str],
         list_metrics: list[str],
     ) -> list[Tuple[str, float, str, str]]:
-        """Method used to create a list that link each ai with its coeficient, hyperparameters and metrics"""
+        """
+        Method used to create a list that link each ai with its normalized coeficient
+        and its hyperparameters and its metrics
+        """
         for i, elmt_i in enumerate(list_coef):
             # 2 way to normalize coeficients (if higher is beter or worse)
             if used_metric[i] in [
@@ -114,7 +114,10 @@ class Business:
         return [(ai_i, np.prod(list_coef[i]), list_params[i], list_metrics[i]) for i, ai_i in enumerate(list_ai)]
 
     def rank_ais(self, run_page: PagedList[Run], used_metric: list[str]) -> Optional[Tuple[list, list]]:
-        """Method used to rank all ais an return them in an ordered list of tuple"""
+        """
+        Method used to rank all ais an return them in an ordered list of tuple
+        and return also the list of used metrics
+        """
         if not run_page:
             return None
 

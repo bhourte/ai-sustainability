@@ -19,20 +19,18 @@ class Application:
     def get_all_user(self) -> list[str]:
         return self.database.get_all_users()
 
-    def get_experiment_from_user(
-        self, selected_user: str, all_user: bool = False
-    ) -> Optional[Tuple[list[str], list[str]]]:
-        return self.mlflow_connector.get_experiment(selected_user, all_user)
+    def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
+        return self.mlflow_connector.get_experiment(selected_user)
 
     def get_ai_from_experiment(self, selected_experiment_id: str) -> Optional[Tuple[list, list]]:
         """
         Function used to get all ai raked and there hyper parameters
-        Return : (list[(ai_name:str, coef:float, param:str)], used_metric:list)
+        Return : Tuple(list:list[(ai_name:str, coef:float, param:str)], used_metric:list)
         """
         selected_experiment_name = self.mlflow_connector.get_experiment_name(selected_experiment_id)
-        run_page = self.mlflow_connector.get_one_run(selected_experiment_id)
         selected_experiment = selected_experiment_name.split("-")
         if len(selected_experiment) <= 2:
             return None
+        run_page = self.mlflow_connector.get_run_page(selected_experiment_id)
         used_metric = self.database.get_all_metrics(selected_experiment[-2], selected_experiment[-1])
         return self.business.rank_ais(run_page, used_metric)
