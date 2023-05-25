@@ -31,12 +31,12 @@ class Business:
                 new_metrics.append(i)
         return new_metrics
 
-    def get_param(self, run: Run) -> str:
+    def get_param_explainer(self, run: Run) -> str:
         """Method used to get a string explaining all params of a single run"""
         dico = run.data.to_dictionary()["params"]
         return "There are all used hyperparameters for this AI :" + "  \n".join([f"{i} : {dico[i]}" for i in dico])
 
-    def get_metrics(self, run: Run, metric_used: list[str]) -> str:
+    def get_metrics_expaliner(self, run: Run, metric_used: list[str]) -> str:
         """Method used to get a string explaining all metrics and their value of a single run"""
         dico = run.data.to_dictionary()["metrics"]
         list_metrics: list[str] = ["There are all used metrics for this AI :"]
@@ -76,8 +76,8 @@ class Business:
                     list_coef[j][i] = run_data["metrics"][metric_j]
 
             list_ai.append(run_i.info.run_name)
-            list_params.append(self.get_param(run_i))
-            list_metrics.append(self.get_metrics((run_i), used_metric))
+            list_params.append(self.get_param_explainer(run_i))
+            list_metrics.append(self.get_metrics_expaliner((run_i), used_metric))
         return list_coef, list_ai, list_params, list_metrics
 
     def create_ai_list_with_coef(
@@ -118,9 +118,9 @@ class Business:
         if not run_page:
             return None
 
-        list_coef, list_ai, list_params, list_metrics = self.create_coef_matrix(run_page, used_metric)
+        list_coef, list_ai, list_params, list_metrics_strings = self.create_coef_matrix(run_page, used_metric)
 
-        list_ranking = self.create_ai_list_with_coef(list_coef, list_ai, used_metric, list_params, list_metrics)
+        list_ranking = self.create_ai_list_with_coef(list_coef, list_ai, used_metric, list_params, list_metrics_strings)
 
         list_ranking.sort(key=lambda x: x[1], reverse=True)
         return list_ranking

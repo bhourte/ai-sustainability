@@ -27,10 +27,12 @@ class Application:
     def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
         return self.mlflow_connector.get_experiment(selected_user)
 
-    def get_ai_from_experiment(self, selected_experiment_id: str, used_metric: list[str]) -> Optional[list]:
+    def get_ai_from_experiment(
+        self, selected_experiment_id: str, used_metric: list[str]
+    ) -> Optional[list[Tuple[str, float, str, str]]]:
         """
         Function used to get all ai raked and there hyper parameters
-        Return : Tuple(list:list[(ai_name:str, coef:float, param:str)], used_metric:list)
+        Return : list[(ai_name:str, coef:float, param_expaliner:str, metrics_explainer:str)]
         """
         selected_experiment_name = self.mlflow_connector.get_experiment_name(selected_experiment_id)
         selected_experiment = selected_experiment_name.split("-")

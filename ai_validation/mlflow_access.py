@@ -16,7 +16,7 @@ class MlflowConnector:
         self.client = MlflowClient(tracking_uri=config("URI"))
 
     def get_experiment(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
-        """Method used to get all experiment name from a username"""
+        """Method used to get all experiment name and id from a username"""
         try:
             experiments = self.client.search_experiments()
         except MlflowException:
