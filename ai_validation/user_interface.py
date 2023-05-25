@@ -7,7 +7,7 @@ from decouple import config
 from ai_validation.application import Application
 
 
-# @st.cache_resource
+@st.cache_resource
 def get_application() -> Application:
     app = Application()
     return app
@@ -78,8 +78,6 @@ class UserInterface:
         """
         This is the code used to render the form and used by the user to fill it
         """
-        st.set_page_config(page_title="Result page", page_icon="🔍")
-        st.title("🔍 Result")
 
         list_user = self.app.get_all_user()
         selected_user = self.select_user(list_user)
@@ -110,5 +108,7 @@ class UserInterface:
 
 
 if __name__ == "__main__":
+    st.set_page_config(page_title="Result page", page_icon="🔍")
+    st.title("🔍 Result")
     ui = UserInterface()
     ui.render()
