@@ -13,11 +13,15 @@ class MlFlow:
     def __init__(self) -> None:
         pass
 
-    def create_experiment(self, name: str) -> Optional[str]:
+    def create_experiment(self, name: str, description: str) -> Optional[str]:
         """create an mlflow experiment and return the used metrics"""
         mlflow.set_tracking_uri(config("URI"))
         try:
-            return mlflow.set_experiment(name).experiment_id
+            experiment_id = mlflow.set_experiment(name).experiment_id
+            with mlflow.start_run() as run:
+                mlflow.set_experiment_tag("mlflow.note.content", description)
+            mlflow.delete_run(run.info.run_id)
+            return experiment_id
         except MlflowException:
             return None
 

@@ -34,7 +34,7 @@ class Business:
     def get_param_explainer(self, run: Run) -> str:
         """Method used to get a string explaining all params of a single run"""
         dico = run.data.to_dictionary()["params"]
-        return "There are all used hyperparameters for this AI :" + "  \n".join([f"{i} : {dico[i]}" for i in dico])
+        return "There are all used hyperparameters for this AI :  \n" + "  \n".join([f"{i} : {dico[i]}" for i in dico])
 
     def get_metrics_expaliner(self, run: Run, metric_used: list[str]) -> str:
         """Method used to get a string explaining all metrics and their value of a single run"""

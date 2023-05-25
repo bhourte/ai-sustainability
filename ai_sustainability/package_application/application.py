@@ -141,10 +141,10 @@ class Application:
         """
         self.database.save_feedback(username, feedback)
 
-    def create_experiment(self, username: Username, form_name: str) -> Optional[str]:
+    def create_experiment(self, username: Username, form_name: str, description: str) -> Optional[str]:
         """Method used to create an mlflow experiment and return the experiment ID"""
         name = "experiment-" + username + "-" + form_name
-        return self.mlflow.create_experiment(name)
+        return self.mlflow.create_experiment(name, description)
 
     def change_experiment_name(self, username: Username, old_form_name: str, new_form_name: str) -> Optional[str]:
         """method used to change the name of an mlflow experiment and return the corresponding ID"""

@@ -52,7 +52,9 @@ class FormStreamlit:
             self.form_ui.show_best_ai_graph(list_bests_ais)
 
             with st.spinner("Saving..."):
-                experiment_id = self.app.create_experiment(self.username, form_name)
+                description = form.question_list[0].choosen_answers[0].text
+                print(description)
+                experiment_id = self.app.create_experiment(self.username, form_name, description)
                 if experiment_id is not None:
                     st.caption(f"The mlflow's experiment id corresponding to this form is : {experiment_id}")
                 else:
