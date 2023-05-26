@@ -6,6 +6,21 @@ import numpy as np
 from mlflow.entities.run import Run
 from mlflow.store.entities import PagedList
 
+from ai_validation.models import Model
+
+POSITIVE_METRICS = [
+    "f1_score_handmade",
+    "f1_score",
+    "evaluation_accuracy",
+]
+NEGATIVE_METRICS = [
+    "Duration",
+    "false_negatives",
+    "false_positives",
+    "max_error",
+    "mean_absolute_error",
+]
+
 
 class Business:
     """Class used for all business task of the result displayer"""
@@ -13,114 +28,93 @@ class Business:
     def __init__(self) -> None:
         pass
 
-    def replace_accuracy(self, used_metric: list[str]) -> list[str]:
+    def delete_accuracy(self, used_metric: list[str]) -> list[str]:
         """Method used to replace the Accuracy term by the good ones"""
         new_metrics: list[str] = []
         for i in used_metric:
-            if i == "Accuracy":
-                for j in used_metric:
-                    if j in [
-                        "f1_score_handmade",
-                        "f1_score",
-                        "evaluation_accuracy",
-                        "max_error",
-                        "mean_absolute_error",
-                    ]:
-                        new_metrics.append(j)
-            else:
+            if i != "Accuracy":
                 new_metrics.append(i)
         return new_metrics
 
-    def get_param_explainer(self, run: Run) -> str:
-        """Method used to get a string explaining all params of a single run"""
-        dico = run.data.to_dictionary()["params"]
-        return "There are all used hyperparameters for this AI :  \n" + "  \n".join([f"{i} : {dico[i]}" for i in dico])
-
-    def get_metrics_expaliner(self, run: Run, metric_used: list[str]) -> str:
-        """Method used to get a string explaining all metrics and their value of a single run"""
-        dico = run.data.to_dictionary()["metrics"]
-        list_metrics: list[str] = ["There are all used metrics for this AI :"]
-        for i in dico:
-            if i in metric_used:
-                list_metrics.append(f"{i} : {dico[i]}")
-        if "Duration" in metric_used:
-            list_metrics.append(f"Duration : {run.info.end_time - run.info.start_time} ms")
-        return "  \n".join(list_metrics)
-
-    def create_coef_matrix(
-        self, run_page: PagedList[Run], used_metric: list[str]
-    ) -> Tuple[np.ndarray, list[str], list[str], list[str]]:
-        """
-        Method used to create a matrix with all the normalized coeficient for all runs and all metrics (but not only)
-        return : [
-            - matrix of coef
-            - list of coresponding AIs
-            - list of string explaining hyperparameters choosen
-            - list of string explaining metrics obtained
-        ]
-        """
-        list_ai: list[str] = []
-        list_params: list[str] = []
-        list_metrics: list[str] = []
-        list_coef = np.zeros((len(used_metric), len(run_page)))
-
-        for i, run_i in enumerate(run_page):
-            run_data = run_i.data.to_dictionary()
-            for j, metric_j in enumerate(used_metric):
-                if metric_j not in run_data["metrics"]:
-                    if metric_j == "Duration":
-                        list_coef[j][i] = run_i.info.end_time - run_i.info.start_time
-                    else:
-                        raise RuntimeError("Error, needed metrics not log in the mlflow run")
-                else:
-                    list_coef[j][i] = run_data["metrics"][metric_j]
-
-            list_ai.append(run_i.info.run_name)
-            list_params.append(self.get_param_explainer(run_i))
-            list_metrics.append(self.get_metrics_expaliner((run_i), used_metric))
-        return list_coef, list_ai, list_params, list_metrics
-
-    def create_ai_list_with_coef(
-        self,
-        list_coef: np.ndarray,
-        list_ai: list[str],
-        used_metric: list[str],
-        list_params: list[str],
-        list_metrics: list[str],
-    ) -> list[Tuple[str, float, str, str]]:
+    def get_ai_list(self, run_page: PagedList[Run]) -> Optional[list[Model]]:
         """
         Method used to create a list that link each ai with its normalized coeficient
         and its hyperparameters and its metrics
         """
-        for i, elmt_i in enumerate(list_coef):
-            # 2 way to normalize coeficients (if higher is beter or worse)
-            if used_metric[i] in [
-                "f1_score_handmade",
-                "f1_score",
-                "evaluation_accuracy",
-            ]:
-                list_coef[i] = elmt_i / max(elmt_i)
-            elif used_metric[i] in [
-                "Duration",
-                "false_negatives",
-                "false_positives",
-                "max_error",
-                "mean_absolute_error",
-            ]:
-                list_coef[i] = min(elmt_i) / elmt_i
-            else:
-                raise NotImplementedError("A not implemented metric has been stored in the database answer, how ???")
-        list_coef = list_coef.T
-        return [(ai_i, np.prod(list_coef[i]), list_params[i], list_metrics[i]) for i, ai_i in enumerate(list_ai)]
-
-    def rank_ais(self, run_page: PagedList[Run], used_metric: list[str]) -> Optional[list[Tuple[str, float, str, str]]]:
-        """Method used to rank all ais an return them in an ordered list of tuple"""
         if not run_page:
             return None
+        list_model: list[Model] = []
+        for run in run_page:
+            model_name = run.data.to_dictionary()["tags"]["mlflow.runName"]
+            params = run.data.to_dictionary()["params"]
+            metrics = run.data.to_dictionary()["metrics"]
+            metrics["Duration"] = (
+                run.info.end_time - run.info.start_time
+            )  # TODO change it here, berk, depend of the computer
+            list_model.append(Model(model_name, params, metrics))
+        return list_model
 
-        list_coef, list_ai, list_params, list_metrics_strings = self.create_coef_matrix(run_page, used_metric)
+    def set_and_normalize_one_metric(self, list_models: list[Model], used_metric: str) -> None:
+        """Method used to set a normalized coeficient for one metric (used_metric)"""
+        if used_metric in POSITIVE_METRICS:
+            max_value = max(list(i.metrics[used_metric] for i in list_models))
+            min_value = min(list(i.metrics[used_metric] for i in list_models))
+            for model in list_models:
+                model.normalized_metrics[used_metric] = (model.metrics[used_metric] - min_value) / (
+                    max_value - min_value
+                )
+        elif used_metric in NEGATIVE_METRICS:
+            max_value = max(list(1 / i.metrics[used_metric] for i in list_models))
+            min_value = min(list(1 / i.metrics[used_metric] for i in list_models))
+            for model in list_models:
+                model.normalized_metrics[used_metric] = (1 / model.metrics[used_metric] - min_value) / (
+                    max_value - min_value
+                )
+        elif used_metric == "Global score":
+            list_coef = np.ones(len(list_models))
+            for index, model in enumerate(list_models):
+                for metric in POSITIVE_METRICS:
+                    if metric in model.metrics.keys():
+                        list_coef[index] = list_coef[index] * model.metrics[metric]
+                for metric in NEGATIVE_METRICS:
+                    if metric in model.metrics.keys():
+                        list_coef[index] = list_coef[index] / model.metrics[metric]
+            max_value = max(list(list_coef[i] for i in range(len(list_models))))
+            min_value = min(list(list_coef[i] for i in range(len(list_models))))
+            for index, model in enumerate(list_models):
+                model.normalized_metrics[used_metric] = (list_coef[index] - min_value) / (max_value - min_value)
+                print(model.normalized_metrics)
+        else:
+            raise NotImplementedError(f"Metric {used_metric} not implemented yet, choose an other one.")
 
-        list_ranking = self.create_ai_list_with_coef(list_coef, list_ai, used_metric, list_params, list_metrics_strings)
+    def set_normalized_metrics(self, list_model: list[Model], list_metrics: list[str]) -> None:
+        """
+        Method used to rank all AIs according to selected_metric
+        Return : a list of Tuple(Model, float: normalized selected_metric)
+        """
+        for metric in list_metrics:
+            self.set_and_normalize_one_metric(list_model, metric)
+        self.set_and_normalize_one_metric(list_model, "Global score")
 
-        list_ranking.sort(key=lambda x: x[1], reverse=True)
-        return list_ranking
+    def get_pareto_points(self, list_model: list[Model], metric1: str, metric2: str) -> list[Tuple[Model, bool]]:
+        list_tuple = [(model, 0) for model in list_model]  # 0 = no yet tested, -1 = non-pareto, 1 = pareto
+        list_tuple.sort(key=lambda x: x[0].normalized_metrics[metric1] + x[0].normalized_metrics[metric1], reverse=True)
+        for i, (model_i, state) in enumerate(list_tuple):
+            if state == 0:
+                for j in range(i, len(list_tuple)):
+                    if (
+                        model_i.normalized_metrics[metric1] > list_tuple[j][0].normalized_metrics[metric1]
+                        and model_i.normalized_metrics[metric2] > list_tuple[j][0].normalized_metrics[metric2]
+                    ):
+                        # j < i for the 2 metrics => j is not a pareto point
+                        list_tuple[j] = (list_tuple[j][0], -1)
+                    elif (
+                        model_i.normalized_metrics[metric1] < list_tuple[j][0].normalized_metrics[metric1]
+                        and model_i.normalized_metrics[metric2] < list_tuple[j][0].normalized_metrics[metric2]
+                    ):
+                        # We have find a biger one in the 2 metrics => i is not a pareto point
+                        list_tuple[i] = (model_i, -1)
+                        break
+                    # if reach here, it's a pareto point => congrats!
+                    list_tuple[i] = (model_i, 1)
+        return [(i, j == 1) for i, j in list_tuple]

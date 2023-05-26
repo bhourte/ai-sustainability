@@ -37,6 +37,8 @@ class Application:
         - save_answers
         - save_feedback
         - create_experiment
+        - get_experiment_id
+        - change_experiment_name
     """
 
     def __init__(self, database: DbConnection) -> None:
@@ -147,8 +149,8 @@ class Application:
         return self.mlflow.create_experiment(name, description)
 
     def get_experiment_id(self, username: Username, form_name: str) -> Optional[str]:
-        id = self.database.get_experiment_id(username, form_name)
-        return id[0] if id else None
+        experiment_id = self.database.get_experiment_id(username, form_name)
+        return experiment_id[0] if experiment_id else None
 
     def change_experiment_name(self, username: Username, old_form_name: str, new_form_name: str) -> Optional[str]:
         """method used to change the name of an mlflow experiment and return the corresponding ID"""
