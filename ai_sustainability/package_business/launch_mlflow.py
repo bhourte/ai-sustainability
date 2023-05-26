@@ -25,12 +25,11 @@ class MlFlow:
         except MlflowException:
             return None
 
-    def change_experiment_name(self, old_name: str, new_name: str) -> Optional[str]:
+    def change_experiment_name(self, experiment_id: str, new_name: str) -> Optional[str]:
         """Change the name of an existing mlflow experiment"""
         try:
             client = MlflowClient(config("URI"))
-            experiment_id = client.get_experiment_by_name(old_name).experiment_id
-            client.rename_experiment(str(experiment_id), new_name)
+            client.rename_experiment(experiment_id, new_name)
             return experiment_id
         except MlflowException:
             return None

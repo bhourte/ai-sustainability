@@ -1,15 +1,16 @@
 """File used to show the result of the tests made by the expert in mlflow"""
 
-from typing import Tuple
+from typing import Optional
 
 import plotly.graph_objects as go
 import streamlit as st
 from decouple import config
 
 from ai_validation.application import Application
+from ai_validation.models import Experiment
 
 
-@st.cache_resource
+# @st.cache_resource
 def get_application() -> Application:
     app = Application()
     return app
@@ -23,26 +24,25 @@ class UserInterface:
         st.title("🔍 Result")
         self.app = get_application()
 
-    def select_user(self, list_username: list[str]) -> str:
+    def select_user(self, list_username: list[str]) -> Optional[str]:
         """Method used to show all user and select one"""
         list_username = ["<Select a user>", "<All user>"] + list_username
         question = "Select an user"
         selected_user = str(st.selectbox(label=question, options=list_username, index=0))
+        if selected_user == "<All user>":
+            return None
         return selected_user if selected_user != "<Select a user>" else ""
 
-    def select_experiment(self, list_exp_name: list[str], list_exp_ids: list[str]) -> Tuple[str, str]:
+    def select_experiment(self, list_experiment: list[Experiment]) -> Optional[Experiment]:
         """Method used to show all not empty experiment and used to select one"""
-        list_exp = [f"{val_i} with id : {list_exp_ids[i]}" for i, val_i in enumerate(list_exp_name)]
+        list_exp = [f"{i.experiment_name} with id : {i.experiment_id}" for i in list_experiment]
         list_exp = ["<Select a experiment>"] + list_exp
         question = "Select a experiment by is name"
         selected_experiment = str(st.selectbox(label=question, options=list_exp, index=0))
         return (
-            (
-                list_exp_name[list_exp.index(selected_experiment) - 1],
-                list_exp_ids[list_exp.index(selected_experiment) - 1],
-            )
+            list_experiment[list_exp.index(selected_experiment) - 1]
             if selected_experiment != "<Select a experiment>"
-            else ("", "")
+            else None
         )
 
     def show_ordered_ais(self, list_of_ai: list[tuple[str, float, str, str]]) -> None:
@@ -70,7 +70,7 @@ class UserInterface:
             help="Each metrcis is normalized between 0 and 1 before being put in the calculation",
         )
 
-    def show_best_ai_graph(self, list_of_ais: list[tuple[str, float]]) -> None:
+    def show_best_ai_graph(self, list_of_ais: list[tuple[str, float, str, str]]) -> None:
         if list_of_ais:
             labels = [i[0] for i in list_of_ais]
             values = [i[1] for i in list_of_ais]
@@ -88,24 +88,24 @@ class UserInterface:
 
         list_user = self.app.get_all_user()
         selected_user = self.select_user(list_user)
-        if not selected_user:
+        if not selected_user and selected_user is not None:
             return
 
-        exp = self.app.get_experiment_from_user(None if selected_user == "<All user>" else selected_user)
-        if exp is None:
+        list_experiments = self.app.get_experiment_from_user(selected_user)
+        if list_experiments is None:
             st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
             return
-        list_experiments, list_ids = exp
         if not list_experiments:
             st.warning("There is no experiment for this user")
             return
-        selected_experiment_name, selected_experiment_id = self.select_experiment(list_experiments, list_ids)
-        if not selected_experiment_id:
+        selected_experiment = self.select_experiment(list_experiments)
+        if selected_experiment is None:
             return
-        form_name = selected_experiment_name.rsplit("-", maxsplit=1)[-1]
-        list_metrics = self.app.get_metrics(selected_user, form_name)
+        form_id = self.app.get_form_id(selected_experiment.experiment_id)
+        list_metrics = self.app.get_metrics(form_id)
+        print(list_metrics)
 
-        ranked_ais = self.app.get_ai_from_experiment(selected_experiment_id, list_metrics)
+        ranked_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id, list_metrics)
         if ranked_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return

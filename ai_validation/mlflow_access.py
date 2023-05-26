@@ -1,12 +1,14 @@
 """File used to connect to an mlflow to retreive all information about test run"""
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from decouple import config
 from mlflow.entities.run import Run
 from mlflow.exceptions import MlflowException
 from mlflow.store.entities import PagedList
 from mlflow.tracking import MlflowClient
+
+from ai_validation.models import Experiment
 
 
 class MlflowConnector:
@@ -15,19 +17,17 @@ class MlflowConnector:
     def __init__(self) -> None:
         self.client = MlflowClient(tracking_uri=config("URI"))
 
-    def get_experiment(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
+    def get_experiment(self, selected_user: Optional[str], id_list: list[str]) -> Optional[list[Experiment]]:
         """Method used to get all experiment name and id from a username"""
         try:
             experiments = self.client.search_experiments()
         except MlflowException:
             return None
-        if selected_user is not None:  # If we need to only keep experiment of a specific user
-            new_list = []
-            for i in experiments:
-                if len(i.name.split("-")) > 1 and i.name.split("-")[1] == selected_user:
-                    new_list.append(i)
-            experiments = new_list
-        return ([i.name for i in experiments], [i.experiment_id for i in experiments])
+        list_experiment: list[Experiment] = []
+        for i in experiments:
+            if i.experiment_id in id_list or selected_user is None:
+                list_experiment.append(Experiment(i.experiment_id, i.name, selected_user))
+        return list_experiment
 
     def get_experiment_name(self, experiment_id: str) -> str:
         return self.client.get_experiment(experiment_id).name

@@ -2,6 +2,8 @@
 This file contains the class DbConnection, used to connect to the database and to run the queries
 """
 
+from typing import Optional
+
 from decouple import config
 from gremlin_python import statics
 from gremlin_python.driver import client, serializer
@@ -59,14 +61,16 @@ class DbAccess:
         """
         return self.run_gremlin_query("g.V().hasLabel('user').id()")
 
-    def get_all_metrics(self, username: str, form_name: str) -> list[str]:
+    def get_form_id(self, experiment_id: str) -> str:
+        """Method used to get a form name from an experiment id"""
+        return self.run_gremlin_query(f"g.V().where(values('mlflow_id').is('{experiment_id}')).id()")[0]
+
+    def get_all_metrics(self, form_id: str) -> list[str]:
         """
         Return all the needed metrics to evaluate a list of ai based on a completed form
         """
-        print(username)
-        print(form_name)
         list_metrics: list[str] = []
-        first_node_id = f"{username}-answer{FIRST_NODE_ID}-{form_name}"
+        first_node_id = form_id
         query = f"g.V('{first_node_id}')"
         node = self.run_gremlin_query(query)[0]
         while node["label"] != "end":
@@ -77,3 +81,14 @@ class DbAccess:
             query = f"g.V('{node['id']}').out()"
             node = self.run_gremlin_query(query)[0]
         return list_metrics
+
+    def get_experiment_id(self, selected_user: Optional[str]) -> list[str]:
+        if selected_user is None:
+            all_node = self.run_gremlin_query(
+                "g.V().haslabel('user').outE().hasLabel('Answer').inV().properties('mlflow_id')"
+            )
+        else:
+            all_node = self.run_gremlin_query(
+                f"g.V('{selected_user}').outE().hasLabel('Answer').inV().properties('mlflow_id')"
+            )
+        return [i["value"] for i in all_node]

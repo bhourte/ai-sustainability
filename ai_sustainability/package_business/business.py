@@ -23,9 +23,7 @@ class Business:
     def __init__(self) -> None:
         pass
 
-    def calcul_best_ais_old(
-        self, nb_ai: int, list_ai: list[str], form_answers: list[AnswersList]
-    ) -> list[str]:  # TODO suppr
+    def calcul_best_ais_old(self, nb_ai: int, list_ai: list[str], form_answers: list[AnswersList]) -> list[str]:
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for answer_list in form_answers:
             for answer in answer_list:
@@ -45,7 +43,7 @@ class Business:
     def get_best_coefs(self, count: int, coefs: list[float]) -> list[float]:
         return list(heapq.nlargest(count, np.array(coefs)))  # We sort and find the nb_ai best AIs
 
-    def calcul_best_ais(self, nb_ai: int, list_ai: list[str], form: Form) -> list[str]:  # TODO put this in Form
+    def calcul_best_ais(self, nb_ai: int, list_ai: list[str], form: Form) -> list[str]:  # DONE put this in Form
         raw_coef_ai = np.array([1.0] * len(list_ai))
         for question in form.question_list:
             for answer in question.choosen_answers:

@@ -416,3 +416,9 @@ class DbConnection(DBInterface):
         query = Query(f"g.V('{form_id}').properties('best_ais').value()")
         result = self.run_gremlin_query(query)
         return result[0].split(", ") if result[0] else []
+
+    def get_experiment_id(self, username: Username, form_name: str) -> list[str]:
+        """Method used to get an experiment ID stored in the form"""
+        node_name = f"{username}-answer1-{form_name}"
+        query = Query(f"g.V('{node_name}').properties('mlflow_id').value()")
+        return self.run_gremlin_query(query)

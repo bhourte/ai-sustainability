@@ -146,8 +146,14 @@ class Application:
         name = "experiment-" + username + "-" + form_name
         return self.mlflow.create_experiment(name, description)
 
+    def get_experiment_id(self, username: Username, form_name: str) -> Optional[str]:
+        id = self.database.get_experiment_id(username, form_name)
+        return id[0] if id else None
+
     def change_experiment_name(self, username: Username, old_form_name: str, new_form_name: str) -> Optional[str]:
         """method used to change the name of an mlflow experiment and return the corresponding ID"""
-        old_experiment_name = "experiment-" + username + "-" + old_form_name
+        experiment_id = self.get_experiment_id(username, old_form_name)
+        if experiment_id is None:
+            return None
         new_experiment_name = "experiment-" + username + "-" + new_form_name
-        return self.mlflow.change_experiment_name(old_experiment_name, new_experiment_name)
+        return self.mlflow.change_experiment_name(experiment_id, new_experiment_name)

@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 from ai_validation.business import Business
 from ai_validation.db_access import DbAccess
 from ai_validation.mlflow_access import MlflowConnector
+from ai_validation.models import Experiment
 
 
 class Application:
@@ -19,13 +20,17 @@ class Application:
     def get_all_user(self) -> list[str]:
         return self.database.get_all_users()
 
-    def get_metrics(self, username: str, form_name: str, replace_accuracy: bool = True) -> list[str]:
+    def get_form_id(self, experiment_id: str) -> str:
+        return self.database.get_form_id(experiment_id)
+
+    def get_metrics(self, form_id: str, replace_accuracy: bool = True) -> list[str]:
         # Use replace_accuracy if an "Accuracy" metric is log in the mlflow experience
-        raw_metrics = self.database.get_all_metrics(username, form_name)
+        raw_metrics = self.database.get_all_metrics(form_id)
         return self.business.replace_accuracy(raw_metrics) if replace_accuracy else raw_metrics
 
-    def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[Tuple[list[str], list[str]]]:
-        return self.mlflow_connector.get_experiment(selected_user)
+    def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[list[Experiment]]:
+        id_list = self.database.get_experiment_id(selected_user)
+        return self.mlflow_connector.get_experiment(selected_user, id_list)
 
     def get_ai_from_experiment(
         self, selected_experiment_id: str, used_metric: list[str]
