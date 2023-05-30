@@ -1,1 +1,1 @@
-﻿python3 -m streamlit run .\ai_validation\user_interface.py
+﻿python3 -m streamlit run .\ai_validation\"🔍_Experiment_selection.py"

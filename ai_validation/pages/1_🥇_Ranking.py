@@ -1,14 +1,10 @@
 """File used to show the result of the tests made by the expert in mlflow"""
 
-from typing import Optional
-
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from decouple import config
 
 from ai_validation.application import Application
-from ai_validation.models import Experiment, Model
+from ai_validation.models import Model
 
 METRIC_USED = [
     "Duration",
@@ -28,47 +24,13 @@ def get_application() -> Application:
     return app
 
 
-class UserInterface:
+class Ranking:
     """Class used to show all result of experiment based on the form"""
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Result page", page_icon="🔍")
-        st.title("🔍 Result")
+        st.set_page_config(page_title="Ranking", page_icon="🥇")
+        st.title("🥇 Ranking")
         self.app = get_application()
-
-    def select_user(self, list_username: list[str]) -> Optional[str]:
-        """Method used to show all user and select one"""
-        list_username = ["<Select a user>", "<All user>"] + list_username
-        question = "Select an user"
-        selected_user = str(st.selectbox(label=question, options=list_username, index=0))
-        if selected_user == "<All user>":
-            return None
-        return selected_user if selected_user != "<Select a user>" else ""
-
-    def select_experiment(self, list_experiment: list[Experiment]) -> Optional[Experiment]:
-        """Method used to show all not empty experiment and used to select one"""
-        list_exp = [f"{i.experiment_name} with id : {i.experiment_id}" for i in list_experiment]
-        list_exp = ["<Select a experiment>"] + list_exp
-        question = "Select a experiment by is name"
-        selected_experiment = str(st.selectbox(label=question, options=list_exp, index=0))
-        return (
-            list_experiment[list_exp.index(selected_experiment) - 1]
-            if selected_experiment != "<Select a experiment>"
-            else None
-        )
-
-    def plot_comparison_graph(self, list_model: list[Model], list_metrics: list[str]) -> None:
-        """Method used to show a big graph with 2 axes and show Pareto Front"""
-        # TODO rendre ca + joli (noms axes, changer "color", ajout nom model surtout mdr, etc.)
-        print(list_metrics)
-        metric1 = list_metrics[0]
-        metric2 = list_metrics[1]
-        list_pareto_point = self.app.get_pareto_points(list_model, metric1, metric2)
-        metric1_values = [i.normalized_metrics[metric1] for i, _ in list_pareto_point]
-        metric2_values = [i.normalized_metrics[metric2] for i, _ in list_pareto_point]
-        text_parreto = [i for _, i in list_pareto_point]
-        fig = px.scatter(x=metric1_values, y=metric2_values, color=text_parreto)
-        st.plotly_chart(fig)
 
     def plot_small_graph(self, model: Model, selected_metric: str) -> None:
         """Method used to show a litle bar graph for a model"""
@@ -105,12 +67,13 @@ class UserInterface:
             with col3:
                 st.caption(
                     body=f"score : {round(model.normalized_metrics[selected_metric]*100, 1)}%",
-                    help=model.get_metrics_expaliner(METRIC_USED, get_all_metrics=False),
+                    help=model.get_metrics_expaliner(METRIC_USED, get_all_metrics=True),
                 )
                 # self.plot_small_graph(model, selected_metric)
 
     def show_calculation_global_score(self, list_metrics: list[str]) -> None:
         """Method used to show how the score is calculated from each metrics"""
+        # TODO changer l'affichage de global score pour qu'il soit correct 1/max_error par ex
         text = " * ".join(list_metrics)
         st.subheader(
             body=f"How Global Score is obtained : \n {text}",
@@ -138,21 +101,16 @@ class UserInterface:
         This is the code used to render the form and used by the user to fill it
         """
 
-        list_user = self.app.get_all_user()
-        selected_user = self.select_user(list_user)
-        if not selected_user and selected_user is not None:
-            return
-
-        list_experiments = self.app.get_experiment_from_user(selected_user)
-        if list_experiments is None:
-            st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
-            return
-        if not list_experiments:
-            st.warning("There is no experiment for this user")
-            return
-        selected_experiment = self.select_experiment(list_experiments)
+        selected_experiment = (
+            st.session_state.selected_experiment if "selected_experiment" in st.session_state else None
+        )
         if selected_experiment is None:
+            st.warning("No experiment selected, please select one")
             return
+        st.caption(
+            f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
+        )
+
         form_id = self.app.get_form_id(selected_experiment.experiment_id)
         list_metrics = self.app.get_metrics(form_id)
 
@@ -169,10 +127,9 @@ class UserInterface:
         self.show_ordered_ais(list_ais, selected_metric)
         if selected_metric == "Global score":
             self.show_calculation_global_score(list_metrics)
-        # self.show_best_ai_graph(list_ais, selected_metric)
-        self.plot_comparison_graph(list_ais, list_metrics)
+        self.show_best_ai_graph(list_ais, selected_metric)
 
 
 if __name__ == "__main__":
-    ui = UserInterface()
+    ui = Ranking()
     ui.render()

@@ -34,3 +34,7 @@ class MlflowConnector:
 
     def get_run_page(self, selected_experiment_id: str) -> PagedList[Run]:
         return self.client.search_runs([selected_experiment_id])
+
+    def get_all_metrics(self, experiment_id: str) -> list[str]:
+        run_page = self.get_run_page(experiment_id)
+        return ["Duration"] + list(run_page[0].data.to_dictionary()["metrics"].keys())

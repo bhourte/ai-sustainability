@@ -30,10 +30,17 @@ class Model:
             [f"{i} : {self.parameters[i]}" for i in self.parameters]
         )
 
-    def get_metrics_expaliner(self, metric_used: list[str], get_all_metrics: bool = False) -> str:
+    def get_metrics_expaliner(
+        self, metric_used: list[str], get_all_metrics: bool = False, normalized: bool = False
+    ) -> str:
         """Method used to get a string explaining all metrics and their value of a single run"""
         list_metrics: list[str] = ["There are all used metrics for this AI :"]
-        for i in self.metrics:
-            if i in metric_used or get_all_metrics:
-                list_metrics.append(f"{i} : {self.metrics[i]}")
+        if not normalized:
+            for i in self.metrics:
+                if i in metric_used or get_all_metrics:
+                    list_metrics.append(f"{i} : {self.metrics[i]}")
+        else:
+            for i in self.normalized_metrics:
+                if i in metric_used or get_all_metrics:
+                    list_metrics.append(f"{i} : {self.normalized_metrics[i]}")
         return "  \n".join(list_metrics)

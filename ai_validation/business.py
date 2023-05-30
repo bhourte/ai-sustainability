@@ -50,7 +50,7 @@ class Business:
             metrics = run.data.to_dictionary()["metrics"]
             metrics["Duration"] = (
                 run.info.end_time - run.info.start_time
-            )  # TODO change it here, berk, depend of the computer
+            )  # TODO change Duration here, berk, depend of the computer speed
             list_model.append(Model(model_name, params, metrics))
         return list_model
 

@@ -46,3 +46,6 @@ class Application:
 
     def get_pareto_points(self, list_model: list[Model], metric1: str, metric2: str) -> list[Tuple[Model, bool]]:
         return self.business.get_pareto_points(list_model, metric1, metric2)
+
+    def get_all_metrics(self, experiment_id: str) -> list[str]:
+        return self.mlflow_connector.get_all_metrics(experiment_id)
