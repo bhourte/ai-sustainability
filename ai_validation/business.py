@@ -12,6 +12,7 @@ POSITIVE_METRICS = [
     "f1_score_handmade",
     "f1_score",
     "evaluation_accuracy",
+    "r2_score",
 ]
 NEGATIVE_METRICS = [
     "Duration",
@@ -50,7 +51,7 @@ class Business:
             metrics = run.data.to_dictionary()["metrics"]
             metrics["Duration"] = (
                 run.info.end_time - run.info.start_time
-            )  # TODO change Duration here, berk, depend of the computer speed
+            )  # TODO change Duration here, berk, depend of the computer calculation speed, and it always vary :/
             list_model.append(Model(model_name, params, metrics))
         return list_model
 

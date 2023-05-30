@@ -51,6 +51,24 @@ class UserInterface:
     def select_metrics(self, metric_list: list[str]) -> list[str]:
         return st.multiselect("Select all metrics you want to analyse", metric_list)
 
+    def show_comparison_plot(self, model_list: list[Model], metric_list: list[str]) -> None:
+        selected_models_name = st.multiselect(
+            "Select 2 models to compare :", [i.model_name for i in model_list], max_selections=2
+        )
+        if len(selected_models_name) < 2:
+            return
+        selected_models: list[Model] = []
+        for model in model_list:
+            if model.model_name in selected_models_name:
+                selected_models.append(model)
+        fig = go.Figure()
+        metric1 = [selected_models[0].normalized_metrics[metric] for metric in metric_list]
+        fig.add_trace(go.Scatterpolar(r=metric1, theta=metric_list, fill="toself", name=selected_models[0].model_name))
+        metric2 = [selected_models[1].normalized_metrics[metric] for metric in metric_list]
+        fig.add_trace(go.Scatterpolar(r=metric2, theta=metric_list, fill="toself", name=selected_models[1].model_name))
+        fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
+        st.plotly_chart(fig)
+
     def render(self) -> None:
         """
         This is the code used to render the form and used by the user to fill it
@@ -69,7 +87,7 @@ class UserInterface:
         if list_ais is None:
             st.warning("No run done for this experiment")
             return
-        col1, col2 = st.columns([1, 4])
+        col1, _, col2 = st.columns([1, 1, 4])
         with col1:
             selected_metrics = self.select_metrics(list_metrics)
             selected_models = self.select_model(list_ais)
@@ -78,22 +96,26 @@ class UserInterface:
             self.app.set_normalized_metrics(list_ais, selected_metrics)
         with col2:
             for model in selected_models:
-                col_a, col_b = st.columns(2)
+                col_a, col_b = st.columns([1, 2])
                 with col_a:
+                    st.subheader(" ")
+                    st.subheader(" ")
+                    st.subheader(" ")
                     st.subheader(model.model_name)
                     st.subheader("All metrics : ", help=model.get_metrics_expaliner(selected_metrics, True))
                     st.subheader(
                         "Normalized metrics : ",
-                        help=model.get_metrics_expaliner(selected_metrics, True, normalized=True),
+                        help=model.get_metrics_expaliner(selected_metrics, normalized=True),
                     )
                     st.subheader("Hyperparameters : ", help=model.get_param_explainer())
                 with col_b:
                     values = [model.normalized_metrics[i] for i in selected_metrics]
-                    df = pd.DataFrame(dict(value=values, variable=selected_metrics))
+                    df = pd.DataFrame({"value": values, "variable": selected_metrics})
                     fig = px.line_polar(df, r="value", theta="variable", line_close=True, text="value")
                     fig.update_traces(fill="toself", textposition="top center")
-                    fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 1])))
+                    fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}})
                     st.plotly_chart(fig)
+        self.show_comparison_plot(selected_models, selected_metrics)
 
 
 if __name__ == "__main__":

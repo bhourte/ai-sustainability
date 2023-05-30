@@ -6,16 +6,16 @@ import streamlit as st
 from ai_validation.application import Application
 from ai_validation.models import Model
 
-METRIC_USED = [
+NUMERATOR_METRICS = ["f1_score_handmade", "f1_score", "evaluation_accuracy", "r2_score"]  # Higher is best
+DENOMINATOR_METRICS = [
     "Duration",
     "false_negatives",
     "false_positives",
     "max_error",
     "mean_absolute_error",
-    "f1_score_handmade",
-    "f1_score",
-    "evaluation_accuracy",
-]
+]  # Lower is best
+
+METRIC_USED = NUMERATOR_METRICS + DENOMINATOR_METRICS
 
 
 # @st.cache_resource
@@ -73,11 +73,26 @@ class Ranking:
 
     def show_calculation_global_score(self, list_metrics: list[str]) -> None:
         """Method used to show how the score is calculated from each metrics"""
-        # TODO changer l'affichage de global score pour qu'il soit correct 1/max_error par ex
-        text = " * ".join(list_metrics)
+        list_numerator: list[str] = []
+        list_denominator: list[str] = []
+        for metric in list_metrics:
+            if metric in NUMERATOR_METRICS:
+                list_numerator.append(metric)
+            if metric in DENOMINATOR_METRICS:
+                list_denominator.append(metric)
+        if not list_numerator:
+            list_numerator.append("1")
+        if not list_denominator:
+            list_denominator.append("1")
+        numerator = "*".join(list_numerator).replace("_", "\\;")
+        denominator = "*".join(list_denominator).replace("_", "\\;")
         st.subheader(
-            body=f"How Global Score is obtained : \n {text}",
-            help="Each metrcis is normalized between 0 and 1 before being put in the calculation",
+            body="How Global Score is obtained :",
+            help="The metrics used to calculate the Global Score are those that correspond to the choices made by the user in the form he has completed.",
+        )
+        st.latex(
+            "\\frac{" + numerator + "}{" + denominator + "}",
+            help="The global score is normalized between 0 and 1 after the calculation (1 for the best and 0 for the worst)",
         )
 
     def show_best_ai_graph(self, list_of_ais: list[Model], selected_metric) -> None:
