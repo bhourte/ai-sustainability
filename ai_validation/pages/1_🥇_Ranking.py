@@ -12,7 +12,7 @@ class Ranking:
     """Class used to show all result of experiment based on the form"""
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Ranking page", page_icon="🥇")
+        st.set_page_config(page_title="Ranking page", page_icon="🥇", layout="wide")
         st.title("🥇 Ranking")
         self.app = get_application()
 
@@ -37,12 +37,14 @@ class Ranking:
             in which the 1st ai has the best score and so on
         """
         for i, model in enumerate(list_of_ai):
-            col1, col2, col3 = st.columns([1, 15, 15])
+            col1, col2, col3 = st.columns([1, 10, 20])
             with col1:
+                st.subheader(" ")
                 st.subheader(" ")
                 st.subheader(" ")
                 st.subheader(body=f"{i+1})")
             with col2:
+                st.subheader(" ")
                 st.subheader(" ")
                 st.subheader(" ")
                 st.subheader(body=model.model_name, help=model.get_param_explainer())

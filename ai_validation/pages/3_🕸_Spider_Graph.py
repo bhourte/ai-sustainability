@@ -66,6 +66,9 @@ class UserInterface:
             f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
         )
         list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
+        if list_metrics is None:
+            st.warning("There is no run done for this experiment")
+            return None
         list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("No run done for this experiment")
@@ -98,7 +101,9 @@ class UserInterface:
                     fig.update_traces(fill="toself", textposition="top center")
                     fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}})
                     st.plotly_chart(fig)
-        self.show_comparison_plot(selected_models, selected_metrics)
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
+            self.show_comparison_plot(selected_models, selected_metrics)
 
 
 if __name__ == "__main__":
