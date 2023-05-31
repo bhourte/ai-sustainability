@@ -8,25 +8,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from decouple import config
 
-from ai_validation.application import Application
+from ai_validation.global_variables import METRIC_IMPLEMENTED
 from ai_validation.models import Experiment, Model
-
-METRIC_USED = [
-    "Duration",
-    "false_negatives",
-    "false_positives",
-    "max_error",
-    "mean_absolute_error",
-    "f1_score_handmade",
-    "f1_score",
-    "evaluation_accuracy",
-]
-
-
-# @st.cache_resource
-def get_application() -> Application:
-    app = Application()
-    return app
+from ai_validation.utils import get_application
 
 
 class UserInterface:
@@ -112,7 +96,7 @@ class UserInterface:
             with col3:
                 st.caption(
                     body=f"score : {round(model.normalized_metrics[selected_metric]*100, 1)}%",
-                    help=model.get_metrics_expaliner(METRIC_USED, get_all_metrics=True),
+                    help=model.get_metrics_expaliner(METRIC_IMPLEMENTED, get_all_metrics=True),
                 )
                 # self.plot_small_graph(model, selected_metric)
 
@@ -162,8 +146,10 @@ class UserInterface:
         if selected_experiment is None:
             return
         st.session_state.selected_experiment = selected_experiment
-        
-        st.caption(f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}")
+
+        st.caption(
+            f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
+        )
 
 
 if __name__ == "__main__":

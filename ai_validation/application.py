@@ -41,11 +41,13 @@ class Application:
         run_page = self.mlflow_connector.get_run_page(selected_experiment_id)
         return self.business.get_ai_list(run_page)
 
-    def set_normalized_metrics(self, model_list: list[Model], list_metrics: list[str]) -> None:
-        self.business.set_normalized_metrics(model_list, list_metrics)
+    def set_normalized_metrics(
+        self, model_list: list[Model], list_metrics: list[str], form_list_metrics: Optional[list[str]] = None
+    ) -> None:
+        self.business.set_normalized_metrics(model_list, list_metrics, form_list_metrics)
 
     def get_pareto_points(self, list_model: list[Model], metric1: str, metric2: str) -> list[Tuple[Model, bool]]:
         return self.business.get_pareto_points(list_model, metric1, metric2)
 
-    def get_all_metrics(self, experiment_id: str) -> list[str]:
+    def get_all_metrics(self, experiment_id: str) -> Optional[list[str]]:
         return self.mlflow_connector.get_all_metrics(experiment_id)

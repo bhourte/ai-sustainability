@@ -3,25 +3,13 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-from ai_validation.application import Application
+from ai_validation.global_variables import (
+    DENOMINATOR_METRICS,
+    METRIC_IMPLEMENTED,
+    NUMERATOR_METRICS,
+)
 from ai_validation.models import Model
-
-NUMERATOR_METRICS = ["f1_score_handmade", "f1_score", "evaluation_accuracy", "r2_score"]  # Higher is best
-DENOMINATOR_METRICS = [
-    "Duration",
-    "false_negatives",
-    "false_positives",
-    "max_error",
-    "mean_absolute_error",
-]  # Lower is best
-
-METRIC_USED = NUMERATOR_METRICS + DENOMINATOR_METRICS
-
-
-# @st.cache_resource
-def get_application() -> Application:
-    app = Application()
-    return app
+from ai_validation.utils import get_application
 
 
 class Ranking:
@@ -67,7 +55,7 @@ class Ranking:
             with col3:
                 st.caption(
                     body=f"score : {round(model.normalized_metrics[selected_metric]*100, 1)}%",
-                    help=model.get_metrics_expaliner(METRIC_USED, get_all_metrics=True),
+                    help=model.get_metrics_expaliner(METRIC_IMPLEMENTED, get_all_metrics=True),
                 )
                 # self.plot_small_graph(model, selected_metric)
 
@@ -108,6 +96,7 @@ class Ranking:
 
     def select_ranking(self, list_metrics: list[str]) -> str:
         """Used to show a select box where the user can choose how to rank the Ais"""
+        new_list_metrics: list[str] = []
         choice = ["Global score"] + list_metrics
         return str(st.selectbox(label="Rank AIs by : ", options=choice, index=0))
 
@@ -126,22 +115,27 @@ class Ranking:
             f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
         )
 
-        form_id = self.app.get_form_id(selected_experiment.experiment_id)
-        list_metrics = self.app.get_metrics(form_id)
+        list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
+        if list_metrics is None:
+            st.warning("There is no run done for the selected experiment")
+            return
 
         selected_metric = self.select_ranking(list_metrics)
         print(list_metrics)
+
+        form_id = self.app.get_form_id(selected_experiment.experiment_id)
+        form_list_metrics = self.app.get_metrics(form_id)
 
         list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return
         # ranked_ais = list[Tuple(Model, dict[metric: normalized_metric])]
-        self.app.set_normalized_metrics(list_ais, list_metrics)
+        self.app.set_normalized_metrics(list_ais, list_metrics, form_list_metrics)
         list_ais.sort(key=lambda x: x.normalized_metrics[selected_metric], reverse=True)
         self.show_ordered_ais(list_ais, selected_metric)
         if selected_metric == "Global score":
-            self.show_calculation_global_score(list_metrics)
+            self.show_calculation_global_score(form_list_metrics)
         self.show_best_ai_graph(list_ais, selected_metric)
 
 

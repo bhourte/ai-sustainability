@@ -1,5 +1,6 @@
 """File used to connect to an mlflow to retreive all information about test run"""
 
+from pdb import run
 from typing import Optional
 
 from decouple import config
@@ -8,6 +9,7 @@ from mlflow.exceptions import MlflowException
 from mlflow.store.entities import PagedList
 from mlflow.tracking import MlflowClient
 
+from ai_validation.global_variables import METRIC_IMPLEMENTED
 from ai_validation.models import Experiment
 
 
@@ -35,6 +37,13 @@ class MlflowConnector:
     def get_run_page(self, selected_experiment_id: str) -> PagedList[Run]:
         return self.client.search_runs([selected_experiment_id])
 
-    def get_all_metrics(self, experiment_id: str) -> list[str]:
+    def get_all_metrics(self, experiment_id: str) -> Optional[list[str]]:
         run_page = self.get_run_page(experiment_id)
-        return ["Duration"] + list(run_page[0].data.to_dictionary()["metrics"].keys())
+        if not run_page:
+            return None
+        list_metrics: list[str] = []
+        for metric in list(run_page[0].data.to_dictionary()["metrics"].keys()):
+            if metric in METRIC_IMPLEMENTED:
+                list_metrics.append(metric)
+
+        return ["Duration"] + list_metrics

@@ -7,25 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from ai_validation.application import Application
 from ai_validation.models import Experiment, Model
-
-METRIC_USED = [
-    "Duration",
-    "false_negatives",
-    "false_positives",
-    "max_error",
-    "mean_absolute_error",
-    "f1_score_handmade",
-    "f1_score",
-    "evaluation_accuracy",
-]
-
-
-# @st.cache_resource
-def get_application() -> Application:
-    app = Application()
-    return app
+from ai_validation.utils import get_application
 
 
 class UserInterface:

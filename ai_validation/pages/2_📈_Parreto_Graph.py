@@ -6,25 +6,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from ai_validation.application import Application
 from ai_validation.models import Experiment, Model
-
-METRIC_USED = [
-    "Duration",
-    "false_negatives",
-    "false_positives",
-    "max_error",
-    "mean_absolute_error",
-    "f1_score_handmade",
-    "f1_score",
-    "evaluation_accuracy",
-]
-
-
-# @st.cache_resource
-def get_application() -> Application:
-    app = Application()
-    return app
+from ai_validation.utils import get_application
 
 
 class Parreto:
@@ -73,10 +56,15 @@ class Parreto:
         with col2:
             st.caption(" ")
             st.caption(" ")
-            all_metric: bool = st.checkbox("Allow all metrics?")
+            all_metric: bool = st.checkbox(
+                "Allow all metrics?", help="If not checked, displays only the metrics provided from the completed form"
+            )
         with col1:
             if all_metric:
                 list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
+                if list_metrics is None:
+                    st.warning("No run logs for this experiment")
+                    return
             else:
                 form_id = self.app.get_form_id(selected_experiment.experiment_id)
                 list_metrics = self.app.get_metrics(form_id)

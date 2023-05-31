@@ -6,21 +6,8 @@ import numpy as np
 from mlflow.entities.run import Run
 from mlflow.store.entities import PagedList
 
+from ai_validation.global_variables import DENOMINATOR_METRICS, NUMERATOR_METRICS
 from ai_validation.models import Model
-
-POSITIVE_METRICS = [
-    "f1_score_handmade",
-    "f1_score",
-    "evaluation_accuracy",
-    "r2_score",
-]
-NEGATIVE_METRICS = [
-    "Duration",
-    "false_negatives",
-    "false_positives",
-    "max_error",
-    "mean_absolute_error",
-]
 
 
 class Business:
@@ -55,47 +42,50 @@ class Business:
             list_model.append(Model(model_name, params, metrics))
         return list_model
 
-    def set_and_normalize_one_metric(self, list_models: list[Model], used_metric: str) -> None:
+    def set_and_normalize_one_metric(
+        self, list_models: list[Model], used_metric: str, form_list_metrics: Optional[list[str]] = None
+    ) -> None:
         """Method used to set a normalized coeficient for one metric (used_metric)"""
-        if used_metric in POSITIVE_METRICS:
+        if used_metric in NUMERATOR_METRICS:
             max_value = max(list(i.metrics[used_metric] for i in list_models))
             min_value = min(list(i.metrics[used_metric] for i in list_models))
             for model in list_models:
                 model.normalized_metrics[used_metric] = (model.metrics[used_metric] - min_value) / (
                     max_value - min_value
                 )
-        elif used_metric in NEGATIVE_METRICS:
+        elif used_metric in DENOMINATOR_METRICS:
             max_value = max(list(1 / i.metrics[used_metric] for i in list_models))
             min_value = min(list(1 / i.metrics[used_metric] for i in list_models))
             for model in list_models:
                 model.normalized_metrics[used_metric] = (1 / model.metrics[used_metric] - min_value) / (
                     max_value - min_value
                 )
-        elif used_metric == "Global score":
+        elif used_metric == "Global score" and form_list_metrics is not None:
             list_coef = np.ones(len(list_models))
             for index, model in enumerate(list_models):
-                for metric in POSITIVE_METRICS:
-                    if metric in model.metrics.keys():
+                for metric in form_list_metrics:
+                    if metric in NUMERATOR_METRICS and metric in model.metrics.keys():
                         list_coef[index] = list_coef[index] * model.metrics[metric]
-                for metric in NEGATIVE_METRICS:
-                    if metric in model.metrics.keys():
+                    if metric in DENOMINATOR_METRICS and metric in model.metrics.keys():
                         list_coef[index] = list_coef[index] / model.metrics[metric]
             max_value = max(list(list_coef[i] for i in range(len(list_models))))
             min_value = min(list(list_coef[i] for i in range(len(list_models))))
             for index, model in enumerate(list_models):
                 model.normalized_metrics[used_metric] = (list_coef[index] - min_value) / (max_value - min_value)
                 print(model.normalized_metrics)
-        else:
+        elif used_metric != "Global score":
             raise NotImplementedError(f"Metric {used_metric} not implemented yet, choose an other one.")
 
-    def set_normalized_metrics(self, list_model: list[Model], list_metrics: list[str]) -> None:
+    def set_normalized_metrics(
+        self, list_model: list[Model], list_metrics: list[str], form_list_metrics: Optional[list[str]] = None
+    ) -> None:
         """
         Method used to rank all AIs according to selected_metric
         Return : a list of Tuple(Model, float: normalized selected_metric)
         """
         for metric in list_metrics:
             self.set_and_normalize_one_metric(list_model, metric)
-        self.set_and_normalize_one_metric(list_model, "Global score")
+        self.set_and_normalize_one_metric(list_model, "Global score", form_list_metrics)
 
     def get_pareto_points(self, list_model: list[Model], metric1: str, metric2: str) -> list[Tuple[Model, bool]]:
         list_tuple = [(model, 0) for model in list_model]  # 0 = no yet tested, -1 = non-pareto, 1 = pareto
