@@ -13,7 +13,9 @@ class Ranking:
 
     def __init__(self) -> None:
         st.set_page_config(page_title="Ranking page", page_icon="🥇", layout="wide")
-        st.title("🥇 Ranking")
+        _, col, _ = st.columns([2, 3, 2])
+        with col:
+            st.title("🥇 Ranking")
         self.app = get_application()
 
     def plot_small_graph(self, model: Model, selected_metric: str) -> None:
@@ -47,7 +49,10 @@ class Ranking:
                 st.subheader(" ")
                 st.subheader(" ")
                 st.subheader(" ")
-                st.subheader(body=model.model_name, help=model.get_param_explainer())
+                st.subheader(
+                    body=model.model_name,
+                    help=model.get_param_explainer() + "  \n  \n" + model.get_metrics_expaliner([], True),
+                )
             with col3:
                 self.plot_small_graph(model, selected_metric)
 
@@ -102,14 +107,16 @@ class Ranking:
         if selected_experiment is None:
             st.warning("No experiment selected, please select one")
             return
-        st.caption(
-            f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
-        )
+        _, col, _ = st.columns([2, 3, 2])
+        with col:
+            st.caption(
+                f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
+            )
 
-        list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
-        if list_metrics is None:
-            st.warning("There is no run done for the selected experiment")
-            return
+            list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
+            if list_metrics is None:
+                st.warning("There is no run done for the selected experiment")
+                return
 
         selected_metric = self.select_ranking(list_metrics)
         print(list_metrics)
