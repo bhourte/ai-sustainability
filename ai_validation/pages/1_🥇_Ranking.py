@@ -3,11 +3,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-from ai_validation.global_variables import (
-    DENOMINATOR_METRICS,
-    METRIC_IMPLEMENTED,
-    NUMERATOR_METRICS,
-)
+from ai_validation.global_variables import DENOMINATOR_METRICS, NUMERATOR_METRICS
 from ai_validation.models import Model
 from ai_validation.utils import get_application
 
@@ -16,25 +12,19 @@ class Ranking:
     """Class used to show all result of experiment based on the form"""
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Ranking", page_icon="🥇")
+        st.set_page_config(page_title="Ranking page", page_icon="🥇")
         st.title("🥇 Ranking")
         self.app = get_application()
 
     def plot_small_graph(self, model: Model, selected_metric: str) -> None:
         """Method used to show a litle bar graph for a model"""
-        # TODO ameliorer ca, ca ne ressemble visuellement a rien :
-        # *) scale entre 0 et 100 (certain a 50 prennent tout l'espace)
-        # *) taille de graph
-        # *) mettre en couleur la selected_metric
-        hover_text = [repr(metric) for metric in model.normalized_metrics]  # text with the in and out node
-        values = [model.normalized_metrics[metric] * 100 for metric in model.normalized_metrics]
-        list_metric_name = list(model.normalized_metrics)  # To get the edges name in ascending order
-        fig = go.Figure(data=[go.Bar(x=list_metric_name, y=values, dy=100)])
-        fig.update_layout(
-            yaxis={
-                "dtick": 1,
-            },
-        )
+        list_metric_name = list(model.normalized_metrics)
+        values = [model.normalized_metrics[metric] * 100 for metric in list_metric_name]
+        selected = ["blue"] * len(list_metric_name)
+        selected[list_metric_name.index(selected_metric)] = "green"
+
+        fig = go.Figure(data=[go.Bar(x=list_metric_name, y=values, marker_color=selected)])
+        fig.update_yaxes(nticks=2, range=[0, 100])
         fig.update_layout(height=200)
         st.plotly_chart(fig, use_container_width=True, height=200)
 
@@ -49,15 +39,15 @@ class Ranking:
         for i, model in enumerate(list_of_ai):
             col1, col2, col3 = st.columns([1, 15, 15])
             with col1:
-                st.caption(body=f"{i+1})")
+                st.subheader(" ")
+                st.subheader(" ")
+                st.subheader(body=f"{i+1})")
             with col2:
-                st.caption(body=model.model_name, help=model.get_param_explainer())
+                st.subheader(" ")
+                st.subheader(" ")
+                st.subheader(body=model.model_name, help=model.get_param_explainer())
             with col3:
-                st.caption(
-                    body=f"score : {round(model.normalized_metrics[selected_metric]*100, 1)}%",
-                    help=model.get_metrics_expaliner(METRIC_IMPLEMENTED, get_all_metrics=True),
-                )
-                # self.plot_small_graph(model, selected_metric)
+                self.plot_small_graph(model, selected_metric)
 
     def show_calculation_global_score(self, list_metrics: list[str]) -> None:
         """Method used to show how the score is calculated from each metrics"""
@@ -96,7 +86,6 @@ class Ranking:
 
     def select_ranking(self, list_metrics: list[str]) -> str:
         """Used to show a select box where the user can choose how to rank the Ais"""
-        new_list_metrics: list[str] = []
         choice = ["Global score"] + list_metrics
         return str(st.selectbox(label="Rank AIs by : ", options=choice, index=0))
 
@@ -134,9 +123,14 @@ class Ranking:
         self.app.set_normalized_metrics(list_ais, list_metrics, form_list_metrics)
         list_ais.sort(key=lambda x: x.normalized_metrics[selected_metric], reverse=True)
         self.show_ordered_ais(list_ais, selected_metric)
-        if selected_metric == "Global score":
-            self.show_calculation_global_score(form_list_metrics)
-        self.show_best_ai_graph(list_ais, selected_metric)
+
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
+            if selected_metric == "Global score":
+                self.show_calculation_global_score(form_list_metrics)
+        _, col, _ = st.columns([1, 4, 2])
+        with col:
+            self.show_best_ai_graph(list_ais, selected_metric)
 
 
 if __name__ == "__main__":

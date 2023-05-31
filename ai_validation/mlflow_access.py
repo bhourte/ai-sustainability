@@ -1,6 +1,5 @@
 """File used to connect to an mlflow to retreive all information about test run"""
 
-from pdb import run
 from typing import Optional
 
 from decouple import config
