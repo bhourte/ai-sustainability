@@ -53,7 +53,7 @@ class Form:
     def show_form_metrics(self, form_id: str) -> None:
         list_metrics = self.app.get_metrics(form_id)
         st.header(" ")
-        st.header("And ther are the metrics corresponding to the User's choice :")
+        st.header("And here are the metrics corresponding to the User's choice :")
         for metric in list_metrics:
             st.subheader(metric)
         self.show_calculation_global_score(list_metrics)

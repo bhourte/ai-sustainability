@@ -24,7 +24,7 @@ class UserInterface:
     def select_model(self, model_list: list[Model]) -> Optional[list[Model]]:
         selected_model_list: list[Model] = []
         selected_name = st.multiselect(
-            "select here all the models you want to display in a spider graph", [i.model_name for i in model_list]
+            "Select here all the models you want to display in a spider graph", [i.model_name for i in model_list]
         )
         if not selected_name:
             return None
@@ -72,7 +72,7 @@ class UserInterface:
         list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
         if list_metrics is None:
             st.warning("There is no run done for this experiment")
-            return None
+            return
         list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("No run done for this experiment")
