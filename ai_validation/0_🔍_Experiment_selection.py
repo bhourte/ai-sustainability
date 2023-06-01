@@ -19,10 +19,10 @@ class UserInterface:
 
     def select_user(self, list_username: list[str]) -> Optional[str]:
         """Method used to show all user and select one"""
-        list_username = ["<Select a user>", "<All user>"] + list_username
+        list_username = ["<Select a user>", "<All experiments>", "<Only independant experiments>"] + list_username
         question = "Select an user"
         selected_user = str(st.selectbox(label=question, options=list_username, index=0))
-        if selected_user == "<All user>":
+        if selected_user == "<All experiments>":
             return None
         return selected_user if selected_user != "<Select a user>" else ""
 
@@ -48,13 +48,31 @@ class UserInterface:
         if not selected_user and selected_user is not None:
             return
 
-        list_experiments = self.app.get_experiment_from_user(selected_user)
-        if list_experiments is None:
-            st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
-            return
-        if not list_experiments:
-            st.warning("There is no experiment for this user")
-            return
+        list_experiments: list[Experiment] = []
+        if selected_user == "<Only independant experiments>":
+            all_experiments = self.app.get_experiment_from_user(None)
+            if all_experiments is None:
+                st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
+                return
+            experiments_id_with_form: list[str] = []
+            for user in list_user:
+                experiments_of_user = self.app.get_experiment_from_user(user)
+                if experiments_of_user is None:
+                    st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
+                    return
+                experiments_id_with_form += [exp.experiment_id for exp in experiments_of_user]
+            for experiment in all_experiments:
+                if experiment.experiment_id not in experiments_id_with_form:
+                    list_experiments.append(experiment)
+        else:
+            list_experiments_bis = self.app.get_experiment_from_user(selected_user)
+            if list_experiments_bis is None:
+                st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
+                return
+            if not list_experiments_bis:
+                st.warning("There is no experiment for this user")
+                return
+            list_experiments = list_experiments_bis
         selected_experiment = self.select_experiment(list_experiments)
         if selected_experiment is None:
             return
