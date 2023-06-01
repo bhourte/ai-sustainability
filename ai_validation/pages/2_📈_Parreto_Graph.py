@@ -1,5 +1,6 @@
 """File used to show the result of the tests made by the expert in mlflow"""
 
+import math
 from typing import Tuple
 
 import pandas as pd
@@ -29,13 +30,42 @@ class Parreto:
         fig = px.scatter(df, x=metric1, y=metric2, color="Is Optimal ?", hover_data="Model name")
         st.plotly_chart(fig)
 
-    def show_pareto_point(self, list_pareto_point: list[Tuple[Model, bool]], metric1: str, metric2: str) -> None:
+    def show_pareto_point(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
         """Method used to show all parreto point for the 2 metrics selected"""
-        st.subheader(f"There are {[i for _, i in list_pareto_point].count(True)} optimal models :")
-        for model, is_parreto in list_pareto_point:
-            if is_parreto:
-                help_text = f"Metrics :  \n{model.get_metrics_expaliner([metric1, metric2])}  \n  \n  \nHyperparameters :  \n{model.get_param_explainer()}"
-                st.subheader(model.model_name, help=help_text)
+        col1, col2 = st.columns([5, 4])
+        with col2:
+            st.caption(" ")
+            show_all_models = st.checkbox("Show all model?", help="Check if you want to see all models")
+        with col1:
+            help_text = f"The score corresponds to the distance between the point and the origin of the graph.  \n A point in the upper right corner will have 100% while a point in the 2 extreme corners will have a score of {round(1/math.sqrt(2), 2)}%"
+            number_of_models = (
+                len(list_pareto_score) if show_all_models else [i for _, _, i in list_pareto_score].count(True)
+            )
+            st.subheader(
+                f"There are {number_of_models} {'optimal' if not show_all_models else ''} models :",
+                help=help_text,
+            )
+        i = 1
+        for model, score, is_pareto in list_pareto_score:
+            if is_pareto or show_all_models:
+                col1, col2 = st.columns([1, 6])
+                with col1:
+                    st.subheader(f"{i})")
+                with col2:
+                    help_text = f"Metrics :  \n{model.get_metrics_expaliner([metric1, metric2])}  \n  \n  \nHyperparameters :  \n{model.get_param_explainer()}"
+                    st.subheader(model.model_name, help=help_text)
+                    st.caption(
+                        f"Score : {round(score*100, 2)}%{    'This model is optimal' if is_pareto and show_all_models else ''}"
+                    )
+                i += 1
+
+    def plot_1d_graph(self, list_pareto_point: list[Tuple[Model, bool]], metric1: str, metric2: str) -> None:
+        list_pareto_score: list[Tuple[Model, float, bool]] = []
+        for model, is_pareto in list_pareto_point:
+            score = math.sqrt(model.normalized_metrics[metric1] ** 2 + model.normalized_metrics[metric2]) / math.sqrt(2)
+            list_pareto_score.append((model, score, is_pareto))
+        list_pareto_score.sort(key=lambda x: x[1], reverse=True)
+        self.show_pareto_point(list_pareto_score, metric1, metric2)
 
     def render(self) -> None:
         """
@@ -89,7 +119,7 @@ class Parreto:
 
         list_pareto_point = self.app.get_pareto_points(list_ais, selected_metrics[0], selected_metrics[1])
         self.plot_comparison_graph(list_pareto_point, selected_metrics[0], selected_metrics[1])
-        self.show_pareto_point(list_pareto_point, selected_metrics[0], selected_metrics[1])
+        self.plot_1d_graph(list_pareto_point, selected_metrics[0], selected_metrics[1])
 
 
 if __name__ == "__main__":
