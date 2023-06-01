@@ -74,6 +74,9 @@ class Form:
         )
 
         form_id = self.app.get_form_id(selected_experiment.experiment_id)
+        if form_id is None:
+            st.warning("There is no filled form for this experiment, so nothing to show.")
+            return
         username, _, form_name = form_id.split("-")
 
         # get the list with all previous answers contained in the form

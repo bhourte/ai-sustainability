@@ -61,11 +61,12 @@ class DbAccess:
         """
         return self.run_gremlin_query("g.V().hasLabel('user').id()")
 
-    def get_form_id(self, experiment_id: str) -> str:
+    def get_form_id(self, experiment_id: str) -> Optional[str]:
         """Method used to get the id of the first node of an Answer from an experiment id"""
-        return self.run_gremlin_query(f"g.V().where(values('mlflow_id').is('{experiment_id}')).id()")[0]
+        form_id_list = self.run_gremlin_query(f"g.V().where(values('mlflow_id').is('{experiment_id}')).id()")
+        return form_id_list[0] if form_id_list else None
 
-    def get_all_metrics(self, form_id: str) -> list[str]:
+    def get_metrics_from_form(self, form_id: str) -> list[str]:
         """
         Return all the needed metrics to evaluate a list of ai based on a completed form
         """

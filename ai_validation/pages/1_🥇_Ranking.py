@@ -71,14 +71,16 @@ class Ranking:
             list_denominator.append("1")
         numerator = "*".join(list_numerator).replace("_", "\\;")
         denominator = "*".join(list_denominator).replace("_", "\\;")
-        st.subheader(
-            body="How Global Score is obtained :",
-            help="The metrics used to calculate the Global Score are those that correspond to the choices made by the user in the form he has completed.",
-        )
-        st.latex(
-            "\\frac{" + numerator + "}{" + denominator + "}",
-            help="The global score is normalized between 0 and 1 after the calculation (1 for the best and 0 for the worst)",
-        )
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
+            st.subheader(
+                body="How Global Score is obtained :",
+                help="The metrics used to calculate the Global Score are those that correspond to the choices made by the user in the form he has completed.",
+            )
+            st.latex(
+                "\\frac{" + numerator + "}{" + denominator + "}",
+                help="The global score is normalized between 0 and 1 after the calculation (1 for the best and 0 for the worst)",
+            )
 
     def show_best_ai_graph(self, list_of_ais: list[Model], selected_metric) -> None:
         if list_of_ais:
@@ -118,11 +120,14 @@ class Ranking:
                 st.warning("There is no run done for the selected experiment")
                 return
 
-        selected_metric = self.select_ranking(list_metrics)
-        print(list_metrics)
-
         form_id = self.app.get_form_id(selected_experiment.experiment_id)
-        form_list_metrics = self.app.get_metrics(form_id)
+        if form_id is None:
+            st.warning("There is no filled form for this experiment, but runs were found.")
+        form_list_metrics = self.app.get_metrics(form_id) if form_id is not None else list_metrics
+
+        selected_metric = self.select_ranking(list_metrics)
+        if selected_metric == "Global score":
+            self.show_calculation_global_score(form_list_metrics)
 
         list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
@@ -133,10 +138,6 @@ class Ranking:
         list_ais.sort(key=lambda x: x.normalized_metrics[selected_metric], reverse=True)
         self.show_ordered_ais(list_ais, selected_metric)
 
-        _, col, _ = st.columns([1, 2, 1])
-        with col:
-            if selected_metric == "Global score":
-                self.show_calculation_global_score(form_list_metrics)
         _, col, _ = st.columns([1, 4, 2])
         with col:
             self.show_best_ai_graph(list_ais, selected_metric)

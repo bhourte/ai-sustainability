@@ -20,13 +20,13 @@ class Application:
     def get_all_user(self) -> list[str]:
         return self.database.get_all_users()
 
-    def get_form_id(self, experiment_id: str) -> str:
+    def get_form_id(self, experiment_id: str) -> Optional[str]:
         return self.database.get_form_id(experiment_id)
 
     def get_metrics(self, form_id: str, delete_accuracy: bool = True) -> list[str]:
         # Use delete_accuracy if an "Accuracy" metric is log in the mlflow experience
         # a score parameters it's alway log before but with an other name (max_error, f1_score, etc.)
-        raw_metrics = self.database.get_all_metrics(form_id)
+        raw_metrics = self.database.get_metrics_from_form(form_id)
         return self.business.delete_accuracy(raw_metrics) if delete_accuracy else raw_metrics
 
     def get_experiment_from_user(self, selected_user: Optional[str]) -> Optional[list[Experiment]]:

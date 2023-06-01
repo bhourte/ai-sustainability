@@ -52,21 +52,27 @@ class Parreto:
             f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
         )
 
+        form_id = self.app.get_form_id(selected_experiment.experiment_id)
+        if form_id is None:
+            st.warning("There is no filled form for this experiment, but runs were found.")
+
         col1, col2 = st.columns([10, 5])
         with col2:
             st.caption(" ")
             st.caption(" ")
-            all_metric: bool = st.checkbox(
-                "Allow all metrics?", help="If not checked, displays only the metrics provided from the completed form"
+            help_text = (
+                "If not checked, displays only the metrics provided from the completed form"
+                if form_id is not None
+                else "There is no completed form for this experiment, so all metrics are allowed."
             )
+            all_metric: bool = st.checkbox("Allow all metrics?", help=help_text, disabled=(form_id is None))
         with col1:
-            if all_metric:
+            if all_metric or form_id is None:
                 list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
                 if list_metrics is None:
                     st.warning("No run logs for this experiment")
                     return
             else:
-                form_id = self.app.get_form_id(selected_experiment.experiment_id)
                 list_metrics = self.app.get_metrics(form_id)
             selected_metrics = st.multiselect("Select 2 metrics to compare models :", list_metrics, max_selections=2)
             if len(selected_metrics) < 2:
