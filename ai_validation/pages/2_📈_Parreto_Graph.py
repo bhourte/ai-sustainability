@@ -12,7 +12,7 @@ from ai_validation.models import Model
 from ai_validation.utils import get_actual_experiment, get_application
 
 
-class Parreto:
+class Pareto:
     """Class used to show all result of experiment based on the form"""
 
     def __init__(self) -> None:
@@ -134,5 +134,5 @@ class Parreto:
 
 
 if __name__ == "__main__":
-    ui = Parreto()
+    ui = Pareto()
     ui.render()
