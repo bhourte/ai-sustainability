@@ -60,9 +60,11 @@ class UserInterface:
         This is the code used to render the form and used by the user to fill it
         """
 
-        selected_experiment = get_actual_experiment()
-        if selected_experiment is None:
-            return
+        _, col, _ = st.columns([2, 3, 2])
+        with col:
+            selected_experiment = get_actual_experiment()
+            if selected_experiment is None:
+                return
 
         list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
         if list_metrics is None:

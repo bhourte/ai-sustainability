@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from ai_validation.models import Model
+from ai_validation.models import Experiment, Model
 from ai_validation.utils import get_actual_experiment, get_application
 
 
@@ -37,10 +37,11 @@ class Matrix:
         """
         This is the code used to render the form and used by the user to fill it
         """
-
-        selected_experiment = get_actual_experiment()
-        if selected_experiment is None:
-            return
+        _, col, _ = st.columns([2, 3, 2])
+        with col:
+            selected_experiment = get_actual_experiment()
+            if selected_experiment is None:
+                return
 
         list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
         if list_metrics is None:
@@ -76,6 +77,7 @@ class Matrix:
                     fig, _ = plt.subplots()
                     sns.heatmap(matrix, annot=True, cmap=plt.cm.Reds)
                     st.pyplot(fig)
+        _, col, _ = st.columns([1, 2, 1])
 
 
 if __name__ == "__main__":
