@@ -93,14 +93,24 @@ class Business:
             if state == 0:  # if not yet tested
                 for j in range(i, len(list_tuple)):
                     if (
-                        model_i.normalized_metrics[metric1] > list_tuple[j][0].normalized_metrics[metric1]
-                        and model_i.normalized_metrics[metric2] > list_tuple[j][0].normalized_metrics[metric2]
+                        model_i.normalized_metrics[metric1] == list_tuple[j][0].normalized_metrics[metric1]
+                        and model_i.normalized_metrics[metric2] == list_tuple[j][0].normalized_metrics[metric2]
+                    ):
+                        if list_tuple[j][1] == 1:
+                            list_tuple[i] = (model_i, 1)
+                            break
+                        if list_tuple[j][1] == -1:
+                            list_tuple[i] = (model_i, -1)
+                            break
+                    elif (
+                        model_i.normalized_metrics[metric1] >= list_tuple[j][0].normalized_metrics[metric1]
+                        and model_i.normalized_metrics[metric2] >= list_tuple[j][0].normalized_metrics[metric2]
                     ):
                         # j < i for the 2 metrics => j is not a pareto point
                         list_tuple[j] = (list_tuple[j][0], -1)
                     elif (
-                        model_i.normalized_metrics[metric1] < list_tuple[j][0].normalized_metrics[metric1]
-                        and model_i.normalized_metrics[metric2] < list_tuple[j][0].normalized_metrics[metric2]
+                        model_i.normalized_metrics[metric1] <= list_tuple[j][0].normalized_metrics[metric1]
+                        and model_i.normalized_metrics[metric2] <= list_tuple[j][0].normalized_metrics[metric2]
                     ):
                         # We have find a biger one in the 2 metrics => i is not a pareto point
                         list_tuple[i] = (model_i, -1)

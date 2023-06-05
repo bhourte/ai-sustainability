@@ -5,6 +5,7 @@ from typing import Tuple
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 from ai_validation.models import Model
@@ -22,19 +23,28 @@ class Parreto:
     def plot_comparison_graph(self, list_pareto_point: list[Tuple[Model, bool]], metric1: str, metric2: str) -> None:
         """Method used to show a big graph with 2 axes and show Pareto Front"""
         dico: dict = {}
-        dico[metric1] = [i.normalized_metrics[metric1] for i, _ in list_pareto_point]
-        dico[metric2] = [i.normalized_metrics[metric2] for i, _ in list_pareto_point]
-        dico["Is Optimal ?"] = ["Yes" if i else "No" for _, i in list_pareto_point]
-        dico["Model name"] = [i.model_name for i, _ in list_pareto_point]
-        dataframe_infos = pd.DataFrame(data=dico)
-        fig = px.scatter(
-            dataframe_infos,
-            x=metric1,
-            y=metric2,
-            color="Is Optimal ?",
-            hover_name="Model name",
-            color_discrete_sequence=["red" if i else "grey" for _, i in list_pareto_point],
-        )
+        pareto_points: list[list[Model]] = [[], []]
+        for model, is_pareto in list_pareto_point:
+            if is_pareto:
+                pareto_points[0].append(model)
+            else:
+                pareto_points[1].append(model)
+        scatter: list[px.scatter] = []
+        acc = 0
+        for model_list in pareto_points:
+            dico[metric1] = [i.normalized_metrics[metric1] for i in model_list]
+            dico[metric2] = [i.normalized_metrics[metric2] for i in model_list]
+            dico["Is Optimal ?"] = ["Yes" if acc == 0 else "No"] * len(model_list)
+            dico["Model name"] = [i.model_name for i in model_list]
+            colors = ["red" if acc == 0 else "grey"] * len(model_list)
+            dataframe_infos = pd.DataFrame(data=dico)
+            scatter.append(
+                px.scatter(
+                    dataframe_infos, x=metric1, y=metric2, color="Is Optimal ?", hover_name="Model name"
+                ).update_traces(marker=dict(color=colors))
+            )
+            acc += 1
+        fig = go.Figure(data=scatter[0].data + scatter[1].data)
         st.plotly_chart(fig)
 
     def show_ranked_model(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
