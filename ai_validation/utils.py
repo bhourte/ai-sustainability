@@ -8,6 +8,7 @@ from ai_validation.application import Application
 from ai_validation.models import Experiment
 
 
+# Put the cache in comment during development phase (to not have to restart streamlit each time a modification is made)
 # @st.cache_resource
 def get_application() -> Application:
     app = Application()

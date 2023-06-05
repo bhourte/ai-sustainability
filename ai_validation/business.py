@@ -72,7 +72,6 @@ class Business:
             min_value = min(list(list_coef[i] for i in range(len(list_models))))
             for index, model in enumerate(list_models):
                 model.normalized_metrics[used_metric] = (list_coef[index] - min_value) / (max_value - min_value)
-                print(model.normalized_metrics)
         elif used_metric != "Global score":
             raise NotImplementedError(f"Metric {used_metric} not implemented yet, choose an other one.")
 
