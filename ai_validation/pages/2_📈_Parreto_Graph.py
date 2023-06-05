@@ -112,7 +112,7 @@ class Parreto:
             if len(selected_metrics) < 2:
                 return
 
-        list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
+        list_ais = self.app.get_model_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return

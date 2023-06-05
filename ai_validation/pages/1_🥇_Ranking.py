@@ -129,7 +129,7 @@ class Ranking:
         if selected_metric == "Global score":
             self.show_calculation_global_score(form_list_metrics)
 
-        list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
+        list_ais = self.app.get_model_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return

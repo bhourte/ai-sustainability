@@ -57,7 +57,7 @@ class DbAccess:
 
     def get_all_users(self) -> list[str]:
         """
-        Return all Username in the database
+        Return all username in the database
         """
         return self.run_gremlin_query("g.V().hasLabel('user').id()")
 

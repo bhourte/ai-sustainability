@@ -84,7 +84,7 @@ class UserInterface:
         if list_metrics is None:
             st.warning("There is no run done for this experiment")
             return
-        list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
+        list_ais = self.app.get_model_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("No run done for this experiment")
             return

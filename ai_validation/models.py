@@ -36,11 +36,11 @@ class Model:
         """Method used to get a string explaining all metrics and their value of a single run"""
         list_metrics: list[str] = ["There are all used metrics for this AI :"]
         if not normalized:
-            for i in self.metrics:
+            for i, item in self.metrics.items():
                 if i in metric_used or get_all_metrics:
-                    list_metrics.append(f"{i} : {self.metrics[i]}")
+                    list_metrics.append(f"{i} : {item}")
         else:
-            for i in self.normalized_metrics:
+            for i, item in self.normalized_metrics.items():
                 if i in metric_used or get_all_metrics:
-                    list_metrics.append(f"{i} : {self.normalized_metrics[i]}")
+                    list_metrics.append(f"{i} : {item}")
         return "  \n".join(list_metrics)

@@ -33,11 +33,7 @@ class Application:
         id_list = self.database.get_experiment_id(selected_user)
         return self.mlflow_connector.get_experiment(selected_user, id_list)
 
-    def get_ai_from_experiment(self, selected_experiment_id: str) -> Optional[list[Model]]:
-        """
-        Function used to get all ai raked and there hyper parameters
-        Return : list[(ai_name:str, coef:float, param_expaliner:str, metrics_explainer:str)]
-        """
+    def get_model_from_experiment(self, selected_experiment_id: str) -> Optional[list[Model]]:
         run_page = self.mlflow_connector.get_run_page(selected_experiment_id)
         return self.business.get_ai_list(run_page)
 

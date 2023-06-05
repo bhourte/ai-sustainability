@@ -26,8 +26,8 @@ class Business:
 
     def get_ai_list(self, run_page: PagedList[Run]) -> Optional[list[Model]]:
         """
-        Method used to create a list that link each ai with its normalized coeficient
-        and its hyperparameters and its metrics
+        Method used to create a list that link each ai with its normalized coeficient,
+        its hyperparameters and its metrics
         """
         if not run_page:
             return None
@@ -81,7 +81,6 @@ class Business:
     ) -> None:
         """
         Method used to rank all AIs according to selected_metric
-        Return : a list of Tuple(Model, float: normalized selected_metric)
         """
         for metric in list_metrics:
             self.set_and_normalize_one_metric(list_model, metric)
@@ -91,7 +90,7 @@ class Business:
         list_tuple = [(model, 0) for model in list_model]  # 0 = no yet tested, -1 = non-pareto, 1 = pareto
         list_tuple.sort(key=lambda x: x[0].normalized_metrics[metric1] + x[0].normalized_metrics[metric1], reverse=True)
         for i, (model_i, state) in enumerate(list_tuple):
-            if state == 0:
+            if state == 0:  # if not yet tested
                 for j in range(i, len(list_tuple)):
                     if (
                         model_i.normalized_metrics[metric1] > list_tuple[j][0].normalized_metrics[metric1]
