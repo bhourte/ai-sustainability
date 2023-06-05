@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
-from ai_validation.models import Experiment, Model
+from ai_validation.models import Model
 from ai_validation.utils import get_actual_experiment, get_application
 
 
@@ -75,7 +75,7 @@ class Matrix:
                         [model.metrics["false_negatives"], model.metrics["true_negatives"]],
                     ]
                     fig, _ = plt.subplots()
-                    sns.heatmap(matrix, annot=True, cmap=plt.cm.Reds)
+                    sns.heatmap(matrix, annot=True, cmap="Reds")
                     st.pyplot(fig)
         _, col, _ = st.columns([1, 2, 1])
 

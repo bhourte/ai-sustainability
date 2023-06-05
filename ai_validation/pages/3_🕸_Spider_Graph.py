@@ -2,8 +2,6 @@
 
 from typing import Optional
 
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -48,10 +46,26 @@ class UserInterface:
             if model.model_name in selected_models_name:
                 selected_models.append(model)
         fig = go.Figure()
-        metric1 = [selected_models[0].normalized_metrics[metric] for metric in metric_list]
-        fig.add_trace(go.Scatterpolar(r=metric1, theta=metric_list, fill="toself", name=selected_models[0].model_name))
-        metric2 = [selected_models[1].normalized_metrics[metric] for metric in metric_list]
-        fig.add_trace(go.Scatterpolar(r=metric2, theta=metric_list, fill="toself", name=selected_models[1].model_name))
+        model1 = [selected_models[0].normalized_metrics[metric] for metric in metric_list]
+        fig.add_trace(
+            go.Scatterpolar(
+                r=model1,
+                theta=metric_list,
+                fill="toself",
+                name=selected_models[0].model_name,
+                marker={"color": "red"},
+            )
+        )
+        model2 = [selected_models[1].normalized_metrics[metric] for metric in metric_list]
+        fig.add_trace(
+            go.Scatterpolar(
+                r=model2,
+                theta=metric_list,
+                fill="toself",
+                name=selected_models[1].model_name,
+                marker={"color": "grey"},
+            )
+        )
         fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
         st.plotly_chart(fig)
 
@@ -96,11 +110,18 @@ class UserInterface:
                     )
                     st.subheader("Hyperparameters : ", help=model.get_param_explainer())
                 with col_b:
-                    values = [model.normalized_metrics[i] for i in selected_metrics]
-                    dataframe_infos = pd.DataFrame({"value": values, "variable": selected_metrics})
-                    fig = px.line_polar(dataframe_infos, r="value", theta="variable", line_close=True, text="value")
-                    fig.update_traces(fill="toself", textposition="top center")
-                    fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}})
+                    fig = go.Figure()
+                    values = [model.normalized_metrics[metric] for metric in selected_metrics]
+                    fig.add_trace(
+                        go.Scatterpolar(
+                            r=values,
+                            theta=selected_metrics,
+                            fill="toself",
+                            name=selected_models[0].model_name,
+                            marker={"color": "red"},
+                        )
+                    )
+                    fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
                     st.plotly_chart(fig)
         _, col, _ = st.columns([1, 2, 1])
         with col:

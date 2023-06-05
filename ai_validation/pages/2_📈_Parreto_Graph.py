@@ -27,7 +27,14 @@ class Parreto:
         dico["Is Optimal ?"] = ["Yes" if i else "No" for _, i in list_pareto_point]
         dico["Model name"] = [i.model_name for i, _ in list_pareto_point]
         dataframe_infos = pd.DataFrame(data=dico)
-        fig = px.scatter(dataframe_infos, x=metric1, y=metric2, color="Is Optimal ?", hover_data="Model name")
+        fig = px.scatter(
+            dataframe_infos,
+            x=metric1,
+            y=metric2,
+            color="Is Optimal ?",
+            hover_name="Model name",
+            color_discrete_sequence=["red" if i else "grey" for _, i in list_pareto_point],
+        )
         st.plotly_chart(fig)
 
     def show_ranked_model(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
@@ -63,7 +70,9 @@ class Parreto:
         """Method used to sort the list of model and show them as a ranked list"""
         list_pareto_score: list[Tuple[Model, float, bool]] = []
         for model, is_pareto in list_pareto_point:
-            score = math.sqrt(model.normalized_metrics[metric1] ** 2 + model.normalized_metrics[metric2]) / math.sqrt(2)
+            score = math.sqrt(
+                model.normalized_metrics[metric1] ** 2 + model.normalized_metrics[metric2] ** 2
+            ) / math.sqrt(2)
             list_pareto_score.append((model, score, is_pareto))
         list_pareto_score.sort(key=lambda x: x[1], reverse=True)
         self.show_ranked_model(list_pareto_score, metric1, metric2)

@@ -22,8 +22,8 @@ class Ranking:
         """Method used to show a litle bar graph for a model"""
         list_metric_name = list(model.normalized_metrics)
         values = [model.normalized_metrics[metric] * 100 for metric in list_metric_name]
-        selected = ["blue"] * len(list_metric_name)
-        selected[list_metric_name.index(selected_metric)] = "green"
+        selected = ["grey"] * len(list_metric_name)
+        selected[list_metric_name.index(selected_metric)] = "red"
 
         fig = go.Figure(data=[go.Bar(x=list_metric_name, y=values, marker_color=selected)])
         fig.update_yaxes(nticks=2, range=[0, 100])
