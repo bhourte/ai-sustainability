@@ -38,6 +38,23 @@ class UserInterface:
             else None
         )
 
+    def get_independent_experiments(self, list_user: list[str]) -> Optional[list[Experiment]]:
+        """Method used to get all independent experiment (experiment without any user)"""
+        list_experiments: list[Experiment] = []
+        all_experiments = self.app.get_experiment_from_user(None)
+        if all_experiments is None:
+            return None
+        experiments_id_with_form: list[str] = []
+        for user in list_user:
+            experiments_of_user = self.app.get_experiment_from_user(user)
+            if experiments_of_user is None:
+                return None
+            experiments_id_with_form += [exp.experiment_id for exp in experiments_of_user]
+        for experiment in all_experiments:
+            if experiment.experiment_id not in experiments_id_with_form:
+                list_experiments.append(experiment)
+        return list_experiments
+
     def render(self) -> None:
         """
         This is the code used to render the form and used by the user to fill it
@@ -48,31 +65,22 @@ class UserInterface:
         if not selected_user and selected_user is not None:
             return
 
-        list_experiments: list[Experiment] = []
         if selected_user == "<Only independant experiments>":
-            all_experiments = self.app.get_experiment_from_user(None)
-            if all_experiments is None:
-                st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
-                return
-            experiments_id_with_form: list[str] = []
-            for user in list_user:
-                experiments_of_user = self.app.get_experiment_from_user(user)
-                if experiments_of_user is None:
-                    st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
-                    return
-                experiments_id_with_form += [exp.experiment_id for exp in experiments_of_user]
-            for experiment in all_experiments:
-                if experiment.experiment_id not in experiments_id_with_form:
-                    list_experiments.append(experiment)
+            list_experiments = self.get_independent_experiments(list_user)
         else:
-            list_experiments_bis = self.app.get_experiment_from_user(selected_user)
-            if list_experiments_bis is None:
-                st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
-                return
-            if not list_experiments_bis:
-                st.warning("There is no experiment for this user")
-                return
-            list_experiments = list_experiments_bis
+            list_experiments = self.app.get_experiment_from_user(selected_user)
+
+        if list_experiments is None:
+            st.warning(f"There is no mlflow server running on port {config('URI').rsplit(':', 1)[-1]}")
+            return
+        if not list_experiments:
+            text = (
+                "independent experiment"
+                if selected_user == "<Only independant experiments>"
+                else "experiment for this user"
+            )
+            st.warning(f"There is no {text}")
+            return
         selected_experiment = self.select_experiment(list_experiments)
         if selected_experiment is None:
             return

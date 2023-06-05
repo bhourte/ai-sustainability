@@ -7,8 +7,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from ai_validation.models import Experiment, Model
-from ai_validation.utils import get_application
+from ai_validation.models import Model
+from ai_validation.utils import get_actual_experiment, get_application
 
 
 class Parreto:
@@ -26,12 +26,12 @@ class Parreto:
         dico[metric2] = [i.normalized_metrics[metric2] for i, _ in list_pareto_point]
         dico["Is Optimal ?"] = ["Yes" if i else "No" for _, i in list_pareto_point]
         dico["Model name"] = [i.model_name for i, _ in list_pareto_point]
-        df = pd.DataFrame(data=dico)
-        fig = px.scatter(df, x=metric1, y=metric2, color="Is Optimal ?", hover_data="Model name")
+        dataframe_infos = pd.DataFrame(data=dico)
+        fig = px.scatter(dataframe_infos, x=metric1, y=metric2, color="Is Optimal ?", hover_data="Model name")
         st.plotly_chart(fig)
 
-    def show_pareto_point(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
-        """Method used to show all parreto point for the 2 metrics selected"""
+    def show_ranked_model(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
+        """Method used to show all model in a ranked order for the 2 selected metrics"""
         col1, col2 = st.columns([5, 4])
         with col2:
             st.caption(" ")
@@ -59,28 +59,23 @@ class Parreto:
                     )
                 i += 1
 
-    def plot_1d_graph(self, list_pareto_point: list[Tuple[Model, bool]], metric1: str, metric2: str) -> None:
+    def rank_and_show_models(self, list_pareto_point: list[Tuple[Model, bool]], metric1: str, metric2: str) -> None:
+        """Method used to sort the list of model and show them as a ranked list"""
         list_pareto_score: list[Tuple[Model, float, bool]] = []
         for model, is_pareto in list_pareto_point:
             score = math.sqrt(model.normalized_metrics[metric1] ** 2 + model.normalized_metrics[metric2]) / math.sqrt(2)
             list_pareto_score.append((model, score, is_pareto))
         list_pareto_score.sort(key=lambda x: x[1], reverse=True)
-        self.show_pareto_point(list_pareto_score, metric1, metric2)
+        self.show_ranked_model(list_pareto_score, metric1, metric2)
 
     def render(self) -> None:
         """
         This is the code used to render the form and used by the user to fill it
         """
 
-        selected_experiment: Experiment = (
-            st.session_state.selected_experiment if "selected_experiment" in st.session_state else None
-        )
+        selected_experiment = get_actual_experiment()
         if selected_experiment is None:
-            st.warning("No experiment selected, please select one")
             return
-        st.caption(
-            f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
-        )
 
         form_id = self.app.get_form_id(selected_experiment.experiment_id)
         if form_id is None:
@@ -89,7 +84,7 @@ class Parreto:
         col1, col2 = st.columns([10, 5])
         with col2:
             st.caption(" ")
-            st.caption(" ")
+            st.caption(" ")  # To align
             help_text = (
                 "If not checked, displays only the metrics provided from the completed form"
                 if form_id is not None
@@ -108,18 +103,15 @@ class Parreto:
             if len(selected_metrics) < 2:
                 return
 
-        print(list_metrics)
-
         list_ais = self.app.get_ai_from_experiment(selected_experiment.experiment_id)
         if list_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return
-        # ranked_ais = list[Tuple(Model, dict[metric: normalized_metric])]
         self.app.set_normalized_metrics(list_ais, selected_metrics)
 
         list_pareto_point = self.app.get_pareto_points(list_ais, selected_metrics[0], selected_metrics[1])
         self.plot_comparison_graph(list_pareto_point, selected_metrics[0], selected_metrics[1])
-        self.plot_1d_graph(list_pareto_point, selected_metrics[0], selected_metrics[1])
+        self.rank_and_show_models(list_pareto_point, selected_metrics[0], selected_metrics[1])
 
 
 if __name__ == "__main__":

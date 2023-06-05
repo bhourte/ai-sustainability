@@ -1,5 +1,5 @@
 """File used to store all global variable list"""
-NUMERATOR_METRICS = [
+NUMERATOR_METRICS = [  # Higher is beter
     "accuracy",
     "accuracy_score",
     "evaluation_accuracy",
@@ -16,8 +16,8 @@ NUMERATOR_METRICS = [
     "true_negatives",
     "true_positives",
     "val_accuracy",
-]  # Higher is beter
-DENOMINATOR_METRICS = [
+]
+DENOMINATOR_METRICS = [  # Lower is beter
     "Duration",
     "evaluation_loss",
     "false_negatives",
@@ -34,6 +34,6 @@ DENOMINATOR_METRICS = [
     "training_mean_squared_error",
     "training_root_mean_squared_error",
     "val_loss",
-]  # Lower is beter
+]
 
 METRIC_IMPLEMENTED = NUMERATOR_METRICS + DENOMINATOR_METRICS + ["precision_recall_auc", "roc_auc", "stopped_epoch"]

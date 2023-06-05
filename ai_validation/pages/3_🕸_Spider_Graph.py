@@ -7,8 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from ai_validation.models import Experiment, Model
-from ai_validation.utils import get_application
+from ai_validation.models import Model
+from ai_validation.utils import get_actual_experiment, get_application
 
 
 class UserInterface:
@@ -37,6 +37,7 @@ class UserInterface:
         return st.multiselect("Select all metrics you want to analyse", metric_list)
 
     def show_comparison_plot(self, model_list: list[Model], metric_list: list[str]) -> None:
+        """Method used to show 2 model on the same spider graph"""
         selected_models_name = st.multiselect(
             "Select 2 models to compare :", [i.model_name for i in model_list], max_selections=2
         )
@@ -58,17 +59,11 @@ class UserInterface:
         """
         This is the code used to render the form and used by the user to fill it
         """
-        selected_experiment: Experiment = (
-            st.session_state.selected_experiment if "selected_experiment" in st.session_state else None
-        )
+
+        selected_experiment = get_actual_experiment()
         if selected_experiment is None:
-            st.warning("No experiment selected, please select one")
             return
-        _, col, _ = st.columns([2, 3, 2])
-        with col:
-            st.caption(
-                f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
-            )
+
         list_metrics = self.app.get_all_metrics(selected_experiment.experiment_id)
         if list_metrics is None:
             st.warning("There is no run done for this experiment")
@@ -100,8 +95,8 @@ class UserInterface:
                     st.subheader("Hyperparameters : ", help=model.get_param_explainer())
                 with col_b:
                     values = [model.normalized_metrics[i] for i in selected_metrics]
-                    df = pd.DataFrame({"value": values, "variable": selected_metrics})
-                    fig = px.line_polar(df, r="value", theta="variable", line_close=True, text="value")
+                    dataframe_infos = pd.DataFrame({"value": values, "variable": selected_metrics})
+                    fig = px.line_polar(dataframe_infos, r="value", theta="variable", line_close=True, text="value")
                     fig.update_traces(fill="toself", textposition="top center")
                     fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}})
                     st.plotly_chart(fig)

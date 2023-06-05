@@ -5,7 +5,7 @@ import streamlit as st
 
 from ai_validation.global_variables import DENOMINATOR_METRICS, NUMERATOR_METRICS
 from ai_validation.models import Model
-from ai_validation.utils import get_application
+from ai_validation.utils import get_actual_experiment, get_application
 
 
 class Ranking:
@@ -42,12 +42,12 @@ class Ranking:
             col1, col2, col3 = st.columns([1, 10, 20])
             with col1:
                 st.subheader(" ")
-                st.subheader(" ")
+                st.subheader(" ")  # To align with the graph
                 st.subheader(" ")
                 st.subheader(body=f"{i+1})")
             with col2:
                 st.subheader(" ")
-                st.subheader(" ")
+                st.subheader(" ")  # To align with the graph
                 st.subheader(" ")
                 st.subheader(
                     body=model.model_name,
@@ -57,7 +57,7 @@ class Ranking:
                 self.plot_small_graph(model, selected_metric)
 
     def show_calculation_global_score(self, list_metrics: list[str]) -> None:
-        """Method used to show how the score is calculated from each metrics"""
+        """Method used to show how the global score is calculated from each metrics (in a latex syntax)"""
         list_numerator: list[str] = []
         list_denominator: list[str] = []
         for metric in list_metrics:
@@ -65,12 +65,17 @@ class Ranking:
                 list_numerator.append(metric)
             if metric in DENOMINATOR_METRICS:
                 list_denominator.append(metric)
+
         if not list_numerator:
             list_numerator.append("1")
-        if not list_denominator:
-            list_denominator.append("1")
         numerator = "*".join(list_numerator).replace("_", "\\;")
         denominator = "*".join(list_denominator).replace("_", "\\;")
+        latex_text = "Global\\;Score\\;=\\;"
+        if not list_denominator:
+            latex_text += numerator
+        else:
+            latex_text += "\\frac{" + numerator + "}{" + denominator + "}"
+
         _, col, _ = st.columns([1, 2, 1])
         with col:
             st.subheader(
@@ -78,11 +83,12 @@ class Ranking:
                 help="The metrics used to calculate the Global Score are those that correspond to the choices made by the user in the form he has completed.",
             )
             st.latex(
-                "\\frac{" + numerator + "}{" + denominator + "}",
+                latex_text,
                 help="The global score is normalized between 0 and 1 after the calculation (1 for the best and 0 for the worst)",
             )
 
     def show_best_ai_graph(self, list_of_ais: list[Model], selected_metric) -> None:
+        """Method used to show a pie shart with all runs"""
         if list_of_ais:
             labels = [i.model_name for i in list_of_ais]
             values = [i.normalized_metrics[selected_metric] for i in list_of_ais]
@@ -103,12 +109,10 @@ class Ranking:
         This is the code used to render the form and used by the user to fill it
         """
 
-        selected_experiment = (
-            st.session_state.selected_experiment if "selected_experiment" in st.session_state else None
-        )
+        selected_experiment = get_actual_experiment()
         if selected_experiment is None:
-            st.warning("No experiment selected, please select one")
             return
+
         _, col, _ = st.columns([2, 3, 2])
         with col:
             st.caption(
@@ -133,7 +137,6 @@ class Ranking:
         if list_ais is None:
             st.warning("There is no runs done for this experiment, or no correct runs.")
             return
-        # ranked_ais = list[Tuple(Model, dict[metric: normalized_metric])]
         self.app.set_normalized_metrics(list_ais, list_metrics, form_list_metrics)
         list_ais.sort(key=lambda x: x.normalized_metrics[selected_metric], reverse=True)
         self.show_ordered_ais(list_ais, selected_metric)
