@@ -19,6 +19,7 @@ def get_actual_experiment() -> Optional[Experiment]:
     selected_experiment = st.session_state.selected_experiment if "selected_experiment" in st.session_state else None
     if selected_experiment is None:
         st.warning("No experiment selected, please select one")
+        return None
     st.caption(
         f"Experiment selected : {selected_experiment.experiment_name} with id : {selected_experiment.experiment_id}"
     )

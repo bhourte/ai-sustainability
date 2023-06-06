@@ -41,10 +41,11 @@ class Pareto:
             scatter.append(
                 px.scatter(
                     dataframe_infos, x=metric1, y=metric2, color="Is Optimal ?", hover_name="Model name"
-                ).update_traces(marker=dict(color=colors))
+                ).update_traces(marker={"color": colors})
             )
             acc += 1
         fig = go.Figure(data=scatter[0].data + scatter[1].data)
+        fig.update_layout(xaxis_title=metric1, yaxis_title=metric2)
         st.plotly_chart(fig)
 
     def show_ranked_model(self, list_pareto_score: list[Tuple[Model, float, bool]], metric1: str, metric2: str) -> None:
