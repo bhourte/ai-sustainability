@@ -106,7 +106,7 @@ class Ranking:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to render the ranking of all tested AI
         """
 
         _, col, _ = st.columns([2, 3, 2])

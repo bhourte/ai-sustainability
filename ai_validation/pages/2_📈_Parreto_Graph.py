@@ -90,7 +90,7 @@ class Pareto:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to render the graph with the pareto frontier's point
         """
 
         selected_experiment = get_actual_experiment()

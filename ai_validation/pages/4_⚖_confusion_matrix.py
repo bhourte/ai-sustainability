@@ -35,7 +35,7 @@ class Matrix:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to render the page with all the confusion matrix
         """
         _, col, _ = st.columns([2, 3, 2])
         with col:

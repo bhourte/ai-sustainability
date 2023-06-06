@@ -71,7 +71,7 @@ class UserInterface:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to show all spider graph
         """
 
         _, col, _ = st.columns([2, 3, 2])

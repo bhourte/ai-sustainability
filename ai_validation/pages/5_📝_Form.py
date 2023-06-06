@@ -65,7 +65,7 @@ class Form:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to render a previous completed form
         """
 
         selected_experiment = get_actual_experiment()

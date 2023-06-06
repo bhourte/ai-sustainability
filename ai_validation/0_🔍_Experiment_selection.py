@@ -57,7 +57,7 @@ class UserInterface:
 
     def render(self) -> None:
         """
-        This is the code used to render the form and used by the user to fill it
+        This is the code used to render the selection of an experiment
         """
 
         list_user = self.app.get_all_user()
