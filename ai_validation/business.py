@@ -33,7 +33,7 @@ class Business:
             return None
         list_model: list[Model] = []
         for run in run_page:
-            model_name = run.data.to_dictionary()["tags"]["mlflow.runName"]
+            model_name = run.data.to_dictionary()["params"]["model_name"]
             params = run.data.to_dictionary()["params"]
             metrics = run.data.to_dictionary()["metrics"]
             metrics["Duration"] = (

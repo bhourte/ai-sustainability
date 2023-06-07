@@ -9,7 +9,7 @@ from mlflow.store.entities import PagedList
 from mlflow.tracking import MlflowClient
 
 from ai_validation.global_variables import METRIC_IMPLEMENTED
-from ai_validation.models import Experiment
+from ai_validation.models import Experiment, Model
 
 
 class MlflowConnector:
@@ -46,3 +46,10 @@ class MlflowConnector:
                 list_metrics.append(metric)
 
         return ["Duration"] + list_metrics
+
+    def get_artifact_uri(self, selected_experiment: Experiment, selected_models: Model) -> Optional[str]:
+        run_page = self.get_run_page(selected_experiment.experiment_id)
+        for run in run_page:
+            if run.data.to_dictionary()["params"]["model_name"] == selected_models.model_name:
+                return run.info.artifact_uri
+        return None

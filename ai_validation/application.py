@@ -47,3 +47,8 @@ class Application:
 
     def get_all_metrics(self, experiment_id: str) -> Optional[list[str]]:
         return self.mlflow_connector.get_all_metrics(experiment_id)
+
+    def get_artifact_path(self, selected_experiment: Experiment, selected_models: Model) -> Optional[str]:
+        artifact_uri = self.mlflow_connector.get_artifact_uri(selected_experiment, selected_models)
+        print(artifact_uri)
+        return None if artifact_uri is None else "mlartifacts" + artifact_uri.rsplit(":", maxsplit=1)[-1]
