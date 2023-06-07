@@ -34,10 +34,12 @@ class Artifacts:
             selected_models = self.select_model(list_models, "")
             if selected_models is None:
                 return
+
             path = self.app.get_artifact_path(selected_experiment, selected_models)
             if path is None:
                 st.warning("There is no artifact for this model")
                 return
+
             nb_artifacts = 0
             for file in os.listdir(path):
                 if file[len(file) - 4 : len(file)] == ".png":
@@ -49,7 +51,7 @@ class Artifacts:
                 st.warning("There is no artifact for this model")
                 return
 
-    def render_dual(self, list_models: list[Model], selected_experiment: Experiment) -> None:
+    def select_two_models(self, list_models: list[Model]) -> Optional[list]:
         col1, _, col2 = st.columns([5, 1, 5])
         cols = [col1, col2]
         selected_models = []
@@ -57,46 +59,59 @@ class Artifacts:
             with col:
                 selected_models.append(self.select_model(list_models, str(col)))
         if selected_models[0] is None or selected_models[1] is None:
-            return
+            return None
+        return selected_models
 
+    def get_and_show_all_artifacts_dual(self, selected_models: list[Model], selected_experiment: Experiment) -> None:
+        col1, _, col2 = st.columns([5, 1, 5])
+        cols = [col1, col2]
         paths = []
         dict_artifacts_name = {}
-        possible_col = [True, True]
         lists_artifacts: list[list[str]] = [[], []]
+
         for i, col in enumerate(cols):
             with col:
                 paths.append(self.app.get_artifact_path(selected_experiment, selected_models[i]))
-                if paths[0] is None:
-                    st.warning("There is no artifact for this model")
-                    possible_col[i] = False
-                nb_artifacts = 0
-                for file in os.listdir(paths[i]):
-                    if file[len(file) - 4 : len(file)] == ".png":
-                        dict_artifacts_name[file] = True
-                        lists_artifacts[i].append((file))
-                        nb_artifacts += 1
-                if nb_artifacts == 0:
-                    st.warning("There is no artifact for this model")
-                    possible_col[i] = False
+                if paths[i] is None:
+                    st.warning("There is no corresponding artifact directory for this model")
+                else:
+                    nb_artifacts = 0
+                    for file in os.listdir(paths[i]):
+                        if file[len(file) - 4 : len(file)] == ".png":
+                            dict_artifacts_name[file] = True
+                            lists_artifacts[i].append((file))
+                            nb_artifacts += 1
+                    if nb_artifacts == 0:
+                        st.warning("There is no logged artifact for this model")
+        self.show_all_artifacts_dual(dict_artifacts_name, lists_artifacts, paths)
 
+    def show_all_artifacts_dual(
+        self,
+        dict_artifacts_name: dict,
+        lists_artifacts: list[list[str]],
+        paths: list[Optional[str]],
+    ) -> None:
         for artifact in dict_artifacts_name:
-            container = st.container()
-            with container:
-                colc, _, colv = st.columns([5, 1, 5])
-                cola = [colc, colv]
-                for i, col in enumerate(cola):
-                    if possible_col[i]:
+            with st.container():
+                col1, _, col2 = st.columns([5, 1, 5])
+                cols = [col1, col2]
+                for i, col in enumerate(cols):
+                    if len(lists_artifacts[i]) > 0:
                         with col:
+                            name = artifact[: len(artifact) - 4].replace("_", " ")
                             st.subheader(" ")
-                            st.subheader(f"{artifact[: len(artifact) - 4].replace('_', ' ')}:")
+                            st.subheader(f"{name}:")
                             if artifact in lists_artifacts[i]:
                                 st.image(f"{paths[i]}/{artifact}")
                             else:
-                                st.warning(
-                                    f'"{artifact[: len(artifact) - 4].replace("_", " ")}" is not available for this model'
-                                )
+                                st.warning(f'"{name}" is not available for this model')
 
-        return
+    def render_dual(self, list_models: list[Model], selected_experiment: Experiment) -> None:
+        selected_models = self.select_two_models(list_models)
+        if selected_models is None:
+            return
+
+        self.get_and_show_all_artifacts_dual(selected_models, selected_experiment)
 
     def render(self) -> None:
         """
@@ -114,11 +129,10 @@ class Artifacts:
                 return
 
             two_mode = st.checkbox("Compare 2 models?", help="Check if you want to compare 2 model side-by-side.")
-        return (
+        if two_mode:
             self.render_dual(list_models, selected_experiment)
-            if two_mode
-            else self.render_mono(list_models, selected_experiment)
-        )
+        else:
+            self.render_mono(list_models, selected_experiment)
 
 
 if __name__ == "__main__":
