@@ -3,6 +3,8 @@
 from typing import Optional
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 import streamlit as st
 
@@ -32,6 +34,32 @@ class Matrix:
             if model.model_name in selected_name:
                 selected_model_list.append(model)
         return selected_model_list
+
+    def show_confusion_matrix(self, model: Model) -> None:
+        matrix = [
+            [model.metrics["true_positives"], model.metrics["false_positives"]],
+            [model.metrics["false_negatives"], model.metrics["true_negatives"]],
+        ]
+        annot = np.asarray(
+            [f"TP\n{matrix[0][0]}", f"FP\n{matrix[0][1]}", f"FN\n{matrix[1][0]}", f"TN\n{matrix[1][1]}"]
+        ).reshape((2, 2))
+        fig, _ = plt.subplots()
+        hm = sns.heatmap(matrix, annot=annot, fmt="", cmap="Reds")
+        hm.set_xlabel("Predicted label")
+        hm.xaxis.set_ticklabels(["Positive", "Negative"])
+        hm.set_ylabel("True label")
+        hm.yaxis.set_ticklabels(["Positive", "Negative"])
+        st.pyplot(fig)
+
+    def show_other_metrics(self, model: Model) -> None:
+        tp = model.metrics["true_positives"]
+        tn = model.metrics["true_negatives"]
+        fp = model.metrics["false_positives"]
+        fn = model.metrics["false_negatives"]
+        st.subheader(f"Precision = {tp/(tp+fp)}", help="= PPV = TP/(TP+FP)")
+        st.subheader(f"Recall = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)")
+        st.subheader(f"Sensitivity = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)  \n= Recall")
+        st.subheader(f"Specificity = {tn/(tn+fp)}", help="= TNR = TN/(TN+FP)")
 
     def render(self) -> None:
         """
@@ -64,19 +92,15 @@ class Matrix:
                 col_a, col_b = st.columns([1, 2])
                 with col_a:
                     st.subheader(" ")
+                    st.subheader(
+                        model.model_name,
+                        help=model.get_param_explainer() + "  \n  \n" + model.get_metrics_expaliner([], True),
+                    )
                     st.subheader(" ")
-                    st.subheader(" ")
-                    st.subheader(model.model_name)
-                    st.subheader("Metrics : ", help=model.get_metrics_expaliner([], True))
-                    st.subheader("Hyperparameters : ", help=model.get_param_explainer())
+                    self.show_other_metrics(model)
                 with col_b:
-                    matrix = [
-                        [model.metrics["true_positives"], model.metrics["false_positives"]],
-                        [model.metrics["false_negatives"], model.metrics["true_negatives"]],
-                    ]
-                    fig, _ = plt.subplots()
-                    sns.heatmap(matrix, annot=True, cmap="Reds")
-                    st.pyplot(fig)
+                    self.show_confusion_matrix(model)
+                st.subheader(" ")
         _, col, _ = st.columns([1, 2, 1])
 
 
