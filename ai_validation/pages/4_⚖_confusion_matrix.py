@@ -4,7 +4,6 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import seaborn as sns
 import streamlit as st
 
@@ -37,11 +36,11 @@ class Matrix:
 
     def show_confusion_matrix(self, model: Model) -> None:
         matrix = [
-            [model.metrics["true_positives"], model.metrics["false_positives"]],
-            [model.metrics["false_negatives"], model.metrics["true_negatives"]],
+            [model.metrics["true_positives"], model.metrics["false_negatives"]],
+            [model.metrics["false_positives"], model.metrics["true_negatives"]],
         ]
         annot = np.asarray(
-            [f"TP\n{matrix[0][0]}", f"FP\n{matrix[0][1]}", f"FN\n{matrix[1][0]}", f"TN\n{matrix[1][1]}"]
+            [f"TP\n{matrix[0][0]}", f"FN\n{matrix[0][1]}", f"FP\n{matrix[1][0]}", f"TN\n{matrix[1][1]}"]
         ).reshape((2, 2))
         fig, _ = plt.subplots()
         hm = sns.heatmap(matrix, annot=annot, fmt="", cmap="Reds")
@@ -60,6 +59,11 @@ class Matrix:
         st.subheader(f"Recall = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)")
         st.subheader(f"Sensitivity = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)  \n= Recall")
         st.subheader(f"Specificity = {tn/(tn+fp)}", help="= TNR = TN/(TN+FP)")
+        phi = (tp * tn - fp * fn) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+        st.subheader(
+            f"phi = {phi}",
+            help="= MCC = (TP * TN-FP * FN)/sqrt((TP+FP) * (TP+FN) * (TN+FP) * (TN+FN))  \n(= Matthews correlation coefficient)",
+        )
 
     def render(self) -> None:
         """
@@ -91,7 +95,6 @@ class Matrix:
             for model in selected_models:
                 col_a, col_b = st.columns([1, 2])
                 with col_a:
-                    st.subheader(" ")
                     st.subheader(
                         model.model_name,
                         help=model.get_param_explainer() + "  \n  \n" + model.get_metrics_expaliner([], True),
