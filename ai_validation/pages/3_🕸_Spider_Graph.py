@@ -69,6 +69,35 @@ class UserInterface:
         fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
         st.plotly_chart(fig)
 
+    def show_graph(self, model: Model, selected_metrics: list[str]) -> None:
+        """Method used to show a line with all model's information and the associated spider graph"""
+        col_a, col_b = st.columns([1, 2])
+        with col_a:
+            st.subheader(" ")
+            st.subheader(" ")
+            st.subheader(" ")
+            st.subheader(model.model_name)
+            st.subheader("All metrics : ", help=model.get_metrics_expaliner(selected_metrics, True))
+            st.subheader(
+                "Normalized metrics : ",
+                help=model.get_metrics_expaliner(selected_metrics, normalized=True),
+            )
+            st.subheader("Hyperparameters : ", help=model.get_param_explainer())
+        with col_b:
+            fig = go.Figure()
+            values = [model.normalized_metrics[metric] for metric in selected_metrics]
+            fig.add_trace(
+                go.Scatterpolar(
+                    r=values,
+                    theta=selected_metrics,
+                    fill="toself",
+                    name=model.model_name,
+                    marker={"color": "red"},
+                )
+            )
+            fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
+            st.plotly_chart(fig)
+
     def render(self) -> None:
         """
         This is the code used to show all spider graph
@@ -97,32 +126,7 @@ class UserInterface:
             self.app.set_normalized_metrics(list_ais, selected_metrics)
         with col2:
             for model in selected_models:
-                col_a, col_b = st.columns([1, 2])
-                with col_a:
-                    st.subheader(" ")
-                    st.subheader(" ")
-                    st.subheader(" ")
-                    st.subheader(model.model_name)
-                    st.subheader("All metrics : ", help=model.get_metrics_expaliner(selected_metrics, True))
-                    st.subheader(
-                        "Normalized metrics : ",
-                        help=model.get_metrics_expaliner(selected_metrics, normalized=True),
-                    )
-                    st.subheader("Hyperparameters : ", help=model.get_param_explainer())
-                with col_b:
-                    fig = go.Figure()
-                    values = [model.normalized_metrics[metric] for metric in selected_metrics]
-                    fig.add_trace(
-                        go.Scatterpolar(
-                            r=values,
-                            theta=selected_metrics,
-                            fill="toself",
-                            name=selected_models[0].model_name,
-                            marker={"color": "red"},
-                        )
-                    )
-                    fig.update_layout(polar={"radialaxis": {"visible": True, "range": [0, 1]}}, showlegend=False)
-                    st.plotly_chart(fig)
+                self.show_graph(model, selected_metrics)
         _, col, _ = st.columns([1, 2, 1])
         with col:
             self.show_comparison_plot(selected_models, selected_metrics)

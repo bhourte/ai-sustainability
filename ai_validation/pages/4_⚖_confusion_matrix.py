@@ -43,23 +43,30 @@ class Matrix:
             [f"TP\n{matrix[0][0]}", f"FN\n{matrix[0][1]}", f"FP\n{matrix[1][0]}", f"TN\n{matrix[1][1]}"]
         ).reshape((2, 2))
         fig, _ = plt.subplots()
-        hm = sns.heatmap(matrix, annot=annot, fmt="", cmap="Reds")
-        hm.set_xlabel("Predicted label")
-        hm.xaxis.set_ticklabels(["Positive", "Negative"])
-        hm.set_ylabel("True label")
-        hm.yaxis.set_ticklabels(["Positive", "Negative"])
+        matrix_plot = sns.heatmap(matrix, annot=annot, fmt="", cmap="Reds")
+        matrix_plot.set_xlabel("Predicted label")
+        matrix_plot.xaxis.set_ticklabels(["Positive", "Negative"])
+        matrix_plot.set_ylabel("True label")
+        matrix_plot.yaxis.set_ticklabels(["Positive", "Negative"])
         st.pyplot(fig)
 
     def show_other_metrics(self, model: Model) -> None:
-        tp = model.metrics["true_positives"]
-        tn = model.metrics["true_negatives"]
-        fp = model.metrics["false_positives"]
-        fn = model.metrics["false_negatives"]
-        st.subheader(f"Precision = {tp/(tp+fp)}", help="= PPV = TP/(TP+FP)")
-        st.subheader(f"Recall = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)")
-        st.subheader(f"Sensitivity = {tp/(tp+fn)}", help="= TPR = TP/(TP+FN)  \n= Recall")
-        st.subheader(f"Specificity = {tn/(tn+fp)}", help="= TNR = TN/(TN+FP)")
-        phi = (tp * tn - fp * fn) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+        true_positives = model.metrics["true_positives"]
+        true_negatives = model.metrics["true_negatives"]
+        false_positives = model.metrics["false_positives"]
+        false_negatives = model.metrics["false_negatives"]
+        st.subheader(f"Precision = {true_positives/(true_positives+false_positives)}", help="= PPV = TP/(TP+FP)")
+        st.subheader(f"Recall = {true_positives/(true_positives+false_negatives)}", help="= TPR = TP/(TP+FN)")
+        st.subheader(
+            f"Sensitivity = {true_positives/(true_positives+false_negatives)}", help="= TPR = TP/(TP+FN)  \n= Recall"
+        )
+        st.subheader(f"Specificity = {true_negatives/(true_negatives+false_positives)}", help="= TNR = TN/(TN+FP)")
+        phi = (true_positives * true_negatives - false_positives * false_negatives) / np.sqrt(
+            (true_positives + false_positives)
+            * (true_positives + false_negatives)
+            * (true_negatives + false_positives)
+            * (true_negatives + false_negatives)
+        )
         st.subheader(
             f"phi = {phi}",
             help="= MCC = (TP * TN-FP * FN)/sqrt((TP+FP) * (TP+FN) * (TN+FP) * (TN+FN))  \n(= Matthews correlation coefficient)",
