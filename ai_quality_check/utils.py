@@ -1,3 +1,5 @@
+"""File with all utils functions"""
+
 from ai_quality_check.application import Application
 
 
