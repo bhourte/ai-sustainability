@@ -10,3 +10,7 @@ class Application:
     def __init__(self) -> None:
         self.database = DbAccess()
         self.business = Business()
+
+    def get_data(self) -> dict:
+        """Method used to retreive all the data from the database"""
+        return self.database.get_data()

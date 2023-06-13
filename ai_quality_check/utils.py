@@ -1,5 +1,7 @@
 """File with all utils functions"""
 
+import streamlit as st
+
 from ai_quality_check.application import Application
 
 
@@ -8,3 +10,8 @@ from ai_quality_check.application import Application
 def get_application() -> Application:
     app = Application()
     return app
+
+
+@st.cache_resource
+def get_data(application: Application) -> dict:
+    return application.get_data()

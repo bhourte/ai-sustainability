@@ -3,8 +3,6 @@ Main file for the quality check of an AI Solution
 This file correspond to the general value of the AI Quality Check page
 """
 
-import sqlite3
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

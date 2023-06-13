@@ -1,0 +1,1 @@
+﻿python3 -m streamlit run .\ai_quality_check\📊_0_Global_quality_check.py

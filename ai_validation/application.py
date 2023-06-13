@@ -52,5 +52,4 @@ class Application:
         if selected_models is None:
             return None
         artifact_uri = self.mlflow_connector.get_artifact_uri(selected_experiment, selected_models)
-        print(artifact_uri)
         return None if artifact_uri is None else "mlartifacts" + artifact_uri.rsplit(":", maxsplit=1)[-1]
