@@ -18,6 +18,7 @@ class GlobalQuality:
         st.set_page_config(page_title="Global quality check page", page_icon="📊")
         st.title("📊 Global quality check")
         self.app = get_application()
+        self.app.get_data()
 
     def show_global_score(self) -> None:
         """Method used to show a Eye-Catching Radial Bar Charts with all score and the global score"""
