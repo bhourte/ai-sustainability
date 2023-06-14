@@ -1,3 +1,4 @@
+"""All new dataclass for the check-list"""
 from dataclasses import dataclass
 
 
@@ -9,3 +10,4 @@ class Check:
     text: str
     help_text: str = ""
     cluster: str = ""
+    checked: bool = False

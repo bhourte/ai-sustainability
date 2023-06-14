@@ -7,15 +7,15 @@ import streamlit as st
 
 from ai_quality_check.utils import get_application, get_data, render_check_list
 
-CORESPONDING_TABLE = "Dataset"
+CORESPONDING_TABLE = "Documentation"
 
 
-class DatasetPage:
+class DocumentationPage:
     """Class used to show the general value of the AI Quality Check"""
 
     def __init__(self) -> None:
-        st.set_page_config(page_title="Dataset quality check page")
-        st.title("Dataset quality check")
+        st.set_page_config(page_title="Documentation quality check page")
+        st.title("Documentation quality check")
         self.app = get_application()
 
     def render(self) -> None:
@@ -29,5 +29,5 @@ class DatasetPage:
 
 
 if __name__ == "__main__":
-    ui = DatasetPage()
+    ui = DocumentationPage()
     ui.render()

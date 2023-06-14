@@ -3,12 +3,16 @@ Main file for the quality check of an AI Solution
 This file correspond to the general value of the AI Quality Check page
 """
 
+from typing import Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
 
-from ai_quality_check.utils import get_application
+from ai_quality_check.utils import get_application, get_data
+
+TABLE_LIST = ["Deployment", "Documentation", "Performance", "Model_Selection", "Pipeline", "Dataset"]
 
 
 class GlobalQuality:
@@ -20,18 +24,10 @@ class GlobalQuality:
         self.app = get_application()
         self.app.get_data()
 
-    def show_global_score(self) -> None:
+    def show_graph_score(self, score: dict) -> None:
         """Method used to show a Eye-Catching Radial Bar Charts with all score and the global score"""
-        lith_dict = {
-            "LITH": ["None", "Deployement", "Documentation", "Performance", "Model selection", "Pipeline", "Dataset"],
-            "COUNT": [40, 65, 40, 35, 40, 70, 50],
-        }
-
-        df = pd.DataFrame.from_dict(lith_dict)
-        max_value_full_ring = 100
-        data_len = len(df)
         ring_colours = ["#2f4b7c", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#ffa600"]
-        ring_labels = [f"   {x} ({v}) " for x, v in zip(list(df["LITH"]), list(df["COUNT"]))]
+        ring_labels = [f"   {score_elmt} ({score[score_elmt][0]}/{score[score_elmt][1]}) " for score_elmt in score]
         fig = plt.figure(figsize=(10, 10), linewidth=10, edgecolor="#ffffff", facecolor="#ffffff")
         rect = [0.1, 0.1, 0.8, 0.8]
         # Add axis for radial backgrounds
@@ -42,8 +38,9 @@ class GlobalQuality:
         ax_polar_bg.set_theta_direction(1)
         # Loop through each entry in the dataframe and plot a grey
         # ring to create the background for each one
-        for i in range(data_len):
-            ax_polar_bg.barh(i, max_value_full_ring * 1.5 * np.pi / max_value_full_ring, color="grey", alpha=0.1)
+        for i in score:
+            max_value = score[i][1]
+            ax_polar_bg.barh(i, max_value * 1.5 * np.pi / max_value, color="grey", alpha=0.1)
         # Hide all axis items
         ax_polar_bg.axis("off")
         # Add axis for radial chart for each entry in the dataframe
@@ -51,7 +48,7 @@ class GlobalQuality:
         ax_polar.set_theta_zero_location("N")
         ax_polar.set_theta_direction(1)
         ax_polar.set_rgrids(
-            [0, 1, 2, 3, 4, 5, 6],
+            list(range(len(score.keys()))),
             labels=ring_labels,
             angle=0,
             fontsize=14,
@@ -62,16 +59,32 @@ class GlobalQuality:
 
         # Loop through each entry in the dataframe and create a coloured
         # ring for each entry
-        for i in range(data_len):
-            ax_polar.barh(i, list(df["COUNT"])[i] * 1.5 * np.pi / max_value_full_ring, color=ring_colours[i])
+        a = 0
+        for i in score:
+            value = score[i][0]
+            max_value = score[i][1]
+            ax_polar.barh(a, value * 1.5 * np.pi / max_value, color=ring_colours[a])
+            a += 1
         # Hide all grid elements
         ax_polar.grid(False)
         ax_polar.tick_params(axis="both", left=False, bottom=False, labelbottom=False, labelleft=True)
         st.pyplot(fig)
 
+    def show_global_score(self, score: dict) -> None:
+        global_score = 0
+        for _, (value, max_value) in score.items():
+            global_score += value / max_value
+        st.title(f"Global score = {round(global_score / len(score.keys()) * 100, 2)}%")
+
     def render(self) -> None:
         """Method used to render the page"""
-        self.show_global_score()
+        data = st.session_state.database if "database" in st.session_state else get_data(self.app)
+        print(data)
+        score = self.app.compute_score(data)
+        print(score)
+        # score = {"Database": (20, 20), "Test1": (9, 14), "test3": (65, 140)}
+        self.show_global_score(score)
+        self.show_graph_score(score)
 
 
 if __name__ == "__main__":

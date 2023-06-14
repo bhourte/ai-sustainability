@@ -16,3 +16,6 @@ class Application:
     def get_data(self, table_list: Optional[str] = None) -> dict:
         """Method used to retreive all the data from the database"""
         return self.database.get_data(table_list)
+
+    def compute_score(self, data: dict) -> dict:
+        return self.business.compute_score(data)
