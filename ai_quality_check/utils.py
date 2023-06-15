@@ -28,7 +28,7 @@ def render_check_list(data: dict) -> None:
                 check_elmt.checked = False
         else:
             count = sum(i.checked for i in data[cluster])
-            expender = st.expander(f"{'✅' if count == len(data[cluster]) else ''} {cluster}")
+            expender = st.expander(f"{'✅' if count == len(data[cluster]) else ' '}{cluster}")
             for check_elmt in data[cluster]:
                 if expender.checkbox(check_elmt.text, help=check_elmt.help_text, value=check_elmt.checked):
                     check_elmt.checked = True
@@ -38,5 +38,5 @@ def render_check_list(data: dict) -> None:
                 else:
                     check_elmt.checked = False
                     new_count = sum(i.checked for i in data[cluster])
-                    if count == new_count + 1 and count == len(data[cluster]):  # If all was checked but one is not now
+                    if count == new_count + 1 and count == len(data[cluster]):  # If all was checked but one is no nore
                         st.experimental_rerun()
