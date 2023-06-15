@@ -3,11 +3,8 @@ Main file for the quality check of an AI Solution
 This file correspond to the general value of the AI Quality Check page
 """
 
-from typing import Tuple
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import streamlit as st
 
 from ai_quality_check.utils import get_application, get_data
@@ -71,10 +68,32 @@ class GlobalQuality:
         st.pyplot(fig)
 
     def show_global_score(self, score: dict) -> None:
-        global_score = 0
+        global_score = 0.0
         for _, (value, max_value) in score.items():
             global_score += value / max_value
-        st.title(f"Global score = {round(global_score / len(score.keys()) * 100, 2)}%")
+        global_score = global_score / len(score.keys())
+        st.title(f"Global score = {round(global_score * 100, 2)}%")
+        color = "green" if global_score > 0.75 else "orange" if global_score > 0.5 else "red"
+        if global_score == 1:
+            text = "Perfect!!!"
+        elif global_score > 0.75:
+            text = "Good!!"
+        elif global_score > 0.5:
+            text = "Not that bad!"
+        else:
+            text = "Bad"
+        st.markdown(
+            """
+            <style>
+                .stProgress > div > div > div > div {
+                    background-color: """
+            + color
+            + """;
+                }
+            </style>""",
+            unsafe_allow_html=True,
+        )
+        st.progress(global_score, text)
 
     def render(self) -> None:
         """Method used to render the page"""
