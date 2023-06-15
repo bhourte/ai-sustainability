@@ -24,7 +24,6 @@ def render_check_list(data: dict) -> None:
         if len(data[cluster]) == 1:
             check_elmt: Check = data[cluster][0]
             if st.checkbox(check_elmt.text, help=check_elmt.help_text, value=check_elmt.checked):
-                print(check_elmt.text)
                 check_elmt.checked = True
             else:
                 check_elmt.checked = False
@@ -32,7 +31,6 @@ def render_check_list(data: dict) -> None:
             expender = st.expander(cluster)
             for check_elmt in data[cluster]:
                 if expender.checkbox(check_elmt.text, help=check_elmt.help_text, value=check_elmt.checked):
-                    print(check_elmt.text)
                     check_elmt.checked = True
                 else:
                     check_elmt.checked = False

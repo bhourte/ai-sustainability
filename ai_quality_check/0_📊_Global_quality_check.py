@@ -98,9 +98,7 @@ class GlobalQuality:
     def render(self) -> None:
         """Method used to render the page"""
         data = st.session_state.database if "database" in st.session_state else get_data(self.app)
-        print(data)
         score = self.app.compute_score(data)
-        print(score)
         # score = {"Database": (20, 20), "Test1": (9, 14), "test3": (65, 140)}
         self.show_global_score(score)
         self.show_graph_score(score)
