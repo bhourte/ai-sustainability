@@ -1,7 +1,5 @@
 """File with all utils functions"""
 
-from typing import Optional
-
 import streamlit as st
 
 from ai_quality_check.application import Application
