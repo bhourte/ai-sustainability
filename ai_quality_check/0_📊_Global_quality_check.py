@@ -22,7 +22,7 @@ class GlobalQuality:
         self.app.get_data()
 
     def show_graph_score(self, score: dict) -> None:
-        """Method used to show a Eye-Catching Radial Bar Charts with all score and the global score"""
+        """Method used to show a Eye-Catching Radial Bar Charts with all scores"""
         ring_colours = ["#2f4b7c", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#ffa600"]
         ring_labels = [f"   {score_elmt} ({score[score_elmt][0]}/{score[score_elmt][1]}) " for score_elmt in score]
         fig = plt.figure(figsize=(10, 10), linewidth=10, edgecolor="#ffffff", facecolor="#ffffff")
@@ -33,14 +33,14 @@ class GlobalQuality:
         ax_polar_bg.set_theta_zero_location("N")
         # Make bars go counter-clockwise.
         ax_polar_bg.set_theta_direction(1)
-        # Loop through each entry in the dataframe and plot a grey
+        # Loop through each entry in the dict and plot a grey
         # ring to create the background for each one
         for i in score:
             max_value = score[i][1]
             ax_polar_bg.barh(i, max_value * 1.5 * np.pi / max_value, color="grey", alpha=0.1)
         # Hide all axis items
         ax_polar_bg.axis("off")
-        # Add axis for radial chart for each entry in the dataframe
+        # Add axis for radial chart for each entry
         ax_polar = fig.add_axes(rect, polar=True, frameon=False)
         ax_polar.set_theta_zero_location("N")
         ax_polar.set_theta_direction(1)
@@ -54,14 +54,13 @@ class GlobalQuality:
             verticalalignment="center",
         )
 
-        # Loop through each entry in the dataframe and create a coloured
-        # ring for each entry
-        a = 0
-        for i in score:
-            value = score[i][0]
-            max_value = score[i][1]
-            ax_polar.barh(a, value * 1.5 * np.pi / max_value, color=ring_colours[a])
-            a += 1
+        # Loop through each entry and create a coloured ring for eachones
+        index = 0
+        for _, item in score.items():
+            value = item[0]
+            max_value = item[1]
+            ax_polar.barh(index, value * 1.5 * np.pi / max_value, color=ring_colours[index])
+            index += 1
         # Hide all grid elements
         ax_polar.grid(False)
         ax_polar.tick_params(axis="both", left=False, bottom=False, labelbottom=False, labelleft=True)
