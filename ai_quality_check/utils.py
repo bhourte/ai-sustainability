@@ -1,5 +1,7 @@
 """File with all utils functions"""
 
+from typing import Optional
+
 import streamlit as st
 
 from ai_quality_check.application import Application
@@ -16,6 +18,32 @@ def get_application() -> Application:
 def get_data(application: Application) -> dict:
     st.session_state.database = application.get_data()
     return st.session_state.database
+
+
+def show_score(score: int, max_score: int, container: st._DeltaGenerator) -> None:
+    page_score = score / max_score
+    container.title(f"Global score = {round(page_score * 100, 2)}%")
+    color = "green" if page_score >= 0.75 else "orange" if page_score >= 0.5 else "red"
+    if page_score == 1:
+        text = "Perfect!!!"
+    elif page_score >= 0.75:
+        text = "Good!!"
+    elif page_score >= 0.5:
+        text = "Not that bad!"
+    else:
+        text = "Bad"
+    container.markdown(
+        """
+        <style>
+            .stProgress > div > div > div > div {
+                background-color: """
+        + color
+        + """;
+            }
+        </style>""",
+        unsafe_allow_html=True,
+    )
+    container.progress(page_score, text)
 
 
 def render_check_list(data: dict) -> None:
