@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+~$Weight_matrix.xlsx
+
+# MLflow files
+mlruns/
+mlartifacts/
+# Dataset file
+ai_evaluation_tests/datasets/
