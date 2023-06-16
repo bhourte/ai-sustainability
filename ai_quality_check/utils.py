@@ -22,7 +22,7 @@ def get_data(application: Application) -> dict:
 
 def show_score(score: int, max_score: int, container: st._DeltaGenerator) -> None:
     page_score = score / max_score
-    container.title(f"Global score = {round(page_score * 100, 2)}%")
+    container.title(f"Page score = {round(page_score * 100, 2)}%")
     color = "green" if page_score >= 0.75 else "orange" if page_score >= 0.5 else "red"
     if page_score == 1:
         text = "Perfect!!!"
