@@ -23,7 +23,7 @@ class GlobalQuality:
         self.app = get_application()
         self.app.get_data()
 
-    def show_graph_score(self, score: dict[str, Tuple[int, int]]) -> None:
+    def show_graph_score(self, score: dict) -> None:
         """Method used to show a Eye-Catching Radial Bar Charts with all scores"""
         ring_colours = ["#2f4b7c", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#ffa600"]
         ring_labels = [
