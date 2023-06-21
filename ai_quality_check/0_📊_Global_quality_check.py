@@ -3,6 +3,8 @@ Main file for the quality check of an AI Solution
 This file correspond to the general value of the AI Quality Check page
 """
 
+from typing import Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
@@ -24,7 +26,10 @@ class GlobalQuality:
     def show_graph_score(self, score: dict) -> None:
         """Method used to show a Eye-Catching Radial Bar Charts with all scores"""
         ring_colours = ["#2f4b7c", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#ffa600"]
-        ring_labels = [f"   {score_elmt} ({score[score_elmt][0]}/{score[score_elmt][1]}) " for score_elmt in score]
+        ring_labels = [
+            f"   {score_elmt.replace('_', ' ')} ({score[score_elmt][0]}/{score[score_elmt][1]}) "
+            for score_elmt in score
+        ]
         fig = plt.figure(figsize=(10, 10), linewidth=10, edgecolor="#ffffff", facecolor="#ffffff")
         rect = [0.1, 0.1, 0.8, 0.8]
         # Add axis for radial backgrounds
@@ -54,7 +59,7 @@ class GlobalQuality:
             verticalalignment="center",
         )
 
-        # Loop through each entry and create a coloured ring for eachones
+        # Loop through each entry and create a coloured ring for each ones
         index = 0
         for _, item in score.items():
             value = item[0]
@@ -66,7 +71,7 @@ class GlobalQuality:
         ax_polar.tick_params(axis="both", left=False, bottom=False, labelbottom=False, labelleft=True)
         st.pyplot(fig)
 
-    def show_global_score(self, score: dict) -> None:
+    def show_global_score(self, score: dict[str, Tuple[int, int]]) -> None:
         global_score = 0.0
         for _, (value, max_value) in score.items():
             global_score += value / max_value
