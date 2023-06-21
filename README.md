@@ -47,4 +47,5 @@ For now on, all part can be launch independently, but in the future they will be
 4. The Checklist part : To launch the evaluation tool, the user can simply execute the **start_checklist.ps1** file in a powershell terminal.
 5. The MlFlow server : Part 1, 2 and 3 need to have a running MlFlow server to accomplish their tasks. The user can launch any mlflow server (on the port specified in the .env file), but it is recomended to launche the mlflow server with the **start_mlflow.ps1** powrshell file.
 
+<br>
 Work Done by Hennecart Alexandre and Filee Arnauld
