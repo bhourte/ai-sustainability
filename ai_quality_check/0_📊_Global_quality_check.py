@@ -59,7 +59,7 @@ class GlobalQuality:
             verticalalignment="center",
         )
 
-        # Loop through each entry and create a coloured ring for eachones
+        # Loop through each entry and create a coloured ring for each ones
         index = 0
         for _, item in score.items():
             value = item[0]
