@@ -47,5 +47,39 @@ For now on, all part can be launch independently, but in the future they will be
 4. The Checklist part : To launch the evaluation tool, the user can simply execute the **start_checklist.ps1** file in a powershell terminal.
 5. The MlFlow server : Part 1, 2 and 3 need to have a running MlFlow server to accomplish their tasks. The user can launch any mlflow server (on the port specified in the .env file), but it is recomended to launche the mlflow server with the **start_mlflow.ps1** powrshell file.
 
-<br>
-Work Done by Hennecart Alexandre and Filee Arnauld
+## How does it work?
+In order to make all the elements work, we had to put in place several things:
+1. An Gremlin database deployed on Azure Cosmos DB : we stored the graph with all question-answer in a Gremlin graph db on the cloud (on Azure). This database also store all completed form and all given feedback. It is used by the Form part and the Evaluation Tool part
+2. An mlflow server : part 1 to 3 need a running MlFlow server to operate (Form, to create the experiment, Template to fill it with logs and the Tool to retreive metrics). We usualy store all experiment/artifact directly in the ai-sutainability fodler, but this is not required.
+3. A local SQL database to store all element needed by the check-list.
+
+## How elements are stored in the 2 databases :
+### Gremlin DB :
+The Gremlin DB is used only by the part 1 (the Form) and just a little bit by the evaluation tools (retreive the list of all user and show a previous answered Form)  
+In the Gremlin DB, we store element in 2 form : node and edge (just like a graph, because this is a graph). A Node = a question in the Form and an edge = a (possible) answer in the form.  
+Each question-node has : 
+- id : the number of the question
+- label : the label of the question, one label = one type (Q_QCM, Q_Open, Q_QRM, end). The "end" label is the label for the last element, this is not a question, but each edges need to arrive to a final node, and this is the node.
+- text : the text of the question
+- help text : the help text of the question (a small explaination of the question and why we ask it)
+- list_AI (only for node with id==1) : the list of all existing AI in the Form
+
+Each answer-edge has :
+- id : id of the edge (create as : node_in_node_out_number)
+- label : Proposition (for edge in the possible answers) or Answer (for selected answer in a stored completed form)
+- text : text of the answer
+- help text : a text to help to understand the answer
+- modif_crypted : if the answer is modified with encrypted data (special case)
+- list_coef : the list of all coefficient for each AI  
+
+But there is other type of node :
+1. User node : a node corresponding to an user (with id=username, label==user)
+2. Feedback node : a node that store a feedback of a user (the edge between a feedback node and a User node has label=Feedback)
+3. Answer node : node exactly like question-node, but with only 1 edge in and 1 edge out (the selected answers). And the first node of the form (the node corresponding to question 1) has a best_ais property corresponding to the calculeted best AI when the user has filled the form
+
+## How to update?
+To update the element, it's quite easy. If you want to change/recreate the Gremlin DB in order to add/suppr/change some question, answers you can change the request list in ai-sustainability\ai_sustainability\datas\script.json.  
+And if you want to add some possible AI, you need to modify the Weight_matrix.xlsx (add a column and fill each ligne to add a AI, or add a ligne for a new question and put the coeficient for each AI) and don't forget to use the create_script_with_weight function in ai-sustainability\ai_sustainability\package_data_access\db_gestion.py.  
+If you want to change element for the checklist, you will need to change they in the database_check_list located database located in ai-sustainability\ai_quality_check\package_data_access.  
+<br><br>
+Project made by Hennecart Alexandre and Filee Arnauld
