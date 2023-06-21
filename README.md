@@ -73,9 +73,9 @@ Each answer-edge has :
 - list_coef : the list of all coefficient for each AI  
 
 But there is other type of node :
-1. User node : a node corresponding to an user (with id=username, label==user)
-2. Feedback node : a node that store a feedback of a user (the edge between a feedback node and a User node has label=Feedback)
-3. Answer node : node exactly like question-node, but with only 1 edge in and 1 edge out (the selected answers). And the first node of the form (the node corresponding to question 1) has a best_ais property corresponding to the calculeted best AI when the user has filled the form
+- User node : a node corresponding to an user (with id=username, label==user)
+- Feedback node : a node that store a feedback of a user (the edge between a feedback node and a User node has label=Feedback)
+- Answer node : node exactly like question-node, but with only 1 edge in and 1 edge out (the selected answers). And the first node of the form (the node corresponding to question 1) has a best_ais property corresponding to the calculeted best AI when the user has filled the form
 
 ## How to update?
 To update the element, it's quite easy. If you want to change/recreate the Gremlin DB in order to add/suppr/change some question, answers you can change the request list in ai-sustainability\ai_sustainability\datas\script.json.  
